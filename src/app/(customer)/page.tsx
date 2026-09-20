@@ -17,7 +17,7 @@ export default function Home() {
       <section className="relative w-full h-[300px] md:h-[450px] bg-green-950 flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-40">
           <Image 
-            src="https://images.unsplash.com/photo-1596241913164-3232c91811eb?w=1600&q=80" 
+            src="/images/wheat_flour.jpg" 
             alt="Wheat field" 
             fill 
             className="object-cover"
