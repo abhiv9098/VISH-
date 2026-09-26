@@ -125,6 +125,42 @@ export const products: Product[] = [
     ingredients: ['100% Whole Wheat'],
     category: '25 KG Atta',
     inStock: true,
+  },
+  {
+    id: 'p7',
+    name: 'Bajra ka Atta (Pearl Millet Flour)',
+    nameHi: 'बाजरे का आटा',
+    weight: '1 KG',
+    price: 85,
+    originalPrice: 100,
+    discount: 15,
+    rating: 4.6,
+    reviews: 620,
+    image: '/images/multigrain_flour.jpg', // Placeholder
+    description: 'Freshly ground Bajra Atta, perfect for winter meals. Rich in fiber and essential nutrients.',
+    descriptionHi: 'सर्दियों के भोजन के लिए उत्तम ताज़ा पिसा हुआ बाजरे का आटा। फाइबर और आवश्यक पोषक तत्वों से भरपूर।',
+    benefits: ['Gluten-free', 'Rich in iron', 'Good for heart health'],
+    ingredients: ['100% Pearl Millet'],
+    category: '1 KG Atta',
+    inStock: true,
+  },
+  {
+    id: 'p8',
+    name: 'Jowar ka Atta (Sorghum Flour)',
+    nameHi: 'ज्वार का आटा',
+    weight: '1 KG',
+    price: 95,
+    originalPrice: 120,
+    discount: 20,
+    rating: 4.7,
+    reviews: 430,
+    image: '/images/multigrain_flour.jpg', // Placeholder
+    description: 'High-quality Jowar Atta for soft and nutritious bhakris. A great alternative to wheat for a gluten-free diet.',
+    descriptionHi: 'नरम और पौष्टिक भाकरी के लिए उच्च गुणवत्ता वाला ज्वार का आटा। ग्लूटेन मुक्त आहार के लिए गेहूं का एक बेहतरीन विकल्प।',
+    benefits: ['Gluten-free', 'High in protein', 'Helps in weight loss'],
+    ingredients: ['100% Sorghum'],
+    category: '1 KG Atta',
+    inStock: true,
   }
 ];
 

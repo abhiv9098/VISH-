@@ -1,44 +1,55 @@
 'use client';
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { products } from "@/lib/data";
 import ProductCard from "@/components/ProductCard";
-import { ArrowRight } from "lucide-react";
+import { Search } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function Home() {
   const { t } = useLanguage();
-  const bestSellers = products.slice(0, 4);
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const displayedProducts = products.filter(p => 
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    p.nameHi.includes(searchQuery) ||
+    p.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Banner */}
-      <section className="relative w-full h-[300px] md:h-[450px] bg-green-950 flex items-center overflow-hidden">
-        <div className="absolute inset-0 z-0 opacity-40">
-          <Image 
-            src="/images/wheat_flour.jpg" 
-            alt="Wheat field" 
-            fill 
-            className="object-cover"
-          />
+      
+      <div className="bg-green-900 pb-6 pt-2">
+        <div className="container mx-auto px-4 max-w-2xl">
+          <div className="relative shadow-lg rounded-full">
+            <input 
+              type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t('searchPlaceholder')} 
+              className="w-full bg-white rounded-full py-3.5 pl-12 pr-4 outline-none focus:ring-2 focus:ring-yellow-500 text-gray-900 font-medium"
+            />
+            <Search className="absolute left-4 top-4 text-gray-400" size={20} />
+          </div>
         </div>
-        <div className="container mx-auto px-4 relative z-10 text-white flex flex-col items-center text-center">
+      </div>
 
-          <Link href="/order" className="bg-yellow-500 hover:bg-yellow-600 text-green-950 text-xl font-bold px-10 py-4 rounded-full shadow-lg hover:shadow-xl transition inline-flex items-center gap-2 transform hover:scale-105">
-            Order Atta <ArrowRight size={24} />
-          </Link>
-        </div>
-      </section>
-
-      {/* Best Sellers */}
-      <section className="py-12 bg-white flex-1">
+      <section className="py-8 bg-white flex-1">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl font-bold mb-6 text-gray-900">{t('bestSellers')}</h2>
+          <h2 className="text-2xl font-bold mb-6 text-gray-900">
+            {searchQuery ? "Search Results" : t('allProducts')}
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {bestSellers.map(product => (
+            {displayedProducts.map(product => (
               <ProductCard key={product.id} product={product} />
             ))}
+            {displayedProducts.length === 0 && (
+              <p className="col-span-full text-center text-gray-500 py-8">
+                No products found matching "{searchQuery}"
+              </p>
+            )}
           </div>
         </div>
       </section>

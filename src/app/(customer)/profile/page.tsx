@@ -1,15 +1,28 @@
 /* eslint-disable */
 'use client';
 
+import React, { useState } from 'react';
 import { useOrders } from '@/context/OrderContext';
-import { User, Package, MapPin, LogOut, Globe } from 'lucide-react';
+import { User, Package, MapPin, LogOut, Globe, MoreVertical } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
+import OrderTracking from '@/components/OrderTracking';
 
 export default function ProfilePage() {
   const { orders } = useOrders();
   const { language, setLanguage, t } = useLanguage();
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (orders.length > 0 && !expandedOrder) {
+      setExpandedOrder(orders[0].id);
+    }
+  }, [orders]);
+
+  const toggleTracking = (orderId: string) => {
+    setExpandedOrder(prev => prev === orderId ? null : orderId);
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -28,22 +41,22 @@ export default function ProfilePage() {
             
             <nav className="space-y-1 border-t pt-4">
               <button className="w-full flex items-center gap-3 px-4 py-3 bg-green-50 text-green-700 font-medium rounded-lg transition">
-                <Package size={18} /> My Orders
+                <Package size={18} /> {t('myOrders')}
               </button>
               <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 font-medium rounded-lg transition">
-                <User size={18} /> Profile Details
+                <User size={18} /> {t('profileDetails')}
               </button>
               <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 font-medium rounded-lg transition">
-                <MapPin size={18} /> Saved Addresses
+                <MapPin size={18} /> {t('savedAddresses')}
               </button>
               <button 
                 onClick={() => setLanguage(language === 'en' ? 'hi' : 'en')}
                 className="w-full flex items-center gap-3 px-4 py-3 text-blue-600 hover:bg-blue-50 font-medium rounded-lg transition mt-2"
               >
-                <Globe size={18} /> Change Language ({language === 'en' ? 'HI' : 'EN'})
+                <Globe size={18} /> {language === 'en' ? 'Change Language (HI)' : 'भाषा बदलें (EN)'}
               </button>
               <button className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 font-medium rounded-lg transition mt-4">
-                <LogOut size={18} /> Logout
+                <LogOut size={18} /> {t('logout')}
               </button>
             </nav>
           </div>
@@ -51,7 +64,7 @@ export default function ProfilePage() {
 
         {/* Main Content */}
         <div className="w-full md:w-3/4">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">My Orders</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('myOrders')}</h1>
           
           {orders.length === 0 ? (
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-10 text-center">
@@ -66,7 +79,7 @@ export default function ProfilePage() {
             <div className="space-y-4">
               {orders.map(order => (
                 <div key={order.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                  <div className="bg-gray-50 p-4 border-b flex flex-wrap justify-between items-start md:items-center gap-4">
+                  <div className="bg-gray-50 p-4 border-b flex justify-between items-center gap-4">
                     <div className="flex flex-wrap gap-6">
                       <div>
                         <p className="text-xs text-gray-500 font-medium uppercase mb-1">Order Placed</p>
@@ -81,7 +94,22 @@ export default function ProfilePage() {
                         <p className="text-sm font-semibold text-gray-900">{order.id}</p>
                       </div>
                     </div>
+                    <div>
+                      <button 
+                        onClick={() => toggleTracking(order.id)}
+                        className="p-2 hover:bg-gray-200 rounded-full transition text-gray-600"
+                        title="Track Order"
+                      >
+                        <MoreVertical size={20} />
+                      </button>
+                    </div>
                   </div>
+                  
+                  {expandedOrder === order.id && (
+                    <div className="px-4 md:px-6">
+                      <OrderTracking currentStatus={order.status} city={order.customerInfo?.city || "your city"} />
+                    </div>
+                  )}
                   
                   <div className="p-4 md:p-6">
                     <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">

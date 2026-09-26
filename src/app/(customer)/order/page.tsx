@@ -1,4 +1,3 @@
-/* eslint-disable */
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
@@ -7,9 +6,9 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { products } from '@/lib/data';
 import { useOrders } from '@/context/OrderContext';
-import { CheckCircle, ArrowRight, ArrowLeft, QrCode, ShieldCheck, X } from 'lucide-react';
+import { CheckCircle, ArrowRight, ArrowLeft, QrCode, ShieldCheck, X, Banknote } from 'lucide-react';
 
-type Step = 1 | 2 | 3 | 4 | 5;
+type Step = 1 | 2 | 3 | 4 | 5 | 6;
 
 function OrderFlowContent() {
   const router = useRouter();
@@ -29,11 +28,16 @@ function OrderFlowContent() {
   const [customerInfo, setCustomerInfo] = useState({
     name: customerProfile?.name || '',
     phone: customerProfile?.phone || '',
-    address: customerProfile?.address || ''
+    country: '',
+    address: customerProfile?.address || '',
+    city: '',
+    pincode: ''
   });
   
   const [otp, setOtp] = useState(['', '', '', '']);
   const [orderId, setOrderId] = useState<string>('');
+  
+  const [paymentChoice, setPaymentChoice] = useState<'50' | '100'>('100');
   
   const selectedProduct = products.find(p => p.id === selectedProductId) || products[0];
   
@@ -41,7 +45,7 @@ function OrderFlowContent() {
   const itemTotal = selectedProduct.price * quantity;
   const deliveryCharge = itemTotal > deliverySettings.threshold ? deliverySettings.chargeAbove : deliverySettings.chargeBelow;
   const totalAmount = itemTotal + deliveryCharge;
-  const advanceAmount = totalAmount / 2;
+  const advanceAmount = paymentChoice === '50' ? totalAmount / 2 : totalAmount;
   const remainingAmount = totalAmount - advanceAmount;
 
   const handleNext = () => setStep((prev) => (prev + 1) as Step);
@@ -49,17 +53,7 @@ function OrderFlowContent() {
   const handleExit = () => router.push('/');
 
   const proceedFromStep1 = () => {
-    if (customerProfile?.isVerified && customerProfile.name && customerProfile.phone && customerProfile.address) {
-      setCustomerInfo({
-        name: customerProfile.name,
-        phone: customerProfile.phone,
-        address: customerProfile.address
-      });
-      // Skip straight to Review & Payment
-      setStep(4);
-    } else {
-      setStep(2);
-    }
+    setStep(2);
   };
 
   const handleOtpChange = (index: number, value: string) => {
@@ -80,31 +74,48 @@ function OrderFlowContent() {
       updateCustomerProfile({
         name: customerInfo.name,
         phone: customerInfo.phone,
-        address: customerInfo.address,
+        address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.pincode}, ${customerInfo.country}`,
         isVerified: true
       });
-      handleNext();
+      handleNext(); // go to step 4 Payment
     } else {
       alert("Please enter a 4-digit OTP.");
     }
   };
 
-  const handleConfirmOrder = () => {
+  const handlePaymentSimulation = () => {
+    setTimeout(() => {
+      if (paymentChoice === '50') {
+        setStep(5); // Confirm COD
+      } else {
+        placeOrder(totalAmount, 0); // 100% Paid
+      }
+    }, 1000);
+  };
+
+  const confirmCOD = () => {
+    placeOrder(advanceAmount, remainingAmount);
+  };
+
+  const placeOrder = (paid: number, remaining: number) => {
     const newOrderId = `ORD-${Math.floor(Math.random() * 900000) + 100000}`;
-    setOrderId(newOrderId);
     
     addOrder({
       id: newOrderId,
       date: new Date().toISOString(),
       status: 'Order Placed',
       total: totalAmount,
-      advancePaid: advanceAmount,
-      remainingAmount: remainingAmount,
+      advancePaid: paid,
+      remainingAmount: remaining,
       items: [{ product: selectedProduct, quantity }],
-      customerInfo
+      customerInfo: {
+        name: customerInfo.name,
+        phone: customerInfo.phone,
+        address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.pincode}, ${customerInfo.country}`
+      }
     });
     
-    handleNext();
+    router.push('/profile?newOrder=' + newOrderId);
   };
 
   return (
@@ -112,7 +123,7 @@ function OrderFlowContent() {
       <div className="max-w-2xl mx-auto">
         
         {/* Header with Exit option */}
-        {step < 5 && (
+        {step < 6 && (
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-gray-900">Place Order</h1>
             <button onClick={handleExit} className="flex items-center gap-1 text-gray-500 hover:text-red-600 transition font-medium">
@@ -122,13 +133,13 @@ function OrderFlowContent() {
         )}
 
         {/* Progress Bar */}
-        {step < 5 && (
+        {step < 6 && (
           <div className="mb-8">
             <div className="flex justify-between items-center relative">
               <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 z-0 rounded-full"></div>
               <div 
                 className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-green-600 z-0 rounded-full transition-all duration-300"
-                style={{ width: `${((step - 1) / 3) * 100}%` }}
+                style={{ width: `${((Math.min(step, 4) - 1) / 3) * 100}%` }}
               ></div>
               
               {[1, 2, 3, 4].map((s) => (
@@ -139,7 +150,7 @@ function OrderFlowContent() {
             </div>
             <div className="flex justify-between text-xs font-medium text-gray-500 mt-2">
               <span>Details</span>
-              <span>Delivery</span>
+              <span>Address</span>
               <span>Verify</span>
               <span>Payment</span>
             </div>
@@ -151,30 +162,18 @@ function OrderFlowContent() {
           {/* STEP 1: ORDER DETAILS */}
           {step === 1 && (
             <div className="p-6 md:p-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Select Atta & Quantity</h2>
-              
-              <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2">
-                {products.filter(p => p.name.includes('Gehu') || p.name.includes('Wheat') || p.name.includes('Village')).map(product => (
-                  <label 
-                    key={product.id} 
-                    className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all ${selectedProductId === product.id ? 'border-green-500 bg-green-50/50 shadow-sm' : 'border-gray-200 hover:border-green-300'}`}
-                  >
-                    <input 
-                      type="radio" 
-                      name="product" 
-                      className="w-5 h-5 text-green-600 border-gray-300 focus:ring-green-500"
-                      checked={selectedProductId === product.id}
-                      onChange={() => setSelectedProductId(product.id)}
-                    />
-                    <div className="ml-4 flex-1">
-                      <h3 className="font-semibold text-gray-900">{product.name}</h3>
-                      <p className="text-sm text-gray-500">{product.weight}</p>
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-lg">{selectedProduct.name}</h3>
+                    <div className="mt-2 inline-block border-2 border-green-700 text-green-700 bg-green-50 font-bold px-3 py-1 text-sm rounded-lg">
+                      {selectedProduct.weight}
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-gray-900">₹{product.price}</p>
-                    </div>
-                  </label>
-                ))}
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-gray-900 text-xl">₹{selectedProduct.price}</p>
+                  </div>
+                </div>
               </div>
 
               <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-6">
@@ -192,7 +191,7 @@ function OrderFlowContent() {
                   <span className="font-medium">₹{itemTotal}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Delivery Charge (Orders &gt; ₹{deliverySettings.threshold} get discounted delivery)</span>
+                <span className="text-gray-600">Delivery Charge</span>
                   <span className="font-medium text-orange-600">+₹{deliveryCharge}</span>
                 </div>
                 <div className="flex justify-between border-t border-gray-200 pt-2 mt-2">
@@ -250,15 +249,50 @@ function OrderFlowContent() {
                   </div>
                 </div>
                 <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Country</label>
+                  <input 
+                    required 
+                    type="text" 
+                    value={customerInfo.country}
+                    onChange={(e) => setCustomerInfo({...customerInfo, country: e.target.value})}
+                    className="w-full border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-green-500" 
+                    placeholder="India" 
+                  />
+                </div>
+                <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Complete Delivery Address</label>
                   <textarea 
                     required 
-                    rows={3}
+                    rows={2}
                     value={customerInfo.address}
                     onChange={(e) => setCustomerInfo({...customerInfo, address: e.target.value})}
                     className="w-full border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-green-500" 
-                    placeholder="House no, Building, Street, Area, Pincode"
+                    placeholder="House no, Building, Street, Area"
                   ></textarea>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">City</label>
+                    <input 
+                      required 
+                      type="text" 
+                      value={customerInfo.city}
+                      onChange={(e) => setCustomerInfo({...customerInfo, city: e.target.value})}
+                      className="w-full border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-green-500" 
+                      placeholder="Mumbai" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">PIN Code</label>
+                    <input 
+                      required 
+                      type="text" 
+                      value={customerInfo.pincode}
+                      onChange={(e) => setCustomerInfo({...customerInfo, pincode: e.target.value})}
+                      className="w-full border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-green-500" 
+                      placeholder="400001" 
+                    />
+                  </div>
                 </div>
 
                 <button 
@@ -314,111 +348,99 @@ function OrderFlowContent() {
             </div>
           )}
 
-          {/* STEP 4: 50% ADVANCE PAYMENT & FINAL REVIEW */}
+          {/* STEP 4: PAYMENT SELECTION */}
           {step === 4 && (
             <div className="p-6 md:p-8">
               <div className="flex items-center mb-6">
-                <button onClick={() => setStep(1)} className="mr-3 text-gray-500 hover:text-gray-900 bg-gray-100 p-2 rounded-full">
+                <button onClick={handleBack} className="mr-3 text-gray-500 hover:text-gray-900 bg-gray-100 p-2 rounded-full">
                   <ArrowLeft size={20} />
                 </button>
-                <h2 className="text-xl font-bold text-gray-900">Final Order Review</h2>
+                <h2 className="text-xl font-bold text-gray-900">Advance Payment Required</h2>
               </div>
+              
+              <p className="text-gray-600 mb-6 text-sm">To process your order, please make an advance payment. Cash on Delivery is available for the remaining 50% balance.</p>
 
-              {/* Explicit Final Order Review as requested */}
-              <div className="bg-gray-50 rounded-xl p-5 border border-gray-200 mb-6">
-                <h3 className="font-bold text-gray-800 mb-4 border-b border-gray-200 pb-2 text-sm uppercase">Order Details</h3>
-                
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Selected Atta</span>
-                    <span className="font-medium text-gray-900 text-right">{selectedProduct.name}</span>
+              <div className="space-y-4 mb-8">
+                <label className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition ${paymentChoice === '50' ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}>
+                  <input 
+                    type="radio" 
+                    name="paymentAmount" 
+                    value="50" 
+                    checked={paymentChoice === '50'} 
+                    onChange={() => setPaymentChoice('50')}
+                    className="w-4 h-4 text-green-600 focus:ring-green-500"
+                  />
+                  <div>
+                    <div className="font-bold text-gray-900">Pay 50% Now</div>
+                    <div className="text-sm text-gray-500">Pay ₹{totalAmount / 2} via UPI/QR, remaining on delivery</div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Quantity</span>
-                    <span className="font-medium text-gray-900">{quantity}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Product Price</span>
-                    <span className="font-medium text-gray-900">₹{selectedProduct.price} x {quantity} = ₹{itemTotal}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Delivery Charge</span>
-                    <span className="font-medium text-orange-600">₹{deliveryCharge}</span>
-                  </div>
-                  <div className="flex justify-between bg-white p-2 rounded border border-gray-200">
-                    <span className="font-bold text-gray-900">Total Amount</span>
-                    <span className="font-bold text-gray-900">₹{totalAmount}</span>
-                  </div>
-                </div>
-
-                <h3 className="font-bold text-gray-800 mt-6 mb-4 border-b border-gray-200 pb-2 text-sm uppercase">Delivery Details</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Name</span>
-                    <span className="font-medium text-gray-900">{customerInfo.name}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-gray-600">Delivery Address</span>
-                    <span className="font-medium text-gray-900 mt-1">{customerInfo.address}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 text-center">
-                <p className="text-sm text-blue-800 font-medium">
-                  Please pay <span className="font-bold">50% advance (₹{advanceAmount})</span> to confirm your order. The remaining <span className="font-bold">₹{remainingAmount}</span> will be paid on delivery.
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6 items-center">
-                <div className="space-y-4">
-                  <div className="bg-green-50 rounded-xl p-4 border border-green-200 flex justify-between items-center">
-                    <div>
-                      <p className="text-sm text-green-800 font-medium mb-1">Advance Payment</p>
-                      <p className="text-xs text-green-700">Pay Now</p>
-                    </div>
-                    <p className="text-2xl font-bold text-green-700">₹{advanceAmount}</p>
-                  </div>
-                  <div className="bg-orange-50 rounded-xl p-4 border border-orange-200 flex justify-between items-center">
-                    <div>
-                      <p className="text-sm text-orange-800 font-medium mb-1">Remaining Amount</p>
-                      <p className="text-xs text-orange-700">Pay on Delivery</p>
-                    </div>
-                    <p className="text-xl font-bold text-orange-700">₹{remainingAmount}</p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-center bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                  <div className="bg-gray-100 p-2 rounded-lg mb-2">
-                    <div className="w-32 h-32 bg-white border-2 border-dashed border-gray-300 flex flex-col items-center justify-center rounded-lg">
-                      <QrCode size={40} className="text-gray-400 mb-2" />
-                      <span className="text-[10px] text-gray-500 font-medium uppercase">UPI QR Code</span>
-                    </div>
-                  </div>
-                  <p className="text-sm font-semibold text-gray-800">Scan & Pay ₹{advanceAmount}</p>
-                </div>
-              </div>
-
-              <div className="mt-8 border-t border-gray-200 pt-6">
-                <label className="flex items-start mb-6 cursor-pointer">
-                  <input type="checkbox" required className="mt-1 w-5 h-5 text-green-600 rounded border-gray-300 focus:ring-green-500" />
-                  <span className="ml-3 text-sm text-gray-600 font-medium">
-                    I confirm my details and have completed the advance payment of ₹{advanceAmount}.
-                  </span>
                 </label>
                 
+                <label className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition ${paymentChoice === '100' ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}>
+                  <input 
+                    type="radio" 
+                    name="paymentAmount" 
+                    value="100" 
+                    checked={paymentChoice === '100'} 
+                    onChange={() => setPaymentChoice('100')}
+                    className="w-4 h-4 text-green-600 focus:ring-green-500"
+                  />
+                  <div>
+                    <div className="font-bold text-gray-900">Pay 100% Now</div>
+                    <div className="text-sm text-gray-500">Pay full ₹{totalAmount} via UPI/QR</div>
+                  </div>
+                </label>
+              </div>
+              
+              <div className="bg-gray-50 p-6 rounded-lg text-center border border-gray-200">
+                <QrCode size={64} className="mx-auto text-gray-400 mb-4" />
+                <h3 className="font-bold text-lg mb-2">Scan & Pay ₹{advanceAmount}</h3>
+                <p className="text-sm text-gray-500 mb-6">Use any UPI app (GPay, PhonePe, Paytm, etc.)</p>
                 <button 
-                  onClick={handleConfirmOrder}
-                  className="w-full bg-green-700 hover:bg-green-800 text-white text-lg font-bold py-4 rounded-xl transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  onClick={handlePaymentSimulation}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-lg transition w-full md:w-auto"
                 >
-                  Confirm Order
+                  I have paid ₹{advanceAmount}
                 </button>
               </div>
+
             </div>
           )}
 
-          {/* STEP 5: CONFIRMATION */}
+          {/* STEP 5: CONFIRM COD */}
           {step === 5 && (
+            <div className="p-6 md:p-8 text-center">
+              <CheckCircle size={64} className="text-green-500 mx-auto mb-4" />
+              <h2 className="font-bold text-2xl mb-2">Payment of ₹{advanceAmount} Successful!</h2>
+              <p className="text-gray-600 mb-6">Your advance payment has been received.</p>
+              
+              <div className="bg-orange-50 p-4 rounded-lg border border-orange-100 mb-8 inline-block text-left w-full max-w-md mx-auto">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-700">Total Order Value:</span>
+                  <span className="font-semibold">₹{totalAmount}</span>
+                </div>
+                <div className="flex justify-between items-center mb-2 text-green-700">
+                  <span>Advance Paid:</span>
+                  <span>- ₹{advanceAmount}</span>
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t border-orange-200 mt-2 font-bold text-lg">
+                  <span>Remaining Amount:</span>
+                  <span>₹{remainingAmount}</span>
+                </div>
+              </div>
+              
+              <button 
+                onClick={confirmCOD}
+                className="bg-yellow-500 hover:bg-yellow-600 text-green-950 font-bold px-8 py-4 rounded-lg transition w-full flex items-center justify-center gap-2 mx-auto"
+              >
+                <Banknote size={20} />
+                Confirm Cash on Delivery for ₹{remainingAmount}
+              </button>
+            </div>
+          )}
+
+          {/* STEP 6: CONFIRMATION (Summary) */}
+          {step === 6 && (
             <div className="p-8 md:p-12 text-center">
               <div className="flex justify-center mb-6">
                 <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
@@ -426,27 +448,50 @@ function OrderFlowContent() {
                 </div>
               </div>
               
-              <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Order Confirmed!</h2>
-              <p className="text-gray-600 mb-8">Thank you for your order. We have received your advance payment.</p>
+              <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Order Placed Successfully!</h2>
+              <p className="text-gray-600 mb-8">Thank you for your order.</p>
               
-              <div className="bg-gray-50 rounded-2xl p-6 max-w-sm mx-auto border border-gray-200 text-left mb-8">
+              <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-auto border border-gray-200 text-left mb-8 shadow-sm">
                 <div className="mb-4 pb-4 border-b border-gray-200 text-center">
                   <p className="text-sm text-gray-500 mb-1">Order ID</p>
                   <p className="text-2xl font-bold text-gray-900">{orderId}</p>
                 </div>
                 
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Total Amount</span>
-                    <span className="font-semibold">₹{totalAmount}</span>
+                <h3 className="font-bold text-lg mb-4">Order Summary</h3>
+                <div className="space-y-4 mb-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">
+                      {quantity}x {selectedProduct.name}
+                    </span>
+                    <span className="font-medium text-gray-900">₹{itemTotal}</span>
                   </div>
-                  <div className="flex justify-between text-green-700">
-                    <span>Advance Paid</span>
-                    <span className="font-semibold">-₹{advanceAmount}</span>
+                </div>
+                
+                <div className="border-t pt-4 space-y-2 text-sm">
+                  <div className="flex justify-between text-gray-600">
+                    <span>Delivery Charge</span>
+                    <span className="font-medium">₹{deliveryCharge}</span>
                   </div>
-                  <div className="flex justify-between pt-3 border-t border-gray-200">
-                    <span className="font-bold text-gray-900">Remaining Amount</span>
-                    <span className="font-bold text-orange-600">₹{remainingAmount}</span>
+                  <div className="flex justify-between font-bold text-gray-900 text-base pt-2">
+                    <span>Total Amount</span>
+                    <span>₹{totalAmount}</span>
+                  </div>
+                </div>
+                
+                <div className="border-t mt-4 pt-4 space-y-2 text-sm bg-gray-50 p-4 rounded">
+                  <div className="flex justify-between text-green-700 font-medium">
+                    <span>Amount Paid</span>
+                    <span>₹{advanceAmount}</span>
+                  </div>
+                  {remainingAmount > 0 && (
+                    <div className="flex justify-between text-red-600 font-bold mt-2">
+                      <span>Remaining (Cash on Delivery)</span>
+                      <span>₹{remainingAmount}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-gray-600 mt-2">
+                    <span>Payment Status</span>
+                    <span className="font-medium capitalize">{remainingAmount > 0 ? 'Partially Paid' : 'Fully Paid'}</span>
                   </div>
                 </div>
               </div>
@@ -454,15 +499,15 @@ function OrderFlowContent() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link 
                   href="/profile"
-                  className="bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-8 rounded-xl transition text-center"
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 px-8 rounded-xl transition text-center"
                 >
-                  Track My Order
+                  View Orders
                 </Link>
                 <Link 
                   href="/"
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 px-8 rounded-xl transition text-center"
+                  className="bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-8 rounded-xl transition text-center"
                 >
-                  Back to Home
+                  Continue Shopping
                 </Link>
               </div>
             </div>
@@ -481,4 +526,3 @@ export default function OrderFlow() {
     </Suspense>
   );
 }
-
