@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { notFound, useRouter } from 'next/navigation';
 import { products } from '@/lib/data';
 import { useCart } from '@/context/CartContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { Star, Truck, ShieldCheck, Minus, Plus, ShoppingBag, ArrowLeft } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 
@@ -13,6 +14,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const resolvedParams = use(params);
   const product = products.find(p => p.id === resolvedParams.id);
   const { addToCart, clearCart } = useCart();
+  const { language, t } = useLanguage();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const router = useRouter();
@@ -31,6 +33,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     router.push('/checkout');
   };
 
+  const name = language === 'hi' && product.nameHi ? product.nameHi : product.name;
+  const description = language === 'hi' && product.descriptionHi ? product.descriptionHi : product.description;
+
   return (
     <div className="container mx-auto px-4 py-4 md:py-8">
       {/* Back Button */}
@@ -43,7 +48,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
       {/* Breadcrumb */}
       <div className="text-xs md:text-sm text-gray-500 mb-4 md:mb-6">
-        <Link href="/">Home</Link> / <Link href="/products">Products</Link> / <span className="text-gray-900">{product.name}</span>
+        <Link href="/">{t('home')}</Link> / <Link href="/">{t('allProducts')}</Link> / <span className="text-gray-900">{name}</span>
       </div>
 
       <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-10 shadow-sm border border-gray-100 mb-6 md:mb-12">
@@ -54,7 +59,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             <div className="relative h-[250px] sm:h-[350px] md:h-[500px] w-full bg-gray-50 rounded-xl overflow-hidden">
               <Image 
                 src={product.image} 
-                alt={product.name}
+                alt={name}
                 fill
                 className="object-cover"
               />
@@ -68,7 +73,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
           {/* Product Details */}
           <div className="w-full md:w-1/2 flex flex-col justify-center">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-2">{product.name}</h1>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-2">{name}</h1>
             
             <div className="flex items-center gap-2 md:gap-4 mb-3 md:mb-4">
               <div className="flex items-center text-yellow-500">
@@ -78,7 +83,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <Star size={16} className="fill-current md:w-[18px] md:h-[18px]" />
                 <Star size={16} className="fill-current text-gray-300 md:w-[18px] md:h-[18px]" />
                 <span className="text-gray-700 font-medium ml-2 text-sm md:text-base">{product.rating}</span>
-                <span className="text-gray-400 text-xs md:text-sm ml-1">({product.reviews} reviews)</span>
+                <span className="text-gray-400 text-xs md:text-sm ml-1">({product.reviews} {t('reviews')})</span>
               </div>
             </div>
 
@@ -93,7 +98,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </div>
 
             <p className="text-sm md:text-base text-gray-600 mb-6 md:mb-8 leading-relaxed">
-              {product.description}
+              {description}
             </p>
 
             <div className="flex flex-row items-center gap-2 md:gap-3 mb-6 md:mb-8 pb-6 md:pb-8 border-b border-gray-100">
@@ -121,7 +126,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 onClick={handleBuyNow}
                 className="flex-1 h-10 sm:h-12 rounded-lg font-bold flex items-center justify-center transition text-sm sm:text-base bg-yellow-500 hover:bg-yellow-600 text-green-950 shadow-sm px-4"
               >
-                Buy Now
+                {t('buyNow')}
               </button>
             </div>
 
@@ -130,13 +135,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <div className="bg-green-100 p-1.5 md:p-2 rounded-full text-green-700">
                   <ShieldCheck size={16} className="md:w-[20px] md:h-[20px]" />
                 </div>
-                <span className="font-medium leading-tight">100% Quality Guaranteed</span>
+                <span className="font-medium leading-tight">{t('qualityGuaranteed')}</span>
               </div>
               <div className="flex items-center gap-2 md:gap-3 text-gray-700">
                 <div className="bg-green-100 p-1.5 md:p-2 rounded-full text-green-700">
                   <Truck size={16} className="md:w-[20px] md:h-[20px]" />
                 </div>
-                <span className="font-medium leading-tight">Freshly Milled for You</span>
+                <span className="font-medium leading-tight">{t('freshlyMilledForYou')}</span>
               </div>
             </div>
           </div>

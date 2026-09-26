@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   description: "Freshly milled premium atta.",
 };
 
+import { CartProvider } from "@/context/CartContext";
+import { OrderProvider } from "@/context/OrderContext";
+import { LanguageProvider } from "@/context/LanguageContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -17,7 +21,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        {children}
+        <LanguageProvider>
+          <OrderProvider>
+            <CartProvider>
+              {children}
+            </CartProvider>
+          </OrderProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

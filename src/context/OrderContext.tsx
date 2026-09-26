@@ -13,7 +13,10 @@ export type DeliverySettings = {
 export type CustomerProfile = {
   name: string;
   phone: string;
+  country: string;
+  pincode: string;
   address: string;
+  city: string;
   isVerified: boolean;
 };
 

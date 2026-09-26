@@ -74,9 +74,12 @@ function OrderFlowContent() {
       updateCustomerProfile({
         name: customerInfo.name,
         phone: customerInfo.phone,
-        address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.pincode}, ${customerInfo.country}`,
+        address: customerInfo.address,
+        country: customerInfo.country,
+        pincode: customerInfo.pincode,
+        city: customerInfo.city,
         isVerified: true
-      });
+      } as any);
       handleNext(); // go to step 4 Payment
     } else {
       alert("Please enter a 4-digit OTP.");

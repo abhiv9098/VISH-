@@ -3,17 +3,17 @@
 
 import { useCart } from '@/context/CartContext';
 import { useOrders } from '@/context/OrderContext';
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle, Truck, CreditCard, Banknote, QrCode, ArrowLeft } from 'lucide-react';
+import { CheckCircle, Truck, CreditCard, Banknote, QrCode, ArrowLeft, MapPin } from 'lucide-react';
 import Link from 'next/link';
 
 export default function CheckoutPage() {
   const { cart, getCartTotal, clearCart } = useCart();
-  const { addOrder } = useOrders();
+  const { addOrder, customerProfile, updateCustomerProfile } = useOrders();
   const router = useRouter();
   
-  // Steps: 1: Details, 2: Payment (50% or 100%), 3: Success
+  // Steps: 1: Details, 2: Payment, 3: Success
   const [step, setStep] = useState(1);
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
@@ -23,8 +23,13 @@ export default function CheckoutPage() {
     city: '',
     pincode: ''
   });
+  const [locationVerified, setLocationVerified] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState('');
   
-  const [paymentChoice, setPaymentChoice] = useState<'50' | '100'>('50');
+  const [paymentChoice, setPaymentChoice] = useState<'online' | 'cod'>('online');
+  const [txnId, setTxnId] = useState('');
+  const [txnError, setTxnError] = useState('');
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [generatedOrderId, setGeneratedOrderId] = useState('');
 
@@ -32,9 +37,50 @@ export default function CheckoutPage() {
   const deliveryCharge = 50; 
   const subtotal = getCartTotal();
   const total = subtotal + deliveryCharge;
-  
-  const advanceAmount = paymentChoice === '50' ? total / 2 : total;
-  const remainingAmount = total - advanceAmount;
+
+  // Pre-fill if exists
+  useEffect(() => {
+    if (customerProfile && customerProfile.name) {
+      setCustomerInfo({
+        name: customerProfile.name || '',
+        phone: customerProfile.phone || '',
+        country: customerProfile.country || 'India',
+        address: customerProfile.address || '',
+        city: customerProfile.city || '',
+        pincode: customerProfile.pincode || ''
+      });
+      // Optionally auto-skip step 1 if all required fields are there?
+      // "ye dal de to is per Nahin dalna chahie use per ek hi bar dalna chahie"
+      // If we skip automatically, they can edit in profile. Let's just prefill.
+    }
+  }, [customerProfile]);
+
+  // Automatic Location Tracking
+  useEffect(() => {
+    if (step === 1 && !locationVerified) {
+      detectLocation();
+    }
+  }, [step]);
+
+  const detectLocation = () => {
+    setLocationLoading(true);
+    setLocationError('');
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocationVerified(true);
+          setLocationLoading(false);
+        },
+        (error) => {
+          setLocationLoading(false);
+          setLocationError('Please allow location access to verify address.');
+        }
+      );
+    } else {
+      setLocationLoading(false);
+      setLocationError('Geolocation not supported.');
+    }
+  };
 
   if (cart.length === 0 && !orderPlaced) {
     return (
@@ -49,39 +95,99 @@ export default function CheckoutPage() {
 
   const handleDetailsSubmit = (e: FormEvent) => {
     e.preventDefault();
+    if (!locationVerified) {
+      alert("Please allow location access to verify your address.");
+      return;
+    }
+    
+    // Save to context so it's not asked again
+    updateCustomerProfile({
+      ...customerInfo,
+      isVerified: true
+    });
+    
     setStep(2);
   };
 
-  const handlePaymentSimulation = () => {
-    // Simulate successful payment delay
-    setTimeout(() => {
-      setStep(3);
-    }, 1500);
-  };
-
-  const confirmCOD = () => {
+  const handlePaymentVerification = () => {
+    if (paymentChoice === 'online') {
+      if (txnId.trim().length < 8) {
+        setTxnError('Please enter a valid Transaction ID after payment.');
+        return;
+      }
+      setTxnError('');
+    }
+    
     placeOrder();
   };
 
   const placeOrder = () => {
     const newOrderId = `ORD-${Math.floor(Math.random() * 900000) + 100000}`;
+    setGeneratedOrderId(newOrderId);
     addOrder({
       id: newOrderId,
       date: new Date().toISOString(),
       status: 'Order Placed',
       total: total,
-      advancePaid: advanceAmount,
-      remainingAmount: remainingAmount,
+      advancePaid: paymentChoice === 'online' ? total : 0,
+      remainingAmount: paymentChoice === 'cod' ? total : 0,
       items: cart,
       customerInfo: customerInfo
     });
     clearCart();
-    router.push('/profile?newOrder=' + newOrderId);
+    setOrderPlaced(true);
   };
+
+  if (orderPlaced) {
+    return (
+      <div className="container mx-auto px-4 py-20 flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <CheckCircle size={80} className="text-green-500 mb-6" />
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">Order Placed Successfully!</h1>
+        <p className="text-gray-600 mb-2">Thank you for choosing Vishwakarma Chakki.</p>
+        <p className="text-gray-500 mb-8">Order ID: <span className="font-semibold text-gray-800">{generatedOrderId}</span></p>
+        
+        <div className="bg-gray-50 p-6 rounded-lg w-full max-w-md border border-gray-200 mb-8 text-left">
+          <h3 className="font-bold border-b pb-2 mb-4">Order Summary</h3>
+          <div className="space-y-2 text-sm text-gray-700">
+             <div className="flex justify-between">
+                <span>Subtotal:</span>
+                <span>₹{subtotal}</span>
+             </div>
+             <div className="flex justify-between">
+                <span>Delivery Charge:</span>
+                <span>₹{deliveryCharge}</span>
+             </div>
+             <div className="flex justify-between font-bold text-gray-900 border-t pt-2 mt-2">
+                <span>Total:</span>
+                <span>₹{total}</span>
+             </div>
+             <div className="flex justify-between text-green-700 mt-2">
+                <span>Payment Status:</span>
+                <span className="font-bold">{paymentChoice === 'online' ? 'PAID ONLINE' : 'CASH ON DELIVERY'}</span>
+             </div>
+          </div>
+        </div>
+
+        <div className="flex gap-4 justify-center">
+          <button 
+            onClick={() => router.push('/profile')}
+            className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium px-6 py-2 rounded transition"
+          >
+            Track Order
+          </button>
+          <button 
+            onClick={() => router.push('/')}
+            className="bg-green-700 hover:bg-green-800 text-white font-medium px-6 py-2 rounded transition"
+          >
+            Continue Shopping
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Back Button */}
       {step === 1 && (
         <button 
           onClick={() => router.back()} 
@@ -101,10 +207,33 @@ export default function CheckoutPage() {
           {step === 1 && (
             <form id="checkout-details-form" onSubmit={handleDetailsSubmit}>
               <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm mb-6">
-                <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
-                  <Truck className="text-green-700" size={20} /> 
-                  Delivery Address & Details
-                </h2>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="font-bold text-lg flex items-center gap-2">
+                    <Truck className="text-green-700" size={20} /> 
+                    Delivery Address & Details
+                  </h2>
+                  <Link href="/profile" className="text-sm text-blue-600 hover:underline">
+                    Edit saved profile?
+                  </Link>
+                </div>
+
+                <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg mb-6 flex items-start gap-3">
+                  <MapPin className="text-blue-600 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-blue-900 text-sm">Location Verification</h4>
+                    <p className="text-xs text-blue-700 mb-2">To prevent fake orders, we need to verify your current location.</p>
+                    {locationVerified ? (
+                      <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">
+                        <CheckCircle size={14} /> Location Verified
+                      </span>
+                    ) : (
+                      <button type="button" onClick={detectLocation} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700">
+                        {locationLoading ? 'Detecting...' : 'Verify Location'}
+                      </button>
+                    )}
+                    {locationError && <p className="text-xs text-red-600 mt-1">{locationError}</p>}
+                  </div>
+                </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -144,96 +273,81 @@ export default function CheckoutPage() {
 
           {step === 2 && (
             <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+              <button onClick={() => setStep(1)} className="flex items-center gap-1 text-gray-500 hover:text-green-700 text-sm mb-4">
+                <ArrowLeft size={16} /> Back to Details
+              </button>
+              
               <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
                 <CreditCard className="text-green-700" size={20} /> 
-                Advance Payment Required
+                Payment Options
               </h2>
-              <p className="text-gray-600 mb-6 text-sm">To process your order, please make an advance payment.</p>
+              <p className="text-gray-600 mb-6 text-sm">Please choose how you would like to pay for your order.</p>
               
               <div className="space-y-4 mb-8">
-                <label className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition ${paymentChoice === '50' ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}>
+                <label className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition ${paymentChoice === 'online' ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}>
                   <input 
                     type="radio" 
-                    name="paymentAmount" 
-                    value="50" 
-                    checked={paymentChoice === '50'} 
-                    onChange={() => setPaymentChoice('50')}
+                    name="paymentChoice" 
+                    value="online" 
+                    checked={paymentChoice === 'online'} 
+                    onChange={() => setPaymentChoice('online')}
                     className="w-4 h-4 text-green-600 focus:ring-green-500"
                   />
                   <div>
-                    <div className="font-bold text-gray-900">Pay 50% Now</div>
-                    <div className="text-sm text-gray-500">Pay ₹{total / 2} via UPI/QR, remaining on delivery</div>
+                    <div className="font-bold text-gray-900">Pay Online via UPI</div>
+                    <div className="text-sm text-gray-500">Secure online payment</div>
                   </div>
                 </label>
                 
-                <label className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition ${paymentChoice === '100' ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}>
+                <label className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition ${paymentChoice === 'cod' ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}>
                   <input 
                     type="radio" 
-                    name="paymentAmount" 
-                    value="100" 
-                    checked={paymentChoice === '100'} 
-                    onChange={() => setPaymentChoice('100')}
+                    name="paymentChoice" 
+                    value="cod" 
+                    checked={paymentChoice === 'cod'} 
+                    onChange={() => setPaymentChoice('cod')}
                     className="w-4 h-4 text-green-600 focus:ring-green-500"
                   />
                   <div>
-                    <div className="font-bold text-gray-900">Pay 100% Now</div>
-                    <div className="text-sm text-gray-500">Pay full ₹{total} via UPI/QR</div>
+                    <div className="font-bold text-gray-900">Cash on Delivery (COD)</div>
+                    <div className="text-sm text-gray-500">Pay when your order arrives</div>
                   </div>
                 </label>
               </div>
               
-              <div className="bg-gray-50 p-6 rounded-lg text-center border border-gray-200">
-                <QrCode size={64} className="mx-auto text-gray-400 mb-4" />
-                <h3 className="font-bold text-lg mb-2">Scan & Pay ₹{advanceAmount}</h3>
-                <p className="text-sm text-gray-500 mb-6">Use any UPI app (GPay, PhonePe, Paytm, etc.)</p>
-                <button 
-                  onClick={handlePaymentSimulation}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-lg transition w-full md:w-auto"
-                >
-                  Confirm Payment of ₹{advanceAmount}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm text-center">
-              <CheckCircle size={64} className="text-green-500 mx-auto mb-4" />
-              <h2 className="font-bold text-2xl mb-2">Payment of ₹{advanceAmount} Successful!</h2>
-              <p className="text-gray-600 mb-6">Your advance payment has been received.</p>
-              
-              <div className="bg-orange-50 p-4 rounded-lg border border-orange-100 mb-8 inline-block text-left w-full max-w-md mx-auto">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-700">Total Order Value:</span>
-                  <span className="font-semibold">₹{total}</span>
+              {paymentChoice === 'online' && (
+                <div className="bg-gray-50 p-6 rounded-lg text-center border border-gray-200 mb-6">
+                  <QrCode size={64} className="mx-auto text-gray-400 mb-4" />
+                  <h3 className="font-bold text-lg mb-2">Scan & Pay ₹{total}</h3>
+                  <p className="text-sm text-gray-700 mb-2">
+                    UPI ID: <span className="font-bold text-blue-700 select-all">9893249212@mbk</span>
+                  </p>
+                  <p className="text-xs text-gray-500 mb-6">Please transfer the exact amount and enter the Transaction ID below.</p>
+                  
+                  <div className="max-w-xs mx-auto mb-4 text-left">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Transaction ID (UTR)</label>
+                    <input 
+                      type="text" 
+                      value={txnId} 
+                      onChange={e => setTxnId(e.target.value)} 
+                      className={`w-full border rounded p-2 outline-none ${txnError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-green-500'}`} 
+                      placeholder="e.g. 123456789012" 
+                    />
+                    {txnError && <p className="text-xs text-red-500 mt-1">{txnError}</p>}
+                  </div>
                 </div>
-                <div className="flex justify-between items-center mb-2 text-green-700">
-                  <span>Advance Paid:</span>
-                  <span>- ₹{advanceAmount}</span>
-                </div>
-                <div className="flex justify-between items-center pt-2 border-t border-orange-200 mt-2 font-bold text-lg">
-                  <span>Remaining Amount:</span>
-                  <span>₹{remainingAmount}</span>
-                </div>
-              </div>
-              
-              {remainingAmount > 0 ? (
-                <button 
-                  onClick={confirmCOD}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-green-950 font-bold px-8 py-4 rounded-lg transition w-full md:w-auto flex items-center justify-center gap-2 mx-auto"
-                >
-                  <Banknote size={20} />
-                  Confirm Cash on Delivery for ₹{remainingAmount}
-                </button>
-              ) : (
-                <button 
-                  onClick={placeOrder}
-                  className="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-4 rounded-lg transition w-full md:w-auto flex items-center justify-center gap-2 mx-auto"
-                >
-                  <CheckCircle size={20} />
-                  Complete Order
-                </button>
               )}
+              
+              <button 
+                onClick={handlePaymentVerification}
+                className="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-4 rounded-lg transition w-full md:w-auto flex items-center justify-center gap-2 mx-auto"
+              >
+                {paymentChoice === 'online' ? (
+                  <>Verify Payment & Place Order</>
+                ) : (
+                  <>Confirm COD & Place Order</>
+                )}
+              </button>
             </div>
           )}
         </div>
