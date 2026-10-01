@@ -176,13 +176,21 @@ export type Order = {
     name: string;
     address: string;
     phone: string;
+    city?: string;
+    pincode?: string;
+    country?: string;
+    coordinates?: {
+      lat: number;
+      lng: number;
+    };
+    liveLocationUrl?: string;
   };
 };
 
 export const sampleOrders: Order[] = [
   {
     id: 'ORD-847291',
-    date: '2026-09-10T14:30:00Z',
+    date: '2026-09-28T14:30:00Z',
     status: 'Out for Delivery',
     total: 349,
     advancePaid: 174.5,
@@ -190,8 +198,37 @@ export const sampleOrders: Order[] = [
     items: [{ product: products[3], quantity: 1 }],
     customerInfo: {
       name: 'Rahul Sharma',
-      address: '123, Rosewood Apartments, Andheri West, Mumbai',
-      phone: '+91 9876543210'
+      address: 'Shop No. 4, Main Market, Sector 14, Gurugram, Haryana',
+      phone: '+91 9876543210',
+      city: 'Gurugram',
+      pincode: '122001',
+      coordinates: {
+        lat: 28.4595,
+        lng: 77.0266
+      },
+      liveLocationUrl: 'https://www.google.com/maps?q=28.4595,77.0266'
+    }
+  },
+  {
+    id: 'ORD-519203',
+    date: '2026-09-30T10:15:00Z',
+    status: 'Order Placed',
+    total: 549,
+    advancePaid: 549,
+    remainingAmount: 0,
+    items: [{ product: products[0], quantity: 1 }, { product: products[2], quantity: 2 }],
+    customerInfo: {
+      name: 'Amit Verma',
+      address: 'Flat 302, Green Valley Apartments, Near Metro Station, Delhi',
+      phone: '+91 9811223344',
+      city: 'Delhi',
+      pincode: '110001',
+      coordinates: {
+        lat: 28.6139,
+        lng: 77.2090
+      },
+      liveLocationUrl: 'https://www.google.com/maps?q=28.6139,77.2090'
     }
   }
 ];
+

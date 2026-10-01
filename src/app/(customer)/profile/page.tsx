@@ -206,7 +206,7 @@ export default function ProfilePage() {
                             {order.items.map((item, idx) => (
                               <div key={idx} className="flex gap-4 items-center">
                                 <div className="relative w-16 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                                  <Image src={item.product.image} alt={item.product.name} fill className="object-cover" />
+                                  <Image src={item.product.image || '/images/wheat_flour.jpg'} alt={item.product.name || 'Product'} fill className="object-cover" />
                                 </div>
                                 <div className="flex-1">
                                   <Link href={`/products/${item.product.id}`} className="font-semibold text-gray-800 hover:text-green-700 transition line-clamp-1">

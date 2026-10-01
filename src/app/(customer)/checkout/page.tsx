@@ -24,6 +24,7 @@ export default function CheckoutPage() {
     pincode: ''
   });
   const [locationVerified, setLocationVerified] = useState(false);
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationError, setLocationError] = useState('');
   
@@ -49,9 +50,6 @@ export default function CheckoutPage() {
         city: customerProfile.city || '',
         pincode: customerProfile.pincode || ''
       });
-      // Optionally auto-skip step 1 if all required fields are there?
-      // "ye dal de to is per Nahin dalna chahie use per ek hi bar dalna chahie"
-      // If we skip automatically, they can edit in profile. Let's just prefill.
     }
   }, [customerProfile]);
 
@@ -65,16 +63,20 @@ export default function CheckoutPage() {
   const detectLocation = () => {
     setLocationLoading(true);
     setLocationError('');
-    if ('geolocation' in navigator) {
+    if (typeof window !== 'undefined' && 'geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          setCoordinates({ lat, lng });
           setLocationVerified(true);
           setLocationLoading(false);
         },
         (error) => {
           setLocationLoading(false);
-          setLocationError('Please allow location access to verify address.');
-        }
+          setLocationError('Please enable GPS/Location in browser for live tracking, or proceed manually.');
+        },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
       );
     } else {
       setLocationLoading(false);
@@ -95,15 +97,11 @@ export default function CheckoutPage() {
 
   const handleDetailsSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!locationVerified) {
-      alert("Please allow location access to verify your address.");
-      return;
-    }
     
     // Save to context so it's not asked again
     updateCustomerProfile({
       ...customerInfo,
-      isVerified: true
+      isVerified: locationVerified
     });
     
     setStep(2);
@@ -124,6 +122,12 @@ export default function CheckoutPage() {
   const placeOrder = () => {
     const newOrderId = `ORD-${Math.floor(Math.random() * 900000) + 100000}`;
     setGeneratedOrderId(newOrderId);
+
+    const fullAddr = `${customerInfo.address}, ${customerInfo.city} ${customerInfo.pincode}`.trim();
+    const liveMapUrl = coordinates
+      ? `https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddr || customerInfo.address)}`;
+
     addOrder({
       id: newOrderId,
       date: new Date().toISOString(),
@@ -132,7 +136,11 @@ export default function CheckoutPage() {
       advancePaid: paymentChoice === 'online' ? total : 0,
       remainingAmount: paymentChoice === 'cod' ? total : 0,
       items: cart,
-      customerInfo: customerInfo
+      customerInfo: {
+        ...customerInfo,
+        coordinates: coordinates || undefined,
+        liveLocationUrl: liveMapUrl
+      }
     });
     clearCart();
     setOrderPlaced(true);
@@ -223,12 +231,19 @@ export default function CheckoutPage() {
                     <h4 className="font-bold text-blue-900 text-sm">Location Verification</h4>
                     <p className="text-xs text-blue-700 mb-2">To prevent fake orders, we need to verify your current location.</p>
                     {locationVerified ? (
-                      <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">
-                        <CheckCircle size={14} /> Location Verified
-                      </span>
+                      <div className="flex flex-col gap-1">
+                        <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">
+                          <CheckCircle size={14} /> Live GPS Location Attached
+                        </span>
+                        {coordinates && (
+                          <span className="text-[11px] text-green-800 font-mono">
+                            Coords: {coordinates.lat.toFixed(4)}, {coordinates.lng.toFixed(4)}
+                          </span>
+                        )}
+                      </div>
                     ) : (
-                      <button type="button" onClick={detectLocation} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700">
-                        {locationLoading ? 'Detecting...' : 'Verify Location'}
+                      <button type="button" onClick={detectLocation} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 font-medium">
+                        {locationLoading ? 'Detecting Live GPS...' : '📍 Capture Live GPS Location'}
                       </button>
                     )}
                     {locationError && <p className="text-xs text-red-600 mt-1">{locationError}</p>}

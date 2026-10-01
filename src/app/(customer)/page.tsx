@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import Image from 'next/image';
+import Link from 'next/link';
 import { products } from "@/lib/data";
 import ProductCard from "@/components/ProductCard";
 import { Search } from "lucide-react";

@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
-const nextConfig = {
-  eslint: { ignoreDuringBuilds: true }, typescript: { ignoreBuildErrors: true }, images: {
+const nextConfig: NextConfig = {
+  serverActions: {
+    allowedOrigins: [
+      'localhost:3000',
+      '192.168.1.72:3000',
+    ],
+  },
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
+  images: {
     remotePatterns: [
       {
         protocol: 'https',

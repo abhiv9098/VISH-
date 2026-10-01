@@ -2,7 +2,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Order } from '@/lib/data';
+import { Order, sampleOrders } from '@/lib/data';
+import { getOrdersServer, saveOrderServer } from '@/actions/orderActions';
 
 export type DeliverySettings = {
   threshold: number;
@@ -23,6 +24,8 @@ export type CustomerProfile = {
 type OrderContextType = {
   orders: Order[];
   addOrder: (order: Order) => void;
+  updateOrderStatus: (orderId: string, status: Order['status']) => void;
+  deleteOrder: (orderId: string) => void;
   deliverySettings: DeliverySettings;
   updateDeliverySettings: (settings: DeliverySettings) => void;
   customerProfile: CustomerProfile | null;
@@ -41,28 +44,34 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   });
   const [customerProfile, setCustomerProfile] = useState<CustomerProfile | null>(null);
 
+  // Fetch orders from API
+  const fetchOrders = async () => { try { const data = await getOrdersServer(); if (Array.isArray(data)) { setOrders(data); } } catch(e) { console.error(e); } };
+
   useEffect(() => {
-    const savedOrders = localStorage.getItem('vishwakarma_orders');
-    if (savedOrders) {
-      try { setOrders(JSON.parse(savedOrders)); } catch (e) { }
-    }
-    
+    fetchOrders();
+
+    // Poll every 3 seconds to get real-time updates from mobile!
+    const interval = setInterval(fetchOrders, 3000);
+
+    // Profile and settings still from LocalStorage for the current device
     const savedSettings = localStorage.getItem('vishwakarma_delivery_settings');
     if (savedSettings) {
       try { setDeliverySettings(JSON.parse(savedSettings)); } catch (e) { }
     }
-    
+
     const savedProfile = localStorage.getItem('vishwakarma_customer_profile');
     if (savedProfile) {
       try { setCustomerProfile(JSON.parse(savedProfile)); } catch (e) { }
     }
+
+    return () => clearInterval(interval);
   }, []);
 
-  const addOrder = (order: Order) => {
-    const newOrders = [order, ...orders];
-    setOrders(newOrders);
-    localStorage.setItem('vishwakarma_orders', JSON.stringify(newOrders));
-  };
+  const addOrder = async (order: Order) => { const newOrders = [order, ...orders]; setOrders(newOrders); await saveOrderServer(newOrders); };
+
+  const updateOrderStatus = async (orderId: string, status: Order['status']) => { const newOrders = orders.map(o => o.id === orderId ? { ...o, status } : o); setOrders(newOrders); await saveOrderServer(newOrders); };
+
+  const deleteOrder = async (orderId: string) => { const newOrders = orders.filter(o => o.id !== orderId); setOrders(newOrders); await saveOrderServer(newOrders); };
 
   const updateDeliverySettings = (settings: DeliverySettings) => {
     setDeliverySettings(settings);
@@ -81,7 +90,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <OrderContext.Provider value={{ 
-      orders, addOrder, 
+      orders, addOrder, updateOrderStatus, deleteOrder,
       deliverySettings, updateDeliverySettings,
       customerProfile, updateCustomerProfile, clearCustomerProfile
     }}>
@@ -97,5 +106,3 @@ export function useOrders() {
   }
   return context;
 }
-
-

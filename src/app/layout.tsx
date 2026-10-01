@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Vishwakarma Chakki",
+  title: "Vishwakarma Atta App",
   description: "Freshly milled premium atta.",
 };
 

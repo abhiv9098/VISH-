@@ -24,7 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="w-8 h-8 bg-yellow-500 rounded flex items-center justify-center font-bold text-green-950">
               V
             </div>
-            <span className="font-bold tracking-wide">Admin Panel</span>
+            <span className="font-bold tracking-wide">Atta Admin</span>
           </div>
           <button className="md:hidden text-gray-300 hover:text-white" onClick={() => setSidebarOpen(false)}>
             <X size={24} />
@@ -76,7 +76,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <button className="md:hidden text-gray-600 hover:text-gray-900" onClick={() => setSidebarOpen(true)}>
               <Menu size={24} />
             </button>
-            <h2 className="font-semibold text-gray-800 hidden sm:block">Store Management</h2>
+            <h2 className="font-semibold text-gray-800 hidden sm:block">Atta Admin Dashboard</h2>
           </div>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-800 font-bold">
