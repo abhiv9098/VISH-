@@ -74,8 +74,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden w-full max-w-full">
+        {/* Modern Admin Header / Top Bar */}
+        <header className="h-14 bg-white border-b border-gray-100 flex items-center justify-between px-4 sm:px-6 shrink-0 shadow-sm">
+          <h1 className="text-base font-bold text-gray-900 tracking-tight">Dashboard</h1>
+          
+          <div className="flex items-center gap-4">
+            <Link 
+              href="/admin" 
+              className="text-xs font-semibold text-green-700 hover:text-green-800 hover:underline transition flex items-center gap-1"
+            >
+              ← Back to Dashboard
+            </Link>
+            <div className="w-8 h-8 rounded-full bg-green-100 text-green-800 font-bold flex items-center justify-center text-xs shadow-sm border border-green-200">
+              A
+            </div>
+          </div>
+        </header>
 
-        
         {/* Scrollable Content */}
         <div className="flex-1 overflow-auto p-4 md:p-6 w-full max-w-full">
           {children}
