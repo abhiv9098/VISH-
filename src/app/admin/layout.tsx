@@ -2,10 +2,14 @@
 
 import Link from 'next/link';
 import { LayoutDashboard, ShoppingBag, Users, Settings, LogOut, Package, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    document.title = "vishwakarma admin app";
+  }, []);
 
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden relative w-full">

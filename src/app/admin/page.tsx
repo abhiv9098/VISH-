@@ -119,15 +119,15 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-6 pb-12 max-w-7xl mx-auto">
+    <div className="space-y-6 pb-12 max-w-7xl mx-auto pt-3">
       {/* 1. Top Action Navigation Bar (Exact match to Screenshot Oct 6) */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 pt-1">
         {/* View Orders */}
         <Link
           href="/admin/orders"
-          className="relative inline-flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl border border-gray-100 shadow-sm text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
+          className="relative inline-flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl border border-gray-100 shadow-sm text-sm font-semibold text-gray-800 hover:bg-gray-50 transition mt-1.5"
         >
-          <span className="absolute -top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+          <span className="absolute -top-2.5 left-6 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md whitespace-nowrap z-10">
             {pendingOrders} New
           </span>
           <ShoppingBag size={18} className="text-blue-600" />
