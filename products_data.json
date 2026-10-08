@@ -1,0 +1,502 @@
+[
+  {
+    "id": "vk-prod-1",
+    "name": "Vishwakarma Chakki Fresh Wheat Atta",
+    "nameHi": "Vishwakarma Chakki Fresh Wheat Atta",
+    "weight": "5 KG",
+    "price": 250,
+    "originalPrice": 250,
+    "discount": 0,
+    "rating": 5,
+    "reviews": 253,
+    "image": "/images/wheat_flour.jpg",
+    "description": "Premium quality Vishwakarma Chakki Fresh Wheat Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Vishwakarma Chakki Fresh Wheat Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Vishwakarma Chakki Fresh Wheat Atta"
+    ],
+    "category": "Wheat Atta",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-2",
+    "name": "Multigrain Atta",
+    "nameHi": "Multigrain Atta",
+    "weight": "5 KG",
+    "price": 250,
+    "originalPrice": 250,
+    "discount": 0,
+    "rating": 4.9,
+    "reviews": 511,
+    "image": "/images/multigrain_flour.jpg",
+    "description": "Premium quality Multigrain Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Multigrain Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Multigrain Atta"
+    ],
+    "category": "Multigrain Atta",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-3",
+    "name": "Sharbati Wheat Atta",
+    "nameHi": "Sharbati Wheat Atta",
+    "weight": "5 KG",
+    "price": 480,
+    "originalPrice": 480,
+    "discount": 0,
+    "rating": 5,
+    "reviews": 334,
+    "image": "/images/wheat_flour.jpg",
+    "description": "Premium quality Sharbati Wheat Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Sharbati Wheat Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Sharbati Wheat Atta"
+    ],
+    "category": "Wheat Atta",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-4",
+    "name": "Whole Wheat Atta",
+    "nameHi": "Whole Wheat Atta",
+    "weight": "5 KG",
+    "price": 480,
+    "originalPrice": 480,
+    "discount": 0,
+    "rating": 4.6,
+    "reviews": 364,
+    "image": "/images/wheat_flour.jpg",
+    "description": "Premium quality Whole Wheat Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Whole Wheat Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Whole Wheat Atta"
+    ],
+    "category": "Wheat Atta",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-5",
+    "name": "Bajra Atta (Pearl Millet Flour)",
+    "nameHi": "Bajra Atta (Pearl Millet Flour)",
+    "weight": "5 KG",
+    "price": 550,
+    "originalPrice": 550,
+    "discount": 0,
+    "rating": 4.9,
+    "reviews": 151,
+    "image": "/images/wheat_flour.jpg",
+    "description": "Premium quality Bajra Atta (Pearl Millet Flour), freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Bajra Atta (Pearl Millet Flour), freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Bajra Atta"
+    ],
+    "category": "Millet Flour",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-6",
+    "name": "Jowar Atta (Sorghum Flour)",
+    "nameHi": "Jowar Atta (Sorghum Flour)",
+    "weight": "5 KG",
+    "price": 575,
+    "originalPrice": 575,
+    "discount": 0,
+    "rating": 4.8,
+    "reviews": 518,
+    "image": "/images/wheat_flour.jpg",
+    "description": "Premium quality Jowar Atta (Sorghum Flour), freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Jowar Atta (Sorghum Flour), freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Jowar Atta"
+    ],
+    "category": "Millet Flour",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-7",
+    "name": "Ragi Atta (Finger Millet Flour)",
+    "nameHi": "Ragi Atta (Finger Millet Flour)",
+    "weight": "5 KG",
+    "price": 600,
+    "originalPrice": 600,
+    "discount": 0,
+    "rating": 4.8,
+    "reviews": 543,
+    "image": "/images/wheat_flour.jpg",
+    "description": "Premium quality Ragi Atta (Finger Millet Flour), freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Ragi Atta (Finger Millet Flour), freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Ragi Atta"
+    ],
+    "category": "Millet Flour",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-8",
+    "name": "Maize Atta (Corn Flour)",
+    "nameHi": "Maize Atta (Corn Flour)",
+    "weight": "5 KG",
+    "price": 625,
+    "originalPrice": 625,
+    "discount": 0,
+    "rating": 4.6,
+    "reviews": 496,
+    "image": "/images/maize_flour.jpg",
+    "description": "Premium quality Maize Atta (Corn Flour), freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Maize Atta (Corn Flour), freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Maize Atta"
+    ],
+    "category": "Corn Flour",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-9",
+    "name": "Besan (Gram Flour)",
+    "nameHi": "Besan (Gram Flour)",
+    "weight": "5 KG",
+    "price": 650,
+    "originalPrice": 650,
+    "discount": 0,
+    "rating": 4.9,
+    "reviews": 375,
+    "image": "/images/gram_flour.jpg",
+    "description": "Premium quality Besan (Gram Flour), freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Besan (Gram Flour), freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Besan"
+    ],
+    "category": "Gram Flour",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-10",
+    "name": "Makki Atta",
+    "nameHi": "Makki Atta",
+    "weight": "5 KG",
+    "price": 675,
+    "originalPrice": 675,
+    "discount": 0,
+    "rating": 4.7,
+    "reviews": 480,
+    "image": "/images/maize_flour.jpg",
+    "description": "Premium quality Makki Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Makki Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Makki Atta"
+    ],
+    "category": "Corn Flour",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-11",
+    "name": "Barley Atta (Jau Flour)",
+    "nameHi": "Barley Atta (Jau Flour)",
+    "weight": "5 KG",
+    "price": 700,
+    "originalPrice": 700,
+    "discount": 0,
+    "rating": 5,
+    "reviews": 336,
+    "image": "/images/wheat_flour.jpg",
+    "description": "Premium quality Barley Atta (Jau Flour), freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Barley Atta (Jau Flour), freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Barley Atta"
+    ],
+    "category": "Other Flour",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-12",
+    "name": "Sattu",
+    "nameHi": "Sattu",
+    "weight": "5 KG",
+    "price": 725,
+    "originalPrice": 725,
+    "discount": 0,
+    "rating": 4.9,
+    "reviews": 438,
+    "image": "/images/wheat_flour.jpg",
+    "description": "Premium quality Sattu, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Sattu, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Sattu"
+    ],
+    "category": "Other Flour",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-13",
+    "name": "Chana Atta",
+    "nameHi": "Chana Atta",
+    "weight": "5 KG",
+    "price": 750,
+    "originalPrice": 750,
+    "discount": 0,
+    "rating": 4.9,
+    "reviews": 240,
+    "image": "/images/gram_flour.jpg",
+    "description": "Premium quality Chana Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Chana Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Chana Atta"
+    ],
+    "category": "Gram Flour",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-14",
+    "name": "Soybean Atta",
+    "nameHi": "Soybean Atta",
+    "weight": "5 KG",
+    "price": 775,
+    "originalPrice": 775,
+    "discount": 0,
+    "rating": 4.8,
+    "reviews": 64,
+    "image": "/images/wheat_flour.jpg",
+    "description": "Premium quality Soybean Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Soybean Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Soybean Atta"
+    ],
+    "category": "Other Flour",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-15",
+    "name": "Oats Atta",
+    "nameHi": "Oats Atta",
+    "weight": "5 KG",
+    "price": 800,
+    "originalPrice": 800,
+    "discount": 0,
+    "rating": 4.7,
+    "reviews": 339,
+    "image": "/images/wheat_flour.jpg",
+    "description": "Premium quality Oats Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Oats Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Oats Atta"
+    ],
+    "category": "Other Flour",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-16",
+    "name": "Kuttu Atta (Buckwheat Flour)",
+    "nameHi": "Kuttu Atta (Buckwheat Flour)",
+    "weight": "5 KG",
+    "price": 825,
+    "originalPrice": 825,
+    "discount": 0,
+    "rating": 4.7,
+    "reviews": 132,
+    "image": "/images/wheat_flour.jpg",
+    "description": "Premium quality Kuttu Atta (Buckwheat Flour), freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Kuttu Atta (Buckwheat Flour), freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Kuttu Atta"
+    ],
+    "category": "Other Flour",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-17",
+    "name": "Rajgira Atta (Amaranth Flour)",
+    "nameHi": "Rajgira Atta (Amaranth Flour)",
+    "weight": "5 KG",
+    "price": 850,
+    "originalPrice": 850,
+    "discount": 0,
+    "rating": 4.8,
+    "reviews": 276,
+    "image": "/images/wheat_flour.jpg",
+    "description": "Premium quality Rajgira Atta (Amaranth Flour), freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Rajgira Atta (Amaranth Flour), freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Rajgira Atta"
+    ],
+    "category": "Other Flour",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-18",
+    "name": "Rice Flour",
+    "nameHi": "Rice Flour",
+    "weight": "5 KG",
+    "price": 875,
+    "originalPrice": 875,
+    "discount": 0,
+    "rating": 4.5,
+    "reviews": 274,
+    "image": "/images/wheat_flour.jpg",
+    "description": "Premium quality Rice Flour, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Rice Flour, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Rice Flour"
+    ],
+    "category": "Other Flour",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-19",
+    "name": "Moong Dal Flour",
+    "nameHi": "Moong Dal Flour",
+    "weight": "5 KG",
+    "price": 900,
+    "originalPrice": 900,
+    "discount": 0,
+    "rating": 4.6,
+    "reviews": 522,
+    "image": "/images/wheat_flour.jpg",
+    "description": "Premium quality Moong Dal Flour, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Moong Dal Flour, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Moong Dal Flour"
+    ],
+    "category": "Other Flour",
+    "inStock": true,
+    "enabled": true
+  },
+  {
+    "id": "vk-prod-20",
+    "name": "Mixed Millet Atta",
+    "nameHi": "Mixed Millet Atta",
+    "weight": "5 KG",
+    "price": 250,
+    "originalPrice": 250,
+    "discount": 0,
+    "rating": 4.8,
+    "reviews": 428,
+    "image": "/images/wheat_flour.jpg",
+    "description": "Premium quality Mixed Millet Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "descriptionHi": "Premium quality Mixed Millet Atta, freshly milled and packed with nutrients. Ideal for healthy daily meals.",
+    "benefits": [
+      "Freshly milled",
+      "High quality",
+      "Nutritious"
+    ],
+    "ingredients": [
+      "100% Mixed Millet Atta"
+    ],
+    "category": "Millet Flour",
+    "inStock": true,
+    "enabled": true
+  }
+]

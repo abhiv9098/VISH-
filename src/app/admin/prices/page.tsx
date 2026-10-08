@@ -21,7 +21,7 @@ import { useOrders } from '@/context/OrderContext';
 import { Order, products } from '@/lib/data';
 import Link from 'next/link';
 
-export default function OrdersPage() {
+export default function CancelledOrdersPage() {
   const { orders, updateOrderStatus, deleteOrder, addOrder } = useOrders();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -29,7 +29,7 @@ export default function OrdersPage() {
 
   // Filter orders
   const filteredOrders = orders.filter(order => {
-    if (order.status === 'Cancelled') return false;
+    if (order.status !== 'Cancelled') return false;
     const safeId = order.id || '';
     const safeName = order.customerInfo?.name || '';
     const safePhone = order.customerInfo?.phone || '';
@@ -95,9 +95,9 @@ export default function OrdersPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Orders & Live Tracking</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Cancelled Orders</h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            Local app orders, customer contact details & live GPS delivery location
+            View all cancelled orders here.
           </p>
         </div>
 
@@ -132,24 +132,14 @@ export default function OrdersPage() {
         </div>
 
         <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
-          {['ALL', 'Order Placed', 'Processing', 'Ready', 'Out for Delivery', 'Delivered'].map((status) => (
-            <button
-              key={status}
-              onClick={() => setStatusFilter(status)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${
-                statusFilter === status 
-                  ? 'bg-green-700 text-white shadow-sm' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {status}
-            </button>
-          ))}
+          <span className="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap bg-red-100 text-red-800 shadow-sm">
+            Cancelled Orders Only
+          </span>
           <Link
-            href="/admin/prices"
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition bg-red-100 text-red-700 hover:bg-red-200 ml-2 shadow-sm"
+            href="/admin/orders"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition bg-gray-100 text-gray-600 hover:bg-gray-200"
           >
-            View Cancelled
+            Back to Active Orders
           </Link>
         </div>
       </div>

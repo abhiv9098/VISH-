@@ -70,21 +70,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden w-full max-w-full">
-        {/* Admin Header */}
-        <header className="h-16 bg-white border-b flex items-center justify-between px-4 md:px-6 shrink-0">
-          <div className="flex items-center gap-4">
-            <button className="md:hidden text-gray-600 hover:text-gray-900" onClick={() => setSidebarOpen(true)}>
-              <Menu size={24} />
-            </button>
-            <h2 className="font-semibold text-gray-800 hidden sm:block">Atta Admin Dashboard</h2>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-800 font-bold">
-              A
-            </div>
-            <span className="text-sm font-medium text-gray-700">Admin</span>
-          </div>
-        </header>
+
         
         {/* Scrollable Content */}
         <div className="flex-1 overflow-auto p-4 md:p-6 w-full max-w-full">

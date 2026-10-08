@@ -1,0 +1,26 @@
+[
+  {
+    "id": "mp-1",
+    "productName": "Normal Chakki Atta",
+    "wholesalePrice": 30,
+    "retailPrice": 36,
+    "source": "Bhopal Local Mandi / Grocery Estimate",
+    "lastUpdated": "2026-10-06T16:22:38.931Z"
+  },
+  {
+    "id": "mp-2",
+    "productName": "Sharbati Wheat Atta",
+    "wholesalePrice": 40,
+    "retailPrice": 52,
+    "source": "MP State Mandi Avg / IndiaMart",
+    "lastUpdated": "2026-10-06T16:22:38.943Z"
+  },
+  {
+    "id": "mp-3",
+    "productName": "Multigrain Atta",
+    "wholesalePrice": 55,
+    "retailPrice": 70,
+    "source": "Supermarket / Branded Avg (Bhopal)",
+    "lastUpdated": "2026-10-06T16:22:38.943Z"
+  }
+]
