@@ -1,13 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverActions: {
-    allowedOrigins: [
-      'localhost:3000',
-      '192.168.1.72:3000',
-    ],
+  devIndicators: false,
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        'localhost:3000',
+        'localhost:4000',
+        '192.168.1.72:3000',
+        '192.168.1.72:4000',
+      ],
+    },
   },
-  eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   images: {
     remotePatterns: [

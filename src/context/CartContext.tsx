@@ -27,38 +27,48 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setIsMounted(true);
-    const savedCart = localStorage.getItem('vishwakarma_cart');
-    if (savedCart) {
-      try {
+    try {
+      const savedCart = localStorage.getItem('vishwakarma_cart');
+      if (savedCart) {
         setCart(JSON.parse(savedCart));
-      } catch (e) {
-        console.error('Failed to parse cart');
       }
+    } catch (e) {
+      console.error('Failed to parse cart');
     }
   }, []);
 
-  useEffect(() => {
-    if (isMounted) {
-      localStorage.setItem('vishwakarma_cart', JSON.stringify(cart));
+  const syncStorage = (items: CartItem[]) => {
+    try {
+      localStorage.setItem('vishwakarma_cart', JSON.stringify(items));
+    } catch (e) {
+      // ignore
     }
-  }, [cart, isMounted]);
+  };
 
   const addToCart = (product: Product, quantity: number = 1) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
+      let updated: CartItem[];
       if (existing) {
-        return prev.map((item) =>
+        updated = prev.map((item) =>
           item.product.id === product.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
+      } else {
+        updated = [...prev, { product, quantity }];
       }
-      return [...prev, { product, quantity }];
+      syncStorage(updated);
+      return updated;
     });
   };
 
   const removeFromCart = (productId: string) => {
-    setCart((prev) => prev.filter((item) => item.product.id !== productId));
+    setCart((prev) => {
+      const updated = prev.filter((item) => item.product.id !== productId);
+      syncStorage(updated);
+      return updated;
+    });
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
@@ -66,14 +76,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       removeFromCart(productId);
       return;
     }
-    setCart((prev) =>
-      prev.map((item) =>
+    setCart((prev) => {
+      const updated = prev.map((item) =>
         item.product.id === productId ? { ...item, quantity } : item
-      )
-    );
+      );
+      syncStorage(updated);
+      return updated;
+    });
   };
 
-  const clearCart = () => setCart([]);
+  const clearCart = () => {
+    setCart([]);
+    syncStorage([]);
+  };
 
   const getCartTotal = () => {
     return cart.reduce((total, item) => total + item.product.price * item.quantity, 0);
@@ -99,4 +114,3 @@ export function useCart() {
   }
   return context;
 }
-

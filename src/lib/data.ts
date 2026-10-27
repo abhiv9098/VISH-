@@ -23,8 +23,8 @@ export const products: Product[] = [
     name: 'Gehu ka Atta (Whole Wheat Flour)',
     nameHi: 'गेहूं का आटा (होल व्हीट)',
     weight: '5 KG',
-    price: 299,
-    originalPrice: 350,
+    price: 280,
+    originalPrice: 330,
     discount: 15,
     rating: 4.8,
     reviews: 1245,
@@ -33,61 +33,25 @@ export const products: Product[] = [
     descriptionHi: 'प्रीमियम एमपी शरबती गेहूं से ताज़ा पीसा गया। हमारा चक्की फ्रेश आटा सबसे नरम रोटियां बनाता है।',
     benefits: ['High in fiber', 'No added preservatives', 'Milled upon order for freshness'],
     ingredients: ['100% Sharbati Whole Wheat'],
-    category: '5 KG Atta',
+    category: 'Gehu Atta',
     inStock: true,
   },
   {
     id: 'p6',
     name: 'Village Atta (Desi Chakki)',
     nameHi: 'गांव का आटा (देसी चक्की)',
-    weight: '10 KG',
-    price: 450,
-    originalPrice: 500,
-    discount: 10,
+    weight: '5 KG',
+    price: 240,
+    originalPrice: 280,
+    discount: 14,
     rating: 4.9,
     reviews: 2314,
-    image: '/images/wheat_flour.jpg', // Placeholder
+    image: '/images/wheat_flour.jpg',
     description: 'Traditional village-style chakki atta, coarsely ground for authentic taste and maximum nutrition.',
     descriptionHi: 'पारंपरिक गांव-शैली का चक्की आटा, प्रामाणिक स्वाद और अधिकतम पोषण के लिए मोटा पिसा हुआ।',
     benefits: ['Coarse grind for better digestion', '100% Desi Wheat', 'Traditional stone milled'],
     ingredients: ['100% Desi Whole Wheat'],
-    category: '10 KG Atta',
-    inStock: true,
-  },
-  {
-    id: 'p2',
-    name: 'Makki ka Atta (Maize Flour)',
-    nameHi: 'मक्की का आटा',
-    weight: '1 KG',
-    price: 90,
-    originalPrice: 110,
-    discount: 18,
-    rating: 4.7,
-    reviews: 856,
-    image: '/images/maize_flour.jpg',
-    description: 'Authentic yellow Makki ka Atta, perfect for making traditional winter delicacies like Makki ki Roti.',
-    descriptionHi: 'शुद्ध पीली मक्की का आटा, सर्दियों के व्यंजनों जैसे मक्की की रोटी बनाने के लिए उत्तम।',
-    benefits: ['Rich in iron and zinc', 'Gluten-free', 'High energy source'],
-    ingredients: ['100% Yellow Maize (Corn)'],
-    category: '1 KG Atta',
-    inStock: true,
-  },
-  {
-    id: 'p3',
-    name: 'Chana Dal Besan (Gram Flour)',
-    nameHi: 'चना दाल बेसन',
-    weight: '1 KG',
-    price: 130,
-    originalPrice: 150,
-    discount: 13,
-    rating: 4.9,
-    reviews: 2104,
-    image: '/images/gram_flour.jpg',
-    description: 'Pure, unadulterated Besan made from 100% roasted Chana Dal. Ideal for pakoras, laddoos, and curries.',
-    descriptionHi: '100% भुनी हुई चना दाल से बना शुद्ध बेसन। पकौड़े, लड्डू और कढ़ी के लिए आदर्श।',
-    benefits: ['High protein content', 'No artificial colors', 'Fine texture'],
-    ingredients: ['100% Chana Dal (Gram)'],
-    category: '1 KG Atta',
+    category: 'Gehu Atta',
     inStock: true,
   },
   {
@@ -95,9 +59,9 @@ export const products: Product[] = [
     name: 'Multigrain Atta (7 Grains)',
     nameHi: 'मल्टीग्रेन आटा (7 अनाज)',
     weight: '5 KG',
-    price: 349,
-    originalPrice: 399,
-    discount: 12,
+    price: 340,
+    originalPrice: 390,
+    discount: 13,
     rating: 4.5,
     reviews: 342,
     image: '/images/multigrain_flour.jpg',
@@ -105,7 +69,79 @@ export const products: Product[] = [
     descriptionHi: 'गेहूं, ओट्स, चना, सोया, मक्का, ज्वार और बाजरा सहित 7 पौष्टिक अनाजों का स्वस्थ मिश्रण।',
     benefits: ['Diabetic friendly', 'Improves digestion', 'Rich in minerals'],
     ingredients: ['Wheat (70%)', 'Oats', 'Chana', 'Soya', 'Maize', 'Jowar', 'Bajra'],
-    category: '5 KG Atta',
+    category: 'Multigrain Atta',
+    inStock: true,
+  },
+  {
+    id: 'p2',
+    name: 'Makki ka Atta (Maize Flour)',
+    nameHi: 'मक्की का आटा',
+    weight: '5 KG',
+    price: 420,
+    originalPrice: 480,
+    discount: 12,
+    rating: 4.7,
+    reviews: 856,
+    image: '/images/maize_flour.jpg',
+    description: 'Authentic yellow Makki ka Atta, perfect for making traditional winter delicacies like Makki ki Roti.',
+    descriptionHi: 'शुद्ध पीली मक्की का आटा, सर्दियों के व्यंजनों जैसे मक्की की रोटी बनाने के लिए उत्तम।',
+    benefits: ['Rich in iron and zinc', 'Gluten-free', 'High energy source'],
+    ingredients: ['100% Yellow Maize (Corn)'],
+    category: 'Makka Atta',
+    inStock: true,
+  },
+  {
+    id: 'p3',
+    name: 'Chana Dal Besan (Gram Flour)',
+    nameHi: 'चना दाल बेसन',
+    weight: '5 KG',
+    price: 600,
+    originalPrice: 680,
+    discount: 11,
+    rating: 4.9,
+    reviews: 2104,
+    image: '/images/gram_flour.jpg',
+    description: 'Pure, unadulterated Besan made from 100% roasted Chana Dal. Ideal for pakoras, laddoos, and curries.',
+    descriptionHi: '100% भुनी हुई चना दाल से बना शुद्ध बेसन। पकौड़े, लड्डू और कढ़ी के लिए आदर्श।',
+    benefits: ['High protein content', 'No artificial colors', 'Fine texture'],
+    ingredients: ['100% Chana Dal (Gram)'],
+    category: 'Besan',
+    inStock: true,
+  },
+  {
+    id: 'p7',
+    name: 'Bajra ka Atta (Pearl Millet Flour)',
+    nameHi: 'बाजरे का आटा',
+    weight: '5 KG',
+    price: 400,
+    originalPrice: 460,
+    discount: 13,
+    rating: 4.6,
+    reviews: 620,
+    image: '/images/multigrain_flour.jpg',
+    description: 'Freshly ground Bajra Atta, perfect for winter meals. Rich in fiber and essential nutrients.',
+    descriptionHi: 'सर्दियों के भोजन के लिए उत्तम ताज़ा पिसा हुआ बाजरे का आटा। फाइबर और आवश्यक पोषक तत्वों से भरपूर।',
+    benefits: ['Gluten-free', 'Rich in iron', 'Good for heart health'],
+    ingredients: ['100% Pearl Millet'],
+    category: 'Bajra Atta',
+    inStock: true,
+  },
+  {
+    id: 'p8',
+    name: 'Jowar ka Atta (Sorghum Flour)',
+    nameHi: 'ज्वार का आटा',
+    weight: '5 KG',
+    price: 440,
+    originalPrice: 500,
+    discount: 12,
+    rating: 4.7,
+    reviews: 430,
+    image: '/images/multigrain_flour.jpg',
+    description: 'High-quality Jowar Atta for soft and nutritious bhakris. A great alternative to wheat for a gluten-free diet.',
+    descriptionHi: 'नरम और पौष्टिक भाकरी के लिए उच्च गुणवत्ता वाला ज्वार का आटा। ग्लूटेन मुक्त आहार के लिए गेहूं का एक बेहतरीन विकल्प।',
+    benefits: ['Gluten-free', 'High in protein', 'Helps in weight loss'],
+    ingredients: ['100% Sorghum'],
+    category: 'Jowar Atta',
     inStock: true,
   },
   {
@@ -123,60 +159,81 @@ export const products: Product[] = [
     descriptionHi: 'आपके परिवार के लिए ताज़ा चक्की आटा। बड़े परिवारों के लिए किफायती 25 किलो का पैक।',
     benefits: ['Economical bulk pack', 'Freshly milled', 'Soft rotis'],
     ingredients: ['100% Whole Wheat'],
-    category: '25 KG Atta',
-    inStock: true,
-  },
-  {
-    id: 'p7',
-    name: 'Bajra ka Atta (Pearl Millet Flour)',
-    nameHi: 'बाजरे का आटा',
-    weight: '1 KG',
-    price: 85,
-    originalPrice: 100,
-    discount: 15,
-    rating: 4.6,
-    reviews: 620,
-    image: '/images/multigrain_flour.jpg', // Placeholder
-    description: 'Freshly ground Bajra Atta, perfect for winter meals. Rich in fiber and essential nutrients.',
-    descriptionHi: 'सर्दियों के भोजन के लिए उत्तम ताज़ा पिसा हुआ बाजरे का आटा। फाइबर और आवश्यक पोषक तत्वों से भरपूर।',
-    benefits: ['Gluten-free', 'Rich in iron', 'Good for heart health'],
-    ingredients: ['100% Pearl Millet'],
-    category: '1 KG Atta',
-    inStock: true,
-  },
-  {
-    id: 'p8',
-    name: 'Jowar ka Atta (Sorghum Flour)',
-    nameHi: 'ज्वार का आटा',
-    weight: '1 KG',
-    price: 95,
-    originalPrice: 120,
-    discount: 20,
-    rating: 4.7,
-    reviews: 430,
-    image: '/images/multigrain_flour.jpg', // Placeholder
-    description: 'High-quality Jowar Atta for soft and nutritious bhakris. A great alternative to wheat for a gluten-free diet.',
-    descriptionHi: 'नरम और पौष्टिक भाकरी के लिए उच्च गुणवत्ता वाला ज्वार का आटा। ग्लूटेन मुक्त आहार के लिए गेहूं का एक बेहतरीन विकल्प।',
-    benefits: ['Gluten-free', 'High in protein', 'Helps in weight loss'],
-    ingredients: ['100% Sorghum'],
-    category: '1 KG Atta',
+    category: 'Gehu Atta',
     inStock: true,
   }
 ];
 
+export * from './delivery';
+
+export type OrderStatus =
+  | 'Order Placed'
+  | 'Order Confirmed'
+  | 'Preparing Your Order'
+  | 'Processing'
+  | 'Ready'
+  | 'Pending'
+  | 'Preparing'
+  | 'New'
+  | 'Confirmed'
+  | 'Completed'
+  | 'Complete Delivery'
+  | 'Out for Delivery'
+  | 'Delivered'
+  | 'Cancelled';
+
+export type CanonicalStatus = 'New' | 'Pending' | 'Confirmed' | 'Out for Delivery' | 'Delivered' | 'Cancelled';
+
+export function getCanonicalStatus(status?: string): CanonicalStatus {
+  if (!status) return 'New';
+  const s = status.toLowerCase().trim();
+  if (s === 'order placed' || s === 'new' || s === 'new order') return 'New';
+  if (s === 'order confirmed' || s === 'confirmed' || s === 'accepted') return 'Confirmed';
+  if (s === 'pending' || s === 'preparing your order' || s === 'preparing' || s === 'processing' || s === 'ready') return 'Pending';
+  if (s === 'out for delivery' || s === 'dispatched') return 'Out for Delivery';
+  if (s === 'delivered' || s === 'completed' || s === 'complete delivery') return 'Delivered';
+  if (s === 'cancelled' || s === 'canceled') return 'Cancelled';
+  return 'New';
+}
+
+export function canonicalToDbStatus(canonical: CanonicalStatus): OrderStatus {
+  switch (canonical) {
+    case 'New': return 'Order Placed';
+    case 'Confirmed': return 'Order Confirmed';
+    case 'Pending': return 'Preparing Your Order';
+    case 'Out for Delivery': return 'Out for Delivery';
+    case 'Delivered': return 'Delivered';
+    case 'Cancelled': return 'Cancelled';
+    default: return 'Order Placed';
+  }
+}
+
 export type Order = {
+  deliveryType?: 'express' | 'standard';
+  estimatedDelivery?: string;
+  paymentMethod?: 'online' | 'cod';
+  transactionId?: string;
   id: string;
   date: string;
-  status: 'Order Placed' | 'Processing' | 'Ready' | 'Out for Delivery' | 'Delivered' | 'Cancelled';
+  status: OrderStatus;
   total: number;
   advancePaid: number;
   remainingAmount: number;
+  isHiddenFromAdmin?: boolean;
+  deliveryCode?: string;
+  isVerified?: boolean;
+  verifiedAt?: string;
+  etaNotifiedAt?: string;
   items: { product: Product; quantity: number }[];
   customerInfo: {
     name: string;
     address: string;
     phone: string;
+    email?: string;
+    locality?: string;
     city?: string;
+    district?: string;
+    state?: string;
     pincode?: string;
     country?: string;
     coordinates?: {
@@ -195,6 +252,7 @@ export const sampleOrders: Order[] = [
     total: 349,
     advancePaid: 174.5,
     remainingAmount: 174.5,
+    deliveryCode: '482915',
     items: [{ product: products[3], quantity: 1 }],
     customerInfo: {
       name: 'Rahul Sharma',
@@ -216,6 +274,7 @@ export const sampleOrders: Order[] = [
     total: 549,
     advancePaid: 549,
     remainingAmount: 0,
+    deliveryCode: '739104',
     items: [{ product: products[0], quantity: 1 }, { product: products[2], quantity: 2 }],
     customerInfo: {
       name: 'Amit Verma',

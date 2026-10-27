@@ -1,65 +1,182 @@
+'use client';
+
 import React from "react";
-import { Check, Truck, Package, Clock } from "lucide-react";
+import { Check, Truck, Clock, XCircle, PackageCheck, AlertCircle } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
-type TrackingStage = "Order Placed" | "Confirmed" | "Dispatched" | "Out for Delivery" | "Delivered";
+export type TrackingStage = "Order Placed" | "Confirmed" | "Out for Delivery" | "Delivered";
 
-const STAGES: TrackingStage[] = [
-  "Order Placed",
-  "Confirmed",
-  "Dispatched",
-  "Out for Delivery",
-  "Delivered"
+const STAGES: { key: string; en: string; hi: string }[] = [
+  { key: "orderPlaced", en: "Order Placed", hi: "ऑर्डर दिया गया" },
+  { key: "confirmed", en: "Confirmed", hi: "कन्फ़र्म हुआ" },
+  { key: "outForDelivery", en: "Out for Delivery", hi: "डिलीवरी के लिए निकला" },
+  { key: "delivered", en: "Delivered", hi: "डिलीवर हो गया" }
 ];
 
-export default function OrderTracking({ currentStatus, city = "Mumbai" }: { currentStatus: string, city?: string }) {
-  let currentStageIndex = STAGES.indexOf(currentStatus as TrackingStage);
-  if (currentStageIndex === -1) {
-    currentStageIndex = 0; 
+export default function OrderTracking({ 
+  currentStatus, 
+  city = "Gurugram",
+  estimatedDelivery,
+  deliveryType
+}: { 
+  currentStatus: string; 
+  city?: string;
+  estimatedDelivery?: string;
+  deliveryType?: 'express' | 'standard';
+}) {
+  const { language } = useLanguage();
+
+  if (currentStatus === 'Cancelled') {
+    return (
+      <div className="bg-red-50 p-2.5 sm:p-3 rounded-xl border border-red-200 text-xs flex items-center gap-2 text-red-700">
+        <XCircle size={16} className="text-red-600 shrink-0" />
+        <div className="flex-1">
+          <span className="font-bold">{language === 'hi' ? 'ऑर्डर रद्द कर दिया गया है' : 'Order Cancelled'}</span>
+          <span className="text-slate-500 ml-1.5 text-[11px]">
+            {language === 'hi' ? 'यदि कोई राशि कटी है तो वह वापस कर दी जाएगी' : 'Any refund will be processed to the original payment source'}
+          </span>
+        </div>
+      </div>
+    );
   }
 
+  // Map database status strings cleanly to the 4 timeline stages:
+  // 0 = Order Placed
+  // 1 = Confirmed
+  // 2 = Out for Delivery
+  // 3 = Delivered
+  const getStageIndex = (status: string): number => {
+    const s = (status || '').toLowerCase().trim();
+    if (s === 'delivered' || s === 'completed' || s === 'complete delivery') {
+      return 3;
+    }
+    if (s === 'out for delivery' || s === 'dispatched' || s === 'on the way') {
+      return 2;
+    }
+    if (
+      s === 'order confirmed' ||
+      s === 'confirmed' ||
+      s === 'accepted' ||
+      s === 'preparing your order' ||
+      s === 'preparing' ||
+      s === 'processing' ||
+      s === 'pending' ||
+      s === 'ready'
+    ) {
+      return 1;
+    }
+    return 0; // 'order placed', 'new', 'new order'
+  };
+
+  const currentIndex = getStageIndex(currentStatus);
+  const currentStage = STAGES[currentIndex];
+  const stageDisplayLabel = language === 'hi' ? currentStage.hi : currentStage.en;
+
+  // Percentage for progress line: 0%, 33.3%, 66.6%, 100%
+  const progressPercent = (currentIndex / (STAGES.length - 1)) * 100;
+
   return (
-    <div className="bg-gray-50 p-4 sm:p-6 rounded-xl border border-gray-200 mt-4 transition-all duration-300">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
-        <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2">
-          <Truck className="text-green-600" /> Track Order
-        </h3>
-        {currentStageIndex < 4 && (
-          <div className="text-sm font-medium text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full flex items-center gap-2">
-            <Clock size={16} /> Estimated Delivery: Tomorrow, 2 PM
+    <div className="bg-white rounded-xl p-3 sm:p-3.5 border border-slate-200/90 shadow-2xs">
+      
+      {/* Top Status & ETA Pill */}
+      <div className="flex flex-wrap items-center justify-between gap-1.5 pb-2.5 mb-2.5 border-b border-slate-100 text-xs">
+        <div className="flex items-center gap-1.5">
+          <span className="relative flex h-2 w-2">
+            {currentIndex < 3 ? (
+              <>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+              </>
+            ) : (
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+            )}
+          </span>
+          <span className="text-[11px] font-medium text-slate-500">
+            {language === 'hi' ? 'स्थिति:' : 'Status:'}
+          </span>
+          <span className="text-xs font-black text-emerald-800">
+            {stageDisplayLabel}
+          </span>
+        </div>
+
+        {estimatedDelivery && (
+          <div className="flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200">
+            <Clock size={11} className="text-emerald-700" />
+            <span className="truncate">{estimatedDelivery}</span>
           </div>
         )}
       </div>
 
-      <div className="relative mb-6">
-        <div className="absolute left-5 sm:left-1/2 top-0 bottom-0 w-1 bg-gray-200 sm:-translate-x-1/2 sm:w-full sm:h-1 sm:top-5 sm:bottom-auto"></div>
+      {/* Flipkart-Style 4-Stage Horizontal Timeline */}
+      <div className="relative px-2 sm:px-4 py-2">
         
-        <div className="flex flex-col sm:flex-row justify-between gap-6 sm:gap-0 relative z-10">
-          {STAGES.map((stage, index) => {
-            const isCompleted = index <= currentStageIndex;
-            const isActive = index === currentStageIndex;
+        {/* Background Track Bar */}
+        <div className="absolute top-5 left-6 right-6 sm:left-8 sm:right-8 h-1 bg-slate-200 rounded-full -translate-y-1/2">
+          {/* Animated Green Fill Bar */}
+          <div 
+            className="h-full bg-emerald-600 rounded-full transition-all duration-700 ease-in-out"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+
+        {/* 4 Steps */}
+        <div className="relative flex justify-between items-start">
+          {STAGES.map((stage, idx) => {
+            const isCompleted = idx < currentIndex;
+            const isCurrent = idx === currentIndex;
+            const isFuture = idx > currentIndex;
+            const label = language === 'hi' ? stage.hi : stage.en;
+
             return (
-              <div key={stage} className={`flex sm:flex-col items-center gap-4 sm:gap-2 sm:w-1/5 ${isCompleted ? "text-green-700" : "text-gray-400"}`}>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border-4 sm:border-2 ${isCompleted ? "bg-green-600 border-green-200 text-white" : "bg-white border-gray-200"}`}>
-                  {isCompleted ? <Check size={18} /> : <div className="w-2 h-2 rounded-full bg-gray-300"></div>}
+              <div 
+                key={stage.key} 
+                className="flex flex-col items-center text-center flex-1 min-w-0"
+              >
+                {/* Node Circle */}
+                <div 
+                  className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-500 z-10 ${
+                    isCompleted
+                      ? 'bg-emerald-600 text-white shadow-2xs'
+                      : isCurrent
+                      ? 'bg-emerald-600 text-white ring-4 ring-emerald-100 scale-105 shadow-xs'
+                      : 'bg-white border-2 border-slate-300 text-slate-400'
+                  }`}
+                >
+                  {isCompleted ? (
+                    <Check size={13} className="stroke-[3]" />
+                  ) : isCurrent ? (
+                    <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                  ) : (
+                    <span className="text-[10px] font-bold text-slate-400">{idx + 1}</span>
+                  )}
                 </div>
-                <div className="text-left sm:text-center w-full">
-                  <p className={`text-sm sm:text-xs font-bold ${isActive ? "text-green-800" : ""}`}>{stage}</p>
-                </div>
+
+                {/* Step Label */}
+                <span 
+                  className={`mt-1.5 text-[10px] sm:text-[11.5px] leading-tight px-0.5 max-w-[72px] sm:max-w-[90px] transition-colors ${
+                    isCurrent
+                      ? 'font-black text-emerald-900'
+                      : isCompleted
+                      ? 'font-bold text-slate-800'
+                      : 'font-medium text-slate-400'
+                  }`}
+                >
+                  {label}
+                </span>
+
+                {/* Sub-label for current stage */}
+                {isCurrent && (
+                  <span className="text-[8.5px] font-bold text-emerald-700 uppercase tracking-wider mt-0.5 bg-emerald-50 px-1 py-0.2 rounded">
+                    {language === 'hi' ? 'सक्रिय' : 'Active'}
+                  </span>
+                )}
               </div>
             );
           })}
         </div>
+
       </div>
 
-      {currentStageIndex >= 2 && currentStageIndex < 4 && (
-        <div className="mt-8 bg-blue-50 p-4 rounded-lg border border-blue-100 flex items-start gap-3">
-          <Truck className="text-blue-600 shrink-0 mt-0.5" />
-          <div>
-            <p className="font-bold text-blue-900">Your order has left our store and is on the way.</p>
-            <p className="text-sm text-blue-700 mt-1">Our delivery executive is heading to your location in {city}.</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

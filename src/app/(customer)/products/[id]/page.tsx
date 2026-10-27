@@ -4,7 +4,7 @@ import { useState, use } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, useRouter } from 'next/navigation';
-import { products } from '@/lib/data';
+import { products, Product } from '@/lib/data';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { Star, Truck, ShieldCheck, Minus, Plus, ShoppingBag, ArrowLeft } from 'lucide-react';
@@ -21,31 +21,56 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   if (!product) return notFound();
 
+  const baseKg = parseFloat(product.weight) || 1;
+  const totalKg = baseKg * qty;
+
+  // Dynamic price calculation based on total KG and quantity
+  const getCalculatedPrices = () => {
+    const perKgPrice = product.price / baseKg;
+    const perKgOriginalPrice = product.originalPrice / baseKg;
+
+    // Apply slight volume discount for larger total weight
+    let discountFactor = 1.0;
+    if (totalKg >= 10) discountFactor = 0.88;
+    else if (totalKg >= 8) discountFactor = 0.90;
+    else if (totalKg >= 6) discountFactor = 0.92;
+    else if (totalKg >= 5) discountFactor = 0.94;
+    else if (totalKg >= 3) discountFactor = 0.96;
+
+    const totalPrice = Math.round(perKgPrice * totalKg * discountFactor);
+    const totalOriginalPrice = Math.round(perKgOriginalPrice * totalKg);
+
+    return { totalPrice, totalOriginalPrice };
+  };
+
+  const { totalPrice, totalOriginalPrice } = getCalculatedPrices();
+
+  const selectedProductItem: Product = {
+    ...product,
+    id: `${product.id}-${totalKg}KG`,
+    weight: `${totalKg} KG`,
+    price: Math.round(totalPrice / qty),
+    originalPrice: Math.round(totalOriginalPrice / qty)
+  };
+
   const handleAddToCart = () => {
-    addToCart(product, qty);
+    addToCart(selectedProductItem, qty);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
 
   const handleBuyNow = () => {
     clearCart();
-    addToCart(product, qty);
-    router.push('/checkout');
+    addToCart(selectedProductItem, qty);
+    router.push(`/order?productId=${product.id}&qty=${qty}`);
   };
 
   const name = language === 'hi' && product.nameHi ? product.nameHi : product.name;
   const description = language === 'hi' && product.descriptionHi ? product.descriptionHi : product.description;
+  const weightDisplay = language === 'hi' ? `${totalKg} किलो` : `${totalKg} KG`;
 
   return (
     <div className="container mx-auto px-4 py-4 md:py-8">
-      {/* Back Button */}
-      <button 
-        onClick={() => router.back()} 
-        className="flex items-center gap-2 mb-4 text-gray-600 hover:text-green-700 font-medium transition"
-      >
-        <ArrowLeft size={18} /> Back
-      </button>
-
       {/* Breadcrumb */}
       <div className="text-xs md:text-sm text-gray-500 mb-4 md:mb-6">
         <Link href="/">{t('home')}</Link> / <Link href="/">{t('allProducts')}</Link> / <span className="text-gray-900">{name}</span>
@@ -65,7 +90,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               />
               {product.discount > 0 && (
                 <div className="absolute top-3 left-3 md:top-4 md:left-4 bg-red-600 text-white text-xs md:text-sm font-bold px-2 py-1 md:px-3 rounded">
-                  {product.discount}% OFF
+                  {product.discount}% {t('off')}
                 </div>
               )}
             </div>
@@ -88,12 +113,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </div>
 
             <div className="mb-4 md:mb-6 flex items-end gap-3 md:gap-4 flex-wrap">
-              <span className="text-3xl md:text-4xl font-bold text-gray-900">₹{product.price}</span>
-              {product.originalPrice > product.price && (
-                <span className="text-base md:text-lg text-gray-500 line-through mb-1">₹{product.originalPrice}</span>
+              <span className="text-3xl md:text-4xl font-bold text-gray-900">₹{totalPrice}</span>
+              {totalOriginalPrice > totalPrice && (
+                <span className="text-base md:text-lg text-gray-500 line-through mb-1">₹{totalOriginalPrice}</span>
               )}
               <div className="inline-flex border-2 border-green-700 text-green-700 bg-green-50 font-bold px-3 py-1 text-xs md:text-sm rounded-lg mb-1">
-                {product.weight}
+                {weightDisplay}
               </div>
             </div>
 
@@ -107,6 +132,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <button 
                   onClick={() => setQty(Math.max(1, qty - 1))}
                   className="w-8 sm:w-10 h-full flex items-center justify-center hover:bg-gray-50 text-gray-700 transition font-bold"
+                  aria-label="Decrease quantity"
                 >
                   <Minus size={16} />
                 </button>
@@ -116,6 +142,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <button 
                   onClick={() => setQty(qty + 1)}
                   className="w-8 sm:w-10 h-full flex items-center justify-center hover:bg-gray-50 text-gray-700 transition font-bold"
+                  aria-label="Increase quantity"
                 >
                   <Plus size={16} />
                 </button>
@@ -124,7 +151,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               {/* Buy Now */}
               <button 
                 onClick={handleBuyNow}
-                className="flex-1 h-10 sm:h-12 rounded-lg font-bold flex items-center justify-center transition text-sm sm:text-base bg-yellow-500 hover:bg-yellow-600 text-green-950 shadow-sm px-4"
+                className="flex-1 h-10 sm:h-12 rounded-lg font-bold flex items-center justify-center transition text-sm sm:text-base bg-yellow-500 hover:bg-yellow-600 text-green-950 shadow-sm px-4 cursor-pointer"
               >
                 {t('buyNow')}
               </button>
@@ -152,7 +179,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-10 shadow-sm border border-gray-100 mb-6 md:mb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
           <div>
-            <h3 className="text-lg md:text-xl font-bold mb-3 md:mb-4 text-gray-900">Health Benefits</h3>
+            <h3 className="text-lg md:text-xl font-bold mb-3 md:mb-4 text-gray-900">{t('healthBenefits')}</h3>
             <ul className="space-y-2 md:space-y-3 text-sm md:text-base">
               {product.benefits.map((benefit, i) => (
                 <li key={i} className="flex items-start gap-2">
@@ -163,7 +190,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </ul>
           </div>
           <div>
-            <h3 className="text-lg md:text-xl font-bold mb-3 md:mb-4 text-gray-900">Ingredients</h3>
+            <h3 className="text-lg md:text-xl font-bold mb-3 md:mb-4 text-gray-900">{t('ingredients')}</h3>
             <ul className="space-y-2 flex flex-wrap gap-2">
               {product.ingredients.map((ing, i) => (
                 <li key={i} className="bg-gray-100 text-gray-800 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium">
@@ -177,7 +204,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
       {/* Related Products */}
       <div className="mt-8">
-        <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-6">Other Options</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-6">{t('otherOptions')}</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {products.filter(p => p.id !== product.id).slice(0, 4).map(relatedProduct => (
             <ProductCard key={relatedProduct.id} product={relatedProduct} />

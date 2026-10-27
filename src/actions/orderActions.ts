@@ -1,19 +1,37 @@
 /* eslint-disable */
 'use server';
 
+import fs from 'fs';
+import path from 'path';
 import { Order } from '@/lib/data';
 
-const API_URL = typeof window === 'undefined'
-  ? `http://localhost:${process.env.PORT || 4000}/api/orders`
-  : '/api/orders';
+const dataFilePath = path.join(process.cwd(), 'orders_data.json');
+
+function ensureDataFile() {
+  if (!fs.existsSync(dataFilePath)) {
+    fs.writeFileSync(dataFilePath, JSON.stringify([], null, 2), 'utf8');
+  }
+}
+
+function deduplicateOrders(orders: Order[]): Order[] {
+  if (!Array.isArray(orders)) return [];
+  const seen = new Set<string>();
+  const unique: Order[] = [];
+  for (const o of orders) {
+    if (o && o.id && !seen.has(o.id)) {
+      seen.add(o.id);
+      unique.push(o);
+    }
+  }
+  return unique;
+}
 
 export async function getOrdersServer(): Promise<Order[]> {
   try {
-    const res = await fetch(API_URL, { cache: 'no-store' });
-    if (!res.ok) return [];
-    const data = await res.json();
-    console.log('getOrdersServer CALLED! CWD:', process.cwd(), '| Orders Length:', data.length);
-    return data;
+    ensureDataFile();
+    const data = fs.readFileSync(dataFilePath, 'utf8');
+    const parsed = JSON.parse(data);
+    return deduplicateOrders(parsed);
   } catch (e) {
     console.error('getOrdersServer error:', e);
     return [];
@@ -22,13 +40,10 @@ export async function getOrdersServer(): Promise<Order[]> {
 
 export async function saveOrderServer(orders: Order[]): Promise<{ success: boolean }> {
   try {
-    // Save the full orders array by overwriting
-    const res = await fetch(API_URL, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orders }),
-    });
-    return { success: res.ok };
+    ensureDataFile();
+    const uniqueOrders = deduplicateOrders(orders);
+    fs.writeFileSync(dataFilePath, JSON.stringify(uniqueOrders, null, 2), 'utf8');
+    return { success: true };
   } catch (e) {
     console.error('saveOrderServer error:', e);
     return { success: false };

@@ -1,531 +1,606 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useMemo, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { products } from '@/lib/data';
+import { useSearchParams } from 'next/navigation';
 import { useOrders } from '@/context/OrderContext';
-import { CheckCircle, ArrowRight, ArrowLeft, QrCode, ShieldCheck, X, Banknote } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
+import { 
+  Package, 
+  Clock, 
+  Truck, 
+  ShoppingBag, 
+  MapPin, 
+  ExternalLink, 
+  ChevronDown, 
+  ChevronUp, 
+  Zap,
+  CheckCircle2,
+  CreditCard,
+  Banknote,
+  Calendar,
+  AlertCircle,
+  XCircle,
+  Sparkles,
+  Phone,
+  RotateCcw,
+  Check
+} from 'lucide-react';
+import OrderTracking from '@/components/OrderTracking';
+import CheckoutFlow from '@/components/CheckoutFlow';
 
-type Step = 1 | 2 | 3 | 4 | 5 | 6;
-
-function OrderFlowContent() {
-  const router = useRouter();
+function MyOrdersContent() {
   const searchParams = useSearchParams();
-  const queryProductId = searchParams.get('productId');
-  
-  const { addOrder, deliverySettings, customerProfile, updateCustomerProfile } = useOrders();
-  
-  const [step, setStep] = useState<Step>(1);
-  const [selectedProductId, setSelectedProductId] = useState<string>(
-    queryProductId && products.some(p => p.id === queryProductId) 
-      ? queryProductId 
-      : products[0].id
-  );
-  const [quantity, setQuantity] = useState<number>(1);
-  
-  const [customerInfo, setCustomerInfo] = useState({
-    name: customerProfile?.name || '',
-    phone: customerProfile?.phone || '',
-    country: '',
-    address: customerProfile?.address || '',
-    city: '',
-    pincode: ''
-  });
-  
-  const [otp, setOtp] = useState(['', '', '', '']);
-  const [orderId, setOrderId] = useState<string>('');
-  
-  const [paymentChoice, setPaymentChoice] = useState<'50' | '100'>('100');
-  
-  const selectedProduct = products.find(p => p.id === selectedProductId) || products[0];
-  
-  // Dynamic Delivery Calculation
-  const itemTotal = selectedProduct.price * quantity;
-  const deliveryCharge = itemTotal > deliverySettings.threshold ? deliverySettings.chargeAbove : deliverySettings.chargeBelow;
-  const totalAmount = itemTotal + deliveryCharge;
-  const advanceAmount = paymentChoice === '50' ? totalAmount / 2 : totalAmount;
-  const remainingAmount = totalAmount - advanceAmount;
+  const productId = searchParams?.get('productId');
+  const newOrderId = searchParams?.get('newOrder');
+  const { language, t } = useLanguage();
+  const { orders, customerProfile } = useOrders();
 
-  const handleNext = () => setStep((prev) => (prev + 1) as Step);
-  const handleBack = () => setStep((prev) => (prev - 1) as Step);
-  const handleExit = () => router.push('/');
+  // Filter tab: 'ALL' | 'ACTIVE' | 'HISTORY'
+  const [activeTab, setActiveTab] = useState<'ALL' | 'ACTIVE' | 'HISTORY'>('ALL');
+  // State for show/hide full items/address details per order
+  const [detailsVisible, setDetailsVisible] = useState<Record<string, boolean>>({});
 
-  const proceedFromStep1 = () => {
-    setStep(2);
-  };
+  // Deduplicate orders and separate cleanly into Active / New Orders vs Order History
+  const { activeOrders, historyOrders } = useMemo(() => {
+    const seen = new Set<string>();
+    const deduplicated = orders.filter(o => {
+      if (!o || !o.id || seen.has(o.id)) return false;
+      seen.add(o.id);
+      return true;
+    });
 
-  const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) value = value[0];
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-    
-    if (value && index < 3) {
-      const nextInput = document.getElementById(`otp-${index + 1}`);
-      nextInput?.focus();
-    }
-  };
+    const isOrderDeliveredOrCancelled = (o: any) => {
+      const st = (o.status || '').toLowerCase().trim();
+      return st === 'delivered' || st === 'completed' || st === 'complete delivery' || st === 'cancelled';
+    };
 
-  const handleVerifyOtp = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (otp.join('').length === 4) {
-      updateCustomerProfile({
-        name: customerInfo.name,
-        phone: customerInfo.phone,
-        address: customerInfo.address,
-        country: customerInfo.country,
-        pincode: customerInfo.pincode,
-        city: customerInfo.city,
-        isVerified: true
-      } as any);
-      handleNext(); // go to step 4 Payment
-    } else {
-      alert("Please enter a 4-digit OTP.");
-    }
-  };
+    const activeList: any[] = [];
+    const historyList: any[] = [];
 
-  const handlePaymentSimulation = () => {
-    setTimeout(() => {
-      if (paymentChoice === '50') {
-        setStep(5); // Confirm COD
+    deduplicated.forEach(o => {
+      if (isOrderDeliveredOrCancelled(o)) {
+        historyList.push(o);
       } else {
-        placeOrder(totalAmount, 0); // 100% Paid
-      }
-    }, 1000);
-  };
-
-  const confirmCOD = () => {
-    placeOrder(advanceAmount, remainingAmount);
-  };
-
-  const placeOrder = (paid: number, remaining: number) => {
-    const newOrderId = `ORD-${Math.floor(Math.random() * 900000) + 100000}`;
-    
-    addOrder({
-      id: newOrderId,
-      date: new Date().toISOString(),
-      status: 'Order Placed',
-      total: totalAmount,
-      advancePaid: paid,
-      remainingAmount: remaining,
-      items: [{ product: selectedProduct, quantity }],
-      customerInfo: {
-        name: customerInfo.name,
-        phone: customerInfo.phone,
-        address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.pincode}, ${customerInfo.country}`
+        activeList.push(o);
       }
     });
-    
-    router.push('/profile?newOrder=' + newOrderId);
+
+    // Sort by date (descending), putting newly placed order at the very top
+    const sortOrders = (list: any[]) => {
+      return [...list].sort((a, b) => {
+        if (newOrderId) {
+          if (a.id === newOrderId) return -1;
+          if (b.id === newOrderId) return 1;
+        }
+        const timeA = a.date ? new Date(a.date).getTime() : 0;
+        const timeB = b.date ? new Date(b.date).getTime() : 0;
+        return timeB - timeA;
+      });
+    };
+
+    return {
+      activeOrders: sortOrders(activeList),
+      historyOrders: sortOrders(historyList)
+    };
+  }, [orders, newOrderId]);
+
+  const totalOrdersCount = activeOrders.length + historyOrders.length;
+
+  // Direct checkout flow if customer navigated with a productId
+  if (productId && !newOrderId) {
+    return <CheckoutFlow title={language === 'hi' ? 'ऑर्डर दें' : 'Place Order'} />;
+  }
+
+  const toggleDetails = (id: string) => {
+    setDetailsVisible(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  return (
-    <div className="min-h-[80vh] bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        
-        {/* Header with Exit option */}
-        {step < 6 && (
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Place Order</h1>
-            <button onClick={handleExit} className="flex items-center gap-1 text-gray-500 hover:text-red-600 transition font-medium">
-              <X size={18} /> Exit
-            </button>
+  const formatOrderDate = (dateStr?: string) => {
+    const d = dateStr ? new Date(dateStr) : new Date();
+    return d.toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  const formatOrderTime = (dateStr?: string) => {
+    const d = dateStr ? new Date(dateStr) : new Date();
+    return d.toLocaleTimeString(language === 'hi' ? 'hi-IN' : 'en-IN', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getStatusBadge = (status: string) => {
+    const s = (status || '').toLowerCase().trim();
+    if (s === 'delivered' || s === 'completed') {
+      return {
+        label: language === 'hi' ? 'डिलीवर हो गया' : 'Delivered',
+        bg: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+        dot: 'bg-emerald-600'
+      };
+    }
+    if (s === 'out for delivery' || s === 'dispatched') {
+      return {
+        label: language === 'hi' ? 'डिलीवरी के लिए निकला' : 'Out for Delivery',
+        bg: 'bg-blue-50 text-blue-800 border-blue-200',
+        dot: 'bg-blue-600'
+      };
+    }
+    if (s === 'order confirmed' || s === 'confirmed' || s === 'preparing your order' || s === 'pending') {
+      return {
+        label: language === 'hi' ? 'कन्फ़र्म हुआ' : 'Confirmed',
+        bg: 'bg-teal-50 text-teal-800 border-teal-200',
+        dot: 'bg-teal-600'
+      };
+    }
+    if (s === 'cancelled') {
+      return {
+        label: language === 'hi' ? 'रद्द हुआ' : 'Cancelled',
+        bg: 'bg-red-50 text-red-800 border-red-200',
+        dot: 'bg-red-600'
+      };
+    }
+    return {
+      label: language === 'hi' ? 'ऑर्डर दिया गया' : 'Order Placed',
+      bg: 'bg-amber-50 text-amber-900 border-amber-200',
+      dot: 'bg-amber-500'
+    };
+  };
+
+  // Render an individual Active / Current Purchase Card (Flipkart Style)
+  const renderActiveOrderCard = (order: any) => {
+    const isNew = newOrderId && order.id === newOrderId;
+    const isDetailsOpen = !!detailsVisible[order.id];
+    const statusMeta = getStatusBadge(order.status);
+
+    const safeName = order.customerInfo?.name || customerProfile?.name || 'Customer';
+    const safePhone = order.customerInfo?.phone || customerProfile?.phone || '';
+    const safeAddress = order.customerInfo?.address || customerProfile?.address || 'N/A';
+    const coords = order.customerInfo?.coordinates;
+    const mapsUrl = order.customerInfo?.liveLocationUrl || (coords ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(safeAddress)}`);
+
+    const isOnlinePaid = order.paymentMethod === 'online' || (order.advancePaid > 0 && order.advancePaid >= order.total);
+    const estDelivery = order.estimatedDelivery || (order.deliveryType === 'express' ? 'Within 2 hours' : 'Today in 3-4 hours');
+
+    return (
+      <div 
+        key={order.id} 
+        className={`bg-white rounded-xl border transition-all duration-300 shadow-2xs overflow-hidden ${
+          isNew 
+            ? 'border-emerald-500 ring-2 ring-emerald-500/20' 
+            : 'border-slate-200 hover:border-slate-300'
+        }`}
+      >
+        {/* 1. Header: Date & Status Badge (Clean, No ODR) */}
+        <div className="bg-slate-50/80 px-3.5 py-2.5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-slate-600">
+              {language === 'hi' ? 'ऑर्डर की तारीख:' : 'Ordered on'}{' '}
+              <strong className="text-slate-900">{formatOrderDate(order.date)}, {formatOrderTime(order.date)}</strong>
+            </span>
+            {isNew && (
+              <span className="bg-emerald-600 text-white text-[9.5px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-2xs">
+                <Sparkles size={10} className="fill-white" />
+                <span>{language === 'hi' ? 'नया ऑर्डर' : 'New Order'}</span>
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border ${statusMeta.bg}`}>
+              <span className={`w-2 h-2 rounded-full ${statusMeta.dot}`} />
+              <span>{statusMeta.label}</span>
+            </span>
+          </div>
+        </div>
+
+        {/* 2. Items List (Flipkart E-Commerce Product Rows) */}
+        <div className="p-3.5 space-y-3">
+          <div className="divide-y divide-slate-100">
+            {order.items?.map((item: any, idx: number) => {
+              const itemName = language === 'hi' && item.product?.nameHi ? item.product.nameHi : (item.product?.name || 'Chakki Fresh Atta');
+              const itemWeight = item.product?.weight || '5 KG';
+              const itemPrice = item.product?.price || 0;
+              const itemImage = item.product?.image || '/images/wheat_flour.jpg';
+
+              return (
+                <div key={idx} className="py-2 first:pt-0 last:pb-0 flex items-center gap-3">
+                  <div className="relative w-14 h-14 rounded-lg bg-amber-50/40 border border-slate-200/80 overflow-hidden shrink-0">
+                    <Image 
+                      src={itemImage} 
+                      alt={itemName} 
+                      fill 
+                      className="object-cover" 
+                    />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-slate-900 text-xs sm:text-sm truncate">
+                      {itemName}
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      {language === 'hi' ? 'पैक:' : 'Pack:'} <span className="font-semibold text-slate-700">{itemWeight}</span>
+                      {' • '}
+                      {language === 'hi' ? 'मात्रा:' : 'Qty:'} <span className="font-bold text-emerald-800">{item.quantity}</span>
+                    </p>
+                    <p className="text-xs font-black text-slate-900 mt-0.5">
+                      ₹{itemPrice * item.quantity}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* 3. Flipkart 4-Stage Timeline Tracker */}
+          <div className="pt-2">
+            <OrderTracking 
+              currentStatus={order.status} 
+              city={order.customerInfo?.city || "Gurugram"} 
+              estimatedDelivery={estDelivery}
+              deliveryType={order.deliveryType}
+            />
+          </div>
+
+          {/* 4. Delivery Address & Expected Arrival */}
+          <div className="bg-slate-50/70 rounded-xl p-3 border border-slate-200/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="flex items-start gap-2 min-w-0 flex-1">
+              <MapPin size={14} className="text-emerald-700 shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <p className="font-bold text-slate-900 text-xs truncate">
+                  {safeName} {safePhone ? `(${safePhone})` : ''}
+                </p>
+                <p className="text-[11px] text-slate-600 line-clamp-1 mt-0.5">
+                  {safeAddress}
+                </p>
+              </div>
+            </div>
+
+            {mapsUrl && (
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline shrink-0"
+              >
+                <span>{language === 'hi' ? 'नक्शा देखें' : 'View on Map'}</span>
+                <ExternalLink size={10} />
+              </a>
+            )}
+          </div>
+        </div>
+
+        {/* 5. Footer: Total, Payment Method & Toggle Details */}
+        <div className="bg-slate-50/60 px-3.5 py-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-slate-500 text-[11px]">
+              {language === 'hi' ? 'कुल राशि:' : 'Total Amount:'}
+            </span>
+            <span className="font-black text-sm text-slate-900">
+              ₹{order.total}
+            </span>
+            <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+              isOnlinePaid ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-900 border-amber-200'
+            }`}>
+              {isOnlinePaid ? <CreditCard size={10} /> : <Banknote size={10} />}
+              <span>{isOnlinePaid ? (language === 'hi' ? 'ऑनलाइन भुगतान' : 'Paid Online') : (language === 'hi' ? 'कैश ऑन डिलीवरी' : 'Cash on Delivery')}</span>
+            </span>
+          </div>
+
+          <button
+            onClick={() => toggleDetails(order.id)}
+            className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs hover:bg-slate-50 transition cursor-pointer"
+          >
+            <span>{isDetailsOpen ? (language === 'hi' ? 'कम विवरण' : 'Hide Details') : (language === 'hi' ? 'बिल विवरण' : 'Price Details')}</span>
+            {isDetailsOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          </button>
+        </div>
+
+        {/* 6. Expandable Bill Details */}
+        {isDetailsOpen && (
+          <div className="p-3.5 bg-slate-50 border-t border-slate-200/80 space-y-1.5 text-xs">
+            <div className="flex justify-between text-slate-600">
+              <span>{language === 'hi' ? 'आइटम मूल्य:' : 'Items Subtotal:'}</span>
+              <span className="font-semibold text-slate-900">₹{order.total - 50 > 0 ? order.total - 50 : order.total}</span>
+            </div>
+            <div className="flex justify-between text-slate-600">
+              <span>{language === 'hi' ? 'डिलीवरी शुल्क:' : 'Delivery Charge:'}</span>
+              <span className="font-semibold text-emerald-800">{order.total - 50 > 0 ? '₹50' : (language === 'hi' ? 'मुफ्त' : 'FREE')}</span>
+            </div>
+            <div className="flex justify-between font-black text-xs text-slate-900 border-t border-slate-200 pt-1.5">
+              <span>{language === 'hi' ? 'अंतिम राशि:' : 'Final Payable:'}</span>
+              <span className="text-emerald-950 font-black">₹{order.total}</span>
+            </div>
           </div>
         )}
+      </div>
+    );
+  };
 
-        {/* Progress Bar */}
-        {step < 6 && (
-          <div className="mb-8">
-            <div className="flex justify-between items-center relative">
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 z-0 rounded-full"></div>
-              <div 
-                className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-green-600 z-0 rounded-full transition-all duration-300"
-                style={{ width: `${((Math.min(step, 4) - 1) / 3) * 100}%` }}
-              ></div>
-              
-              {[1, 2, 3, 4].map((s) => (
-                <div key={s} className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${step >= s ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
-                  {s}
+  // Render an individual Previous Purchase Card (Order History)
+  const renderHistoryOrderCard = (order: any) => {
+    const isDetailsOpen = !!detailsVisible[order.id];
+    const isDelivered = order.status === 'Delivered' || order.status === 'Completed';
+    const firstProduct = order.items?.[0]?.product;
+    const firstProductName = language === 'hi' && firstProduct?.nameHi ? firstProduct.nameHi : (firstProduct?.name || 'Fresh Chakki Flour');
+    const firstProductImage = firstProduct?.image || '/images/wheat_flour.jpg';
+
+    return (
+      <div 
+        key={order.id} 
+        className="bg-white rounded-xl border border-slate-200 hover:border-slate-300 transition-all shadow-2xs overflow-hidden"
+      >
+        {/* Header: Delivery Date & Clean Status */}
+        <div className="bg-slate-50/70 px-3.5 py-2.5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-1.5">
+            {isDelivered ? (
+              <span className="inline-flex items-center gap-1 text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 text-xs">
+                <CheckCircle2 size={13} className="text-emerald-600" />
+                <span>{language === 'hi' ? 'डिलीवर हुआ' : 'Delivered on'} {formatOrderDate(order.date)}</span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-red-800 font-bold bg-red-50 px-2 py-0.5 rounded-md border border-red-200 text-xs">
+                <XCircle size={13} className="text-red-600" />
+                <span>{language === 'hi' ? 'रद्द हुआ' : 'Cancelled on'} {formatOrderDate(order.date)}</span>
+              </span>
+            )}
+          </div>
+
+          <span className="text-slate-500 font-medium text-[11px]">
+            {formatOrderTime(order.date)}
+          </span>
+        </div>
+
+        {/* Card Body: Items Preview */}
+        <div className="p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative w-14 h-14 rounded-lg bg-amber-50/40 border border-slate-200/80 overflow-hidden shrink-0">
+              <Image 
+                src={firstProductImage} 
+                alt={firstProductName} 
+                fill 
+                className="object-cover" 
+              />
+            </div>
+
+            <div className="min-w-0">
+              <h4 className="font-bold text-slate-900 text-xs sm:text-sm truncate">
+                {firstProductName}
+              </h4>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {order.items?.length > 1 ? (
+                  <span>{order.items.length} {language === 'hi' ? 'उत्पाद' : 'items'} • </span>
+                ) : null}
+                <span className="font-semibold text-slate-700">{firstProduct?.weight || '5 KG'}</span>
+              </p>
+              <p className="text-xs font-black text-slate-900 mt-0.5">
+                ₹{order.total}
+              </p>
+            </div>
+          </div>
+
+          {/* Action Buttons: Buy Again / Reorder & View Details */}
+          <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+            {firstProduct?.id && (
+              <Link
+                href={`/order?productId=${firstProduct.id}`}
+                className="inline-flex items-center gap-1 bg-emerald-950 hover:bg-emerald-900 text-amber-300 font-bold text-xs px-3 py-1.5 rounded-lg shadow-2xs transition active:scale-95"
+              >
+                <RotateCcw size={12} />
+                <span>{language === 'hi' ? 'फिर से ऑर्डर करें' : 'Buy Again'}</span>
+              </Link>
+            )}
+
+            <button
+              onClick={() => toggleDetails(order.id)}
+              className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg transition cursor-pointer"
+            >
+              <span>{isDetailsOpen ? (language === 'hi' ? 'कम' : 'Hide') : (language === 'hi' ? 'विवरण' : 'Details')}</span>
+              {isDetailsOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Expandable Order Details */}
+        {isDetailsOpen && (
+          <div className="p-3.5 bg-slate-50 border-t border-slate-200/80 space-y-2 text-xs">
+            <div className="divide-y divide-slate-200/60">
+              {order.items?.map((item: any, idx: number) => (
+                <div key={idx} className="py-1.5 first:pt-0 last:pb-0 flex justify-between text-slate-700">
+                  <span>
+                    {language === 'hi' && item.product?.nameHi ? item.product.nameHi : item.product?.name} ({item.product?.weight || '5 KG'}) × {item.quantity}
+                  </span>
+                  <span className="font-bold text-slate-900">₹{(item.product?.price || 0) * item.quantity}</span>
                 </div>
               ))}
             </div>
-            <div className="flex justify-between text-xs font-medium text-gray-500 mt-2">
-              <span>Details</span>
-              <span>Address</span>
-              <span>Verify</span>
-              <span>Payment</span>
+
+            <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between text-xs font-black">
+              <span className="text-slate-600">{language === 'hi' ? 'कुल भुगतान:' : 'Total Paid:'}</span>
+              <span className="text-emerald-900 font-black">₹{order.total}</span>
             </div>
           </div>
         )}
+      </div>
+    );
+  };
 
-        <div className="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100 relative">
+  return (
+    <div className="min-h-[85vh] bg-[#f8f9fa] py-4 sm:py-6 px-3 sm:px-6 lg:px-8 max-w-3xl mx-auto pb-24 md:pb-12">
+      
+      {/* 1. Header Bar with Order Count */}
+      <div className="bg-white px-4 py-3 rounded-xl border border-slate-200 shadow-2xs mb-4 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-emerald-950 text-amber-300 flex items-center justify-center shrink-0 shadow-2xs">
+            <Package size={17} />
+          </div>
+          <div>
+            <h1 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
+              {language === 'hi' ? 'मेरे ऑर्डर' : 'My Orders'}
+            </h1>
+            <p className="text-[11px] text-slate-500">
+              {language === 'hi' ? 'ताज़ा चक्की आटा पिसाई और डिलीवरी स्थिति' : 'Track your fresh chakki flour orders'}
+            </p>
+          </div>
+        </div>
+
+        <span className="bg-slate-100 text-slate-700 font-bold text-xs px-2.5 py-1 rounded-lg border border-slate-200">
+          {totalOrdersCount} {language === 'hi' ? 'ऑर्डर' : (totalOrdersCount === 1 ? 'Order' : 'Orders')}
+        </span>
+      </div>
+
+      {/* 2. Flipkart Style Filter Tabs */}
+      {totalOrdersCount > 0 && (
+        <div className="flex items-center gap-1.5 mb-4 overflow-x-auto pb-1 scrollbar-none">
+          <button
+            onClick={() => setActiveTab('ALL')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap ${
+              activeTab === 'ALL'
+                ? 'bg-emerald-950 text-amber-300 shadow-2xs'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            {language === 'hi' ? 'सभी ऑर्डर' : 'All Orders'} ({totalOrdersCount})
+          </button>
+
+          <button
+            onClick={() => setActiveTab('ACTIVE')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap flex items-center gap-1 ${
+              activeTab === 'ACTIVE'
+                ? 'bg-emerald-950 text-amber-300 shadow-2xs'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <span>{language === 'hi' ? 'सक्रिय नए ऑर्डर' : 'Active Orders'}</span>
+            <span className={`text-[10px] font-black px-1.5 py-0.2 rounded-full ${
+              activeTab === 'ACTIVE' ? 'bg-amber-400 text-emerald-950' : 'bg-emerald-100 text-emerald-800'
+            }`}>
+              {activeOrders.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('HISTORY')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap flex items-center gap-1 ${
+              activeTab === 'HISTORY'
+                ? 'bg-emerald-950 text-amber-300 shadow-2xs'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <span>{language === 'hi' ? 'ऑर्डर इतिहास' : 'Order History'}</span>
+            <span className={`text-[10px] font-black px-1.5 py-0.2 rounded-full ${
+              activeTab === 'HISTORY' ? 'bg-amber-400 text-emerald-950' : 'bg-slate-200 text-slate-700'
+            }`}>
+              {historyOrders.length}
+            </span>
+          </button>
+        </div>
+      )}
+
+      {/* 3. Empty State */}
+      {totalOrdersCount === 0 ? (
+        <div className="bg-white rounded-2xl shadow-2xs border border-slate-200 p-8 sm:p-12 text-center max-w-md mx-auto my-6 space-y-3">
+          <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center mx-auto shadow-2xs">
+            <ShoppingBag size={30} className="stroke-[2.2]" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-base sm:text-lg font-black text-slate-900">
+              {language === 'hi' ? 'कोई ऑर्डर नहीं मिला' : 'No Orders Yet'}
+            </h2>
+            <p className="text-xs text-slate-600 leading-relaxed max-w-xs mx-auto">
+              {language === 'hi' ? 'आपने अभी तक कोई ऑर्डर नहीं दिया है। ताज़ा चक्की आटा आज ही ऑर्डर करें!' : 'You haven\'t placed any orders yet. Fresh stone-milled atta delivered to your doorstep!'}
+            </p>
+          </div>
+          <div className="pt-2">
+            <Link 
+              href="/" 
+              className="inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-emerald-950 font-black px-5 py-2.5 rounded-xl shadow-xs transition active:scale-95 text-xs sm:text-sm"
+            >
+              <ShoppingBag size={15} className="stroke-[2.5]" />
+              <span>{language === 'hi' ? 'अभी आटा ऑर्डर करें' : 'Order Fresh Atta Now'}</span>
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-6">
           
-          {/* STEP 1: ORDER DETAILS */}
-          {step === 1 && (
-            <div className="p-6 md:p-8">
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-lg">{selectedProduct.name}</h3>
-                    <div className="mt-2 inline-block border-2 border-green-700 text-green-700 bg-green-50 font-bold px-3 py-1 text-sm rounded-lg">
-                      {selectedProduct.weight}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-gray-900 text-xl">₹{selectedProduct.price}</p>
-                  </div>
-                </div>
+          {/* 4. ACTIVE / NEW ORDERS SECTION (Clearly at the top) */}
+          {(activeTab === 'ALL' || activeTab === 'ACTIVE') && activeOrders.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-2 px-1">
+                <h2 className="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
+                  </span>
+                  <span>{language === 'hi' ? 'सक्रिय ऑर्डर' : 'Active Orders'}</span>
+                  <span className="bg-emerald-100 text-emerald-900 text-[10px] font-black px-2 py-0.2 rounded-full border border-emerald-300">
+                    {activeOrders.length}
+                  </span>
+                </h2>
+                <span className="text-[11px] text-emerald-700 font-bold">
+                  {language === 'hi' ? 'लाइव ट्रैकिंग जारी' : 'Live Tracking'}
+                </span>
               </div>
 
-              <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-6">
-                <span className="font-medium text-gray-700">Quantity</span>
-                <div className="flex items-center border border-gray-300 rounded-lg">
-                  <button type="button" onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-l-lg">-</button>
-                  <span className="px-4 font-semibold">{quantity}</span>
-                  <button type="button" onClick={() => setQuantity(quantity + 1)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-r-lg">+</button>
-                </div>
+              {/* Each new purchase as its own separate card */}
+              <div className="space-y-3">
+                {activeOrders.map(order => renderActiveOrderCard(order))}
               </div>
-
-              <div className="mt-8 bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Items Total ({quantity}x)</span>
-                  <span className="font-medium">₹{itemTotal}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Delivery Charge</span>
-                  <span className="font-medium text-orange-600">+₹{deliveryCharge}</span>
-                </div>
-                <div className="flex justify-between border-t border-gray-200 pt-2 mt-2">
-                  <span className="font-bold text-gray-900">Total Amount</span>
-                  <span className="font-bold text-xl text-green-700">₹{totalAmount}</span>
-                </div>
-              </div>
-
-              <button 
-                onClick={proceedFromStep1}
-                className="w-full mt-6 bg-yellow-500 hover:bg-yellow-600 text-green-950 text-lg font-bold py-4 rounded-xl transition flex justify-center items-center gap-2"
-              >
-                Proceed to Address <ArrowRight size={20} />
-              </button>
             </div>
           )}
 
-          {/* STEP 2: CUSTOMER INFO */}
-          {step === 2 && (
-            <div className="p-6 md:p-8">
-              <div className="flex items-center mb-6">
-                <button onClick={handleBack} className="mr-3 text-gray-500 hover:text-gray-900 bg-gray-100 p-2 rounded-full">
-                  <ArrowLeft size={20} />
-                </button>
-                <h2 className="text-xl font-bold text-gray-900">Delivery Details</h2>
+          {/* 5. ORDER HISTORY SECTION (Previous purchases below, without duplicates) */}
+          {(activeTab === 'ALL' || activeTab === 'HISTORY') && historyOrders.length > 0 && (
+            <div className={`space-y-3 ${activeOrders.length > 0 && activeTab === 'ALL' ? 'pt-4 border-t border-slate-200' : ''}`}>
+              <div className="flex items-center justify-between gap-2 px-1">
+                <h2 className="text-xs sm:text-sm font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <CheckCircle2 size={15} className="text-emerald-700" />
+                  <span>{language === 'hi' ? 'ऑर्डर इतिहास' : 'Order History'}</span>
+                  <span className="bg-slate-100 text-slate-700 text-[10px] font-black px-2 py-0.2 rounded-full border border-slate-200">
+                    {historyOrders.length}
+                  </span>
+                </h2>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  {language === 'hi' ? 'पूर्ण किए गए ऑर्डर' : 'Past Purchases'}
+                </span>
               </div>
 
-              <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-5">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
-                  <input 
-                    required 
-                    type="text" 
-                    value={customerInfo.name}
-                    onChange={(e) => setCustomerInfo({...customerInfo, name: e.target.value})}
-                    className="w-full border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-green-500" 
-                    placeholder="Enter your full name" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Mobile Number</label>
-                  <div className="flex">
-                    <span className="inline-flex items-center px-4 rounded-l-xl border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
-                      +91
-                    </span>
-                    <input 
-                      required 
-                      type="tel" 
-                      pattern="[0-9]{10}"
-                      value={customerInfo.phone}
-                      onChange={(e) => setCustomerInfo({...customerInfo, phone: e.target.value})}
-                      className="flex-1 border border-gray-300 rounded-r-xl p-3 outline-none focus:ring-2 focus:ring-green-500" 
-                      placeholder="10-digit mobile number" 
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Country</label>
-                  <input 
-                    required 
-                    type="text" 
-                    value={customerInfo.country}
-                    onChange={(e) => setCustomerInfo({...customerInfo, country: e.target.value})}
-                    className="w-full border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-green-500" 
-                    placeholder="India" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Complete Delivery Address</label>
-                  <textarea 
-                    required 
-                    rows={2}
-                    value={customerInfo.address}
-                    onChange={(e) => setCustomerInfo({...customerInfo, address: e.target.value})}
-                    className="w-full border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-green-500" 
-                    placeholder="House no, Building, Street, Area"
-                  ></textarea>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">City</label>
-                    <input 
-                      required 
-                      type="text" 
-                      value={customerInfo.city}
-                      onChange={(e) => setCustomerInfo({...customerInfo, city: e.target.value})}
-                      className="w-full border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-green-500" 
-                      placeholder="Mumbai" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">PIN Code</label>
-                    <input 
-                      required 
-                      type="text" 
-                      value={customerInfo.pincode}
-                      onChange={(e) => setCustomerInfo({...customerInfo, pincode: e.target.value})}
-                      className="w-full border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-green-500" 
-                      placeholder="400001" 
-                    />
-                  </div>
-                </div>
-
-                <button 
-                  type="submit"
-                  className="w-full mt-4 bg-yellow-500 hover:bg-yellow-600 text-green-950 text-lg font-bold py-4 rounded-xl transition flex justify-center items-center gap-2"
-                >
-                  Verify Mobile Number
-                </button>
-              </form>
+              {/* Each past purchase as its own separate card */}
+              <div className="space-y-2.5">
+                {historyOrders.map(order => renderHistoryOrderCard(order))}
+              </div>
             </div>
           )}
 
-          {/* STEP 3: OTP VERIFICATION */}
-          {step === 3 && (
-            <div className="p-6 md:p-8 text-center">
-              <div className="absolute top-6 left-6">
-                <button onClick={handleBack} className="text-gray-500 hover:text-gray-900 bg-gray-100 p-2 rounded-full">
-                  <ArrowLeft size={20} />
-                </button>
-              </div>
-              <div className="flex items-center justify-center mb-4 text-green-600 mt-4">
-                <ShieldCheck size={48} />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Verify Mobile Number</h2>
-              <p className="text-gray-500 mb-8">We've sent a 4-digit OTP to <br/><span className="font-bold text-gray-800">+91 {customerInfo.phone}</span></p>
-
-              <form onSubmit={handleVerifyOtp} className="max-w-xs mx-auto">
-                <div className="flex justify-between gap-3 mb-8">
-                  {[0, 1, 2, 3].map((index) => (
-                    <input
-                      key={index}
-                      id={`otp-${index}`}
-                      type="text"
-                      maxLength={1}
-                      value={otp[index]}
-                      onChange={(e) => handleOtpChange(index, e.target.value)}
-                      className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-xl outline-none focus:border-green-500 focus:ring-2"
-                    />
-                  ))}
-                </div>
-
-                <button 
-                  type="submit"
-                  className="w-full bg-green-700 hover:bg-green-800 text-white text-lg font-bold py-4 rounded-xl transition flex justify-center items-center gap-2"
-                >
-                  Confirm & Proceed
-                </button>
-                
-                <p className="mt-4 text-sm text-gray-500">
-                  Didn't receive OTP? <button type="button" className="text-green-600 font-semibold hover:underline">Resend</button>
-                </p>
-              </form>
+          {/* Fallback when a filter tab has no matching orders */}
+          {activeTab === 'ACTIVE' && activeOrders.length === 0 && (
+            <div className="bg-white rounded-xl p-8 text-center border border-slate-200 text-slate-500 text-xs font-semibold">
+              {language === 'hi' ? 'कोई सक्रिय ऑर्डर नहीं है।' : 'No active orders in progress.'}
             </div>
           )}
 
-          {/* STEP 4: PAYMENT SELECTION */}
-          {step === 4 && (
-            <div className="p-6 md:p-8">
-              <div className="flex items-center mb-6">
-                <button onClick={handleBack} className="mr-3 text-gray-500 hover:text-gray-900 bg-gray-100 p-2 rounded-full">
-                  <ArrowLeft size={20} />
-                </button>
-                <h2 className="text-xl font-bold text-gray-900">Advance Payment Required</h2>
-              </div>
-              
-              <p className="text-gray-600 mb-6 text-sm">To process your order, please make an advance payment. Cash on Delivery is available for the remaining 50% balance.</p>
-
-              <div className="space-y-4 mb-8">
-                <label className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition ${paymentChoice === '50' ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}>
-                  <input 
-                    type="radio" 
-                    name="paymentAmount" 
-                    value="50" 
-                    checked={paymentChoice === '50'} 
-                    onChange={() => setPaymentChoice('50')}
-                    className="w-4 h-4 text-green-600 focus:ring-green-500"
-                  />
-                  <div>
-                    <div className="font-bold text-gray-900">Pay 50% Now</div>
-                    <div className="text-sm text-gray-500">Pay ₹{totalAmount / 2} via UPI/QR, remaining on delivery</div>
-                  </div>
-                </label>
-                
-                <label className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition ${paymentChoice === '100' ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}>
-                  <input 
-                    type="radio" 
-                    name="paymentAmount" 
-                    value="100" 
-                    checked={paymentChoice === '100'} 
-                    onChange={() => setPaymentChoice('100')}
-                    className="w-4 h-4 text-green-600 focus:ring-green-500"
-                  />
-                  <div>
-                    <div className="font-bold text-gray-900">Pay 100% Now</div>
-                    <div className="text-sm text-gray-500">Pay full ₹{totalAmount} via UPI/QR</div>
-                  </div>
-                </label>
-              </div>
-              
-              <div className="bg-gray-50 p-6 rounded-lg text-center border border-gray-200">
-                <QrCode size={64} className="mx-auto text-gray-400 mb-4" />
-                <h3 className="font-bold text-lg mb-2">Scan & Pay ₹{advanceAmount}</h3>
-                <p className="text-sm text-gray-500 mb-6">Use any UPI app (GPay, PhonePe, Paytm, etc.)</p>
-                <button 
-                  onClick={handlePaymentSimulation}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-lg transition w-full md:w-auto"
-                >
-                  I have paid ₹{advanceAmount}
-                </button>
-              </div>
-
-            </div>
-          )}
-
-          {/* STEP 5: CONFIRM COD */}
-          {step === 5 && (
-            <div className="p-6 md:p-8 text-center">
-              <CheckCircle size={64} className="text-green-500 mx-auto mb-4" />
-              <h2 className="font-bold text-2xl mb-2">Payment of ₹{advanceAmount} Successful!</h2>
-              <p className="text-gray-600 mb-6">Your advance payment has been received.</p>
-              
-              <div className="bg-orange-50 p-4 rounded-lg border border-orange-100 mb-8 inline-block text-left w-full max-w-md mx-auto">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-700">Total Order Value:</span>
-                  <span className="font-semibold">₹{totalAmount}</span>
-                </div>
-                <div className="flex justify-between items-center mb-2 text-green-700">
-                  <span>Advance Paid:</span>
-                  <span>- ₹{advanceAmount}</span>
-                </div>
-                <div className="flex justify-between items-center pt-2 border-t border-orange-200 mt-2 font-bold text-lg">
-                  <span>Remaining Amount:</span>
-                  <span>₹{remainingAmount}</span>
-                </div>
-              </div>
-              
-              <button 
-                onClick={confirmCOD}
-                className="bg-yellow-500 hover:bg-yellow-600 text-green-950 font-bold px-8 py-4 rounded-lg transition w-full flex items-center justify-center gap-2 mx-auto"
-              >
-                <Banknote size={20} />
-                Confirm Cash on Delivery for ₹{remainingAmount}
-              </button>
-            </div>
-          )}
-
-          {/* STEP 6: CONFIRMATION (Summary) */}
-          {step === 6 && (
-            <div className="p-8 md:p-12 text-center">
-              <div className="flex justify-center mb-6">
-                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircle size={40} className="text-green-600" />
-                </div>
-              </div>
-              
-              <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Order Placed Successfully!</h2>
-              <p className="text-gray-600 mb-8">Thank you for your order.</p>
-              
-              <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-auto border border-gray-200 text-left mb-8 shadow-sm">
-                <div className="mb-4 pb-4 border-b border-gray-200 text-center">
-                  <p className="text-sm text-gray-500 mb-1">Order ID</p>
-                  <p className="text-2xl font-bold text-gray-900">{orderId}</p>
-                </div>
-                
-                <h3 className="font-bold text-lg mb-4">Order Summary</h3>
-                <div className="space-y-4 mb-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">
-                      {quantity}x {selectedProduct.name}
-                    </span>
-                    <span className="font-medium text-gray-900">₹{itemTotal}</span>
-                  </div>
-                </div>
-                
-                <div className="border-t pt-4 space-y-2 text-sm">
-                  <div className="flex justify-between text-gray-600">
-                    <span>Delivery Charge</span>
-                    <span className="font-medium">₹{deliveryCharge}</span>
-                  </div>
-                  <div className="flex justify-between font-bold text-gray-900 text-base pt-2">
-                    <span>Total Amount</span>
-                    <span>₹{totalAmount}</span>
-                  </div>
-                </div>
-                
-                <div className="border-t mt-4 pt-4 space-y-2 text-sm bg-gray-50 p-4 rounded">
-                  <div className="flex justify-between text-green-700 font-medium">
-                    <span>Amount Paid</span>
-                    <span>₹{advanceAmount}</span>
-                  </div>
-                  {remainingAmount > 0 && (
-                    <div className="flex justify-between text-red-600 font-bold mt-2">
-                      <span>Remaining (Cash on Delivery)</span>
-                      <span>₹{remainingAmount}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-gray-600 mt-2">
-                    <span>Payment Status</span>
-                    <span className="font-medium capitalize">{remainingAmount > 0 ? 'Partially Paid' : 'Fully Paid'}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link 
-                  href="/profile"
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 px-8 rounded-xl transition text-center"
-                >
-                  View Orders
-                </Link>
-                <Link 
-                  href="/"
-                  className="bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-8 rounded-xl transition text-center"
-                >
-                  Continue Shopping
-                </Link>
-              </div>
+          {activeTab === 'HISTORY' && historyOrders.length === 0 && (
+            <div className="bg-white rounded-xl p-8 text-center border border-slate-200 text-slate-500 text-xs font-semibold">
+              {language === 'hi' ? 'अभी तक कोई पिछला ऑर्डर नहीं है।' : 'No past orders in history.'}
             </div>
           )}
 
         </div>
-      </div>
+      )}
+
     </div>
   );
 }
 
-export default function OrderFlow() {
+export default function MyOrdersPage() {
   return (
-    <Suspense fallback={<div className="flex justify-center items-center min-h-[80vh]">Loading...</div>}>
-      <OrderFlowContent />
+    <Suspense fallback={<div className="flex justify-center items-center min-h-[50vh] text-xs font-bold text-slate-500">Loading Orders...</div>}>
+      <MyOrdersContent />
     </Suspense>
   );
 }

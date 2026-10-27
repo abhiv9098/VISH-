@@ -1,9 +1,8 @@
 /* eslint-disable */
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Order, sampleOrders } from '@/lib/data';
-import { getOrdersServer, saveOrderServer } from '@/actions/orderActions';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { Order } from '@/lib/data';
 
 export type DeliverySettings = {
   threshold: number;
@@ -14,24 +13,55 @@ export type DeliverySettings = {
 export type CustomerProfile = {
   name: string;
   phone: string;
+  email?: string;
   country: string;
+  state?: string;
+  district?: string;
+  city: string;
+  locality?: string;
   pincode: string;
   address: string;
-  city: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  liveLocationUrl?: string;
   isVerified: boolean;
+  hasDetectedGps?: boolean;
+  avatar?: string;
 };
 
 type OrderContextType = {
   orders: Order[];
-  addOrder: (order: Order) => void;
-  updateOrderStatus: (orderId: string, status: Order['status']) => void;
-  deleteOrder: (orderId: string) => void;
+  addOrder: (order: Order) => Promise<boolean>;
+  updateOrderStatus: (orderId: string, status: Order['status'], estimatedDelivery?: string) => Promise<boolean>;
+  updateOrderEstimatedDelivery: (orderId: string, estimatedDelivery: string) => Promise<boolean>;
+  verifyDeliveryCode: (orderId: string, inputCode: string) => Promise<{ success: boolean; error?: string }>;
+  sendEtaNotification: (orderId: string, eta: string) => Promise<boolean>;
+  deleteOrder: (orderId: string) => Promise<boolean>;
+  fetchOrders: () => Promise<void>;
   deliverySettings: DeliverySettings;
   updateDeliverySettings: (settings: DeliverySettings) => void;
   customerProfile: CustomerProfile | null;
   updateCustomerProfile: (profile: CustomerProfile) => void;
   clearCustomerProfile: () => void;
+  hasUnseenNewOrder: boolean;
+  newOrdersCount: number;
+  markOrdersAsSeen: () => void;
 };
+
+function deduplicateOrders(orderList: Order[]): Order[] {
+  if (!Array.isArray(orderList)) return [];
+  const seen = new Set<string>();
+  const unique: Order[] = [];
+  for (const o of orderList) {
+    if (o && o.id && !seen.has(o.id)) {
+      seen.add(o.id);
+      unique.push(o);
+    }
+  }
+  return unique;
+}
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
@@ -43,17 +73,103 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     chargeAbove: 20
   });
   const [customerProfile, setCustomerProfile] = useState<CustomerProfile | null>(null);
+  const [lastSeenTime, setLastSeenTime] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('vishwakarma_last_seen_time');
+      return saved ? parseInt(saved, 10) : 0;
+    }
+    return 0;
+  });
 
-  // Fetch orders from API
-  const fetchOrders = async () => { try { const data = await getOrdersServer(); if (Array.isArray(data)) { setOrders(data); } } catch(e) { console.error(e); } };
+  // Fetch orders from API with guaranteed deduplication
+  const fetchOrders = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/orders?t=${Date.now()}`, { 
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          const clean = deduplicateOrders(data);
+          setOrders(clean);
+        }
+      }
+    } catch (e) {
+      // Silently ignore fetch errors during polling
+    }
+  }, []);
+
+  // Fetch saved profile from database
+  const fetchProfile = useCallback(async () => {
+    try {
+      const res = await fetch('/api/profile', { cache: 'no-store' });
+      if (res.ok) {
+        const dbProfile = await res.json();
+        if (dbProfile && dbProfile.name) {
+          setCustomerProfile(prev => {
+            if (prev && prev.name && prev.address) {
+              return { ...dbProfile, ...prev };
+            }
+            return dbProfile;
+          });
+        }
+      }
+    } catch (e) {
+      // Silently ignore profile fetch errors
+    }
+  }, []);
+
+  const broadcastOrderUpdate = () => {
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('vishwakarma_orders_synced_at', Date.now().toString());
+        if ('BroadcastChannel' in window) {
+          const ch = new BroadcastChannel('vishwakarma_orders_channel');
+          ch.postMessage({ type: 'ORDERS_CHANGED', time: Date.now() });
+          ch.close();
+        }
+      }
+    } catch {}
+  };
 
   useEffect(() => {
     fetchOrders();
+    fetchProfile();
 
-    // Poll every 3 seconds to get real-time updates from mobile!
-    const interval = setInterval(fetchOrders, 3000);
+    // Poll every 2 seconds to keep Customer and Admin in real-time sync!
+    const interval = setInterval(fetchOrders, 2000);
 
-    // Profile and settings still from LocalStorage for the current device
+    // Instant sync across tabs using BroadcastChannel & Storage Event
+    let channel: BroadcastChannel | null = null;
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      channel = new BroadcastChannel('vishwakarma_orders_channel');
+      channel.onmessage = () => {
+        fetchOrders();
+      };
+    }
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'vishwakarma_orders_synced_at') {
+        fetchOrders();
+      }
+    };
+
+    const handleVisibility = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        fetchOrders();
+      }
+    };
+
+    const handleFocus = () => {
+      fetchOrders();
+    };
+
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    // Profile and settings from LocalStorage for the current device
     const savedSettings = localStorage.getItem('vishwakarma_delivery_settings');
     if (savedSettings) {
       try { setDeliverySettings(JSON.parse(savedSettings)); } catch (e) { }
@@ -64,35 +180,207 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       try { setCustomerProfile(JSON.parse(savedProfile)); } catch (e) { }
     }
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => {
+      clearInterval(interval);
+      if (channel) channel.close();
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [fetchOrders, fetchProfile]);
 
-  const addOrder = async (order: Order) => { const newOrders = [order, ...orders]; setOrders(newOrders); await saveOrderServer(newOrders); };
+  // Unseen new orders check
+  const hasUnseenNewOrder = orders.some(o => {
+    if (!o || o.isHiddenFromAdmin || o.status !== 'Order Placed') {
+      return false;
+    }
+    const orderTime = o.date ? new Date(o.date).getTime() : 0;
+    return orderTime > lastSeenTime;
+  });
 
-  const updateOrderStatus = async (orderId: string, status: Order['status']) => { const newOrders = orders.map(o => o.id === orderId ? { ...o, status } : o); setOrders(newOrders); await saveOrderServer(newOrders); };
+  // Count active new orders
+  const newOrdersCount = orders.filter(o => o.status === 'Order Placed' && !o.isHiddenFromAdmin).length;
 
-  const deleteOrder = async (orderId: string) => { const newOrders = orders.filter(o => o.id !== orderId); setOrders(newOrders); await saveOrderServer(newOrders); };
+  const markOrdersAsSeen = () => {
+    const now = Date.now();
+    setLastSeenTime(now);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('vishwakarma_last_seen_time', now.toString());
+    }
+  };
+
+  const addOrder = async (order: Order): Promise<boolean> => {
+    try {
+      // Optimistic update with deduplication
+      setOrders(prev => deduplicateOrders([order, ...prev.filter(o => o.id !== order.id)]));
+      
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order)
+      });
+      
+      if (res.ok) {
+        broadcastOrderUpdate();
+        await fetchOrders();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.error('Error adding order:', e);
+      return false;
+    }
+  };
+
+  const updateOrderStatus = async (orderId: string, status: Order['status'], estimatedDelivery?: string): Promise<boolean> => {
+    try {
+      setOrders(prev => deduplicateOrders(prev.map(o => {
+        if (o.id === orderId) {
+          return {
+            ...o,
+            status,
+            ...(estimatedDelivery !== undefined ? { estimatedDelivery } : {})
+          };
+        }
+        return o;
+      })));
+      
+      const payload: any = { id: orderId, status };
+      if (estimatedDelivery !== undefined) payload.estimatedDelivery = estimatedDelivery;
+
+      const res = await fetch('/api/orders', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      if (res.ok) {
+        broadcastOrderUpdate();
+        await fetchOrders();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.error('Error updating status:', e);
+      return false;
+    }
+  };
+
+  const updateOrderEstimatedDelivery = async (orderId: string, estimatedDelivery: string): Promise<boolean> => {
+    try {
+      setOrders(prev => deduplicateOrders(prev.map(o => o.id === orderId ? { ...o, estimatedDelivery } : o)));
+
+      const res = await fetch('/api/orders', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: orderId, estimatedDelivery })
+      });
+
+      if (res.ok) {
+        broadcastOrderUpdate();
+        await fetchOrders();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.error('Error updating estimated delivery:', e);
+      return false;
+    }
+  };
+
+  const verifyDeliveryCode = async (orderId: string): Promise<{ success: boolean; error?: string }> => {
+    const success = await updateOrderStatus(orderId, 'Delivered');
+    return { success };
+  };
+
+  const sendEtaNotification = async (orderId: string, eta: string): Promise<boolean> => {
+    try {
+      const now = new Date().toISOString();
+      setOrders(prev => deduplicateOrders(prev.map(o => o.id === orderId ? { ...o, estimatedDelivery: eta, etaNotifiedAt: now } : o)));
+
+      const res = await fetch('/api/orders', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: orderId, estimatedDelivery: eta, etaNotifiedAt: now })
+      });
+
+      if (res.ok) {
+        broadcastOrderUpdate();
+        await fetchOrders();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.error('Error sending ETA notification:', e);
+      return false;
+    }
+  };
+
+  const deleteOrder = async (orderId: string): Promise<boolean> => {
+    try {
+      setOrders(prev => deduplicateOrders(prev.filter(o => o.id !== orderId)));
+      
+      const res = await fetch(`/api/orders?id=${encodeURIComponent(orderId)}`, {
+        method: 'DELETE'
+      });
+      
+      if (res.ok) {
+        broadcastOrderUpdate();
+        await fetchOrders();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.error('Error deleting order:', e);
+      return false;
+    }
+  };
 
   const updateDeliverySettings = (settings: DeliverySettings) => {
     setDeliverySettings(settings);
-    localStorage.setItem('vishwakarma_delivery_settings', JSON.stringify(settings));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('vishwakarma_delivery_settings', JSON.stringify(settings));
+    }
   };
 
   const updateCustomerProfile = (profile: CustomerProfile) => {
     setCustomerProfile(profile);
-    localStorage.setItem('vishwakarma_customer_profile', JSON.stringify(profile));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('vishwakarma_customer_profile', JSON.stringify(profile));
+    }
+    // Persist to server-side database
+    fetch('/api/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(profile)
+    }).catch(() => { });
   };
 
   const clearCustomerProfile = () => {
     setCustomerProfile(null);
-    localStorage.removeItem('vishwakarma_customer_profile');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('vishwakarma_customer_profile');
+    }
   };
 
   return (
     <OrderContext.Provider value={{ 
-      orders, addOrder, updateOrderStatus, deleteOrder,
-      deliverySettings, updateDeliverySettings,
-      customerProfile, updateCustomerProfile, clearCustomerProfile
+      orders, 
+      addOrder, 
+      updateOrderStatus, 
+      updateOrderEstimatedDelivery,
+      verifyDeliveryCode,
+      sendEtaNotification,
+      deleteOrder,
+      fetchOrders,
+      deliverySettings, 
+      updateDeliverySettings,
+      customerProfile, 
+      updateCustomerProfile, 
+      clearCustomerProfile,
+      hasUnseenNewOrder,
+      newOrdersCount,
+      markOrdersAsSeen
     }}>
       {children}
     </OrderContext.Provider>

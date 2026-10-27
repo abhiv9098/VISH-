@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
-import ConditionalFooter from "@/components/ConditionalFooter";
+
+import BottomNav from "@/components/BottomNav";
 
 export default function CustomerLayout({
   children,
@@ -7,10 +8,11 @@ export default function CustomerLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="bg-gray-50 flex flex-col min-h-screen">
+    <div className="bg-[#fcfaf5] flex flex-col min-h-screen text-slate-900 font-sans pb-20 md:pb-0">
       <Header />
       <main className="flex-1">{children}</main>
-      <ConditionalFooter />
+
+      <BottomNav />
     </div>
   );
 }
