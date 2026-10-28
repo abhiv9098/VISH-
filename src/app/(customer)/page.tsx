@@ -32,8 +32,9 @@ export default function Home() {
               return (
                 <button
                   key={cat}
+                  type="button"
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1.5 rounded-lg sm:rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer border ${
+                  className={`px-3.5 py-1.5 rounded-lg sm:rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer border touch-manipulation active:scale-95 ${
                     isSelected
                       ? 'bg-teal-600 text-white border-teal-600 shadow-xs ring-2 ring-teal-500/20'
                       : 'bg-white text-stone-700 border-stone-200/90 hover:bg-teal-50/60 hover:text-teal-900 hover:border-teal-300 shadow-2xs'

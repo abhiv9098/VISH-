@@ -50,6 +50,33 @@ type OrderContextType = {
   markOrdersAsSeen: () => void;
 };
 
+function areOrderListsEqual(listA: Order[], listB: Order[]): boolean {
+  if (listA === listB) return true;
+  if (!listA || !listB) return false;
+  if (listA.length !== listB.length) return false;
+  for (let i = 0; i < listA.length; i++) {
+    const a = listA[i];
+    const b = listB[i];
+    if (!a || !b) return false;
+    if (
+      a.id !== b.id ||
+      a.status !== b.status ||
+      a.total !== b.total ||
+      a.date !== b.date ||
+      a.estimatedDelivery !== b.estimatedDelivery ||
+      a.advancePaid !== b.advancePaid ||
+      a.remainingAmount !== b.remainingAmount ||
+      a.deliveryType !== b.deliveryType ||
+      a.paymentMethod !== b.paymentMethod ||
+      a.isHiddenFromAdmin !== b.isHiddenFromAdmin ||
+      a.items?.length !== b.items?.length
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function deduplicateOrders(orderList: Order[]): Order[] {
   if (!Array.isArray(orderList)) return [];
   const seen = new Set<string>();
@@ -81,7 +108,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     return 0;
   });
 
-  // Fetch orders from API with guaranteed deduplication
+  // Fetch orders from API with guaranteed deduplication and reference equality preservation
   const fetchOrders = useCallback(async () => {
     try {
       const res = await fetch(`/api/orders?t=${Date.now()}`, { 
@@ -92,7 +119,13 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         const data = await res.json();
         if (Array.isArray(data)) {
           const clean = deduplicateOrders(data);
-          setOrders(clean);
+          setOrders(prev => {
+            // Keep identical reference to avoid unnecessary re-renders that interrupt mobile touches
+            if (areOrderListsEqual(prev, clean)) {
+              return prev;
+            }
+            return clean;
+          });
         }
       }
     } catch (e) {
@@ -137,8 +170,8 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     fetchOrders();
     fetchProfile();
 
-    // Poll every 2 seconds to keep Customer and Admin in real-time sync!
-    const interval = setInterval(fetchOrders, 2000);
+    // Poll regularly while preserving reference equality (instant tab sync via BroadcastChannel)
+    const interval = setInterval(fetchOrders, 4000);
 
     // Instant sync across tabs using BroadcastChannel & Storage Event
     let channel: BroadcastChannel | null = null;

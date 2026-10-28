@@ -6,17 +6,24 @@ import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { Star, ArrowRight, Minus, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function ProductCard({ product }: { product: Product }) {
   const { addToCart, clearCart } = useCart();
   const { language, t } = useLanguage();
   const [qty, setQty] = useState(1);
+  const [isOpening, setIsOpening] = useState(false);
   const router = useRouter();
 
+  // Prefetch order route for instant 0ms mobile transitions
+  useEffect(() => {
+    router.prefetch(`/order?productId=${product.id}&qty=1`);
+  }, [product.id, router]);
+
   const handleBuyNow = () => {
-    if (!product.inStock) return;
+    if (!product.inStock || isOpening) return;
+    setIsOpening(true);
     clearCart();
     addToCart(product, qty);
     router.push(`/order?productId=${product.id}&qty=${qty}`);
@@ -115,13 +122,15 @@ export default function ProductCard({ product }: { product: Product }) {
             )}
           </div>
           
-          {/* Buy Action Button */}
+          {/* Buy Action Button with instant tactile feedback */}
           {product.inStock ? (
             <button
+              type="button"
               onClick={handleBuyNow}
-              className="w-full mt-2 py-1.5 sm:py-2 px-2 rounded-xl flex items-center justify-center gap-1 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-emerald-950 font-black text-xs shadow-xs hover:shadow transition-all cursor-pointer"
+              disabled={isOpening}
+              className="w-full mt-2 py-1.5 sm:py-2 px-2 rounded-xl flex items-center justify-center gap-1 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 active:scale-[0.98] text-emerald-950 font-black text-xs shadow-xs hover:shadow transition-all cursor-pointer touch-manipulation disabled:opacity-80"
             >
-              <span>{buyBtnText}</span>
+              <span>{isOpening ? (language === 'hi' ? 'खुल रहा है...' : 'Opening...') : buyBtnText}</span>
               <ArrowRight size={13} className="shrink-0" />
             </button>
           ) : (

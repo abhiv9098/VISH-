@@ -1,0 +1,227 @@
+const fs = require('fs');
+const path = require('path');
+const { chromium } = require('@playwright/test');
+
+const getSvg = (isMaskable = false) => {
+  const bgRect = isMaskable 
+    ? '<rect width="512" height="512" fill="url(#bgGrad)" />' 
+    : '<rect width="512" height="512" rx="110" fill="url(#bgGrad)" />';
+
+  const contentWrapperOpen = isMaskable 
+    ? '<g transform="translate(46, 46) scale(0.82)">' 
+    : '<g>';
+  const contentWrapperClose = '</g>';
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Radial Gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="38%" r="65%">
+      <stop offset="0%" stop-color="#115e59" />
+      <stop offset="45%" stop-color="#042f2e" />
+      <stop offset="100%" stop-color="#021c1b" />
+    </radialGradient>
+
+    <!-- Rich Gold Gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="25%" stop-color="#fde047" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="85%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#92400e" />
+    </linearGradient>
+
+    <!-- Bright Gold Highlight -->
+    <linearGradient id="goldLight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="30%" stop-color="#fef08a" />
+      <stop offset="70%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+
+    <!-- Subtle Glow Shadow -->
+    <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.45" />
+    </filter>
+
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#fbbf24" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <!-- Full Background -->
+  ${bgRect}
+
+  ${contentWrapperOpen}
+  <!-- Outer Decorative Concentric Rings -->
+  <circle cx="256" cy="256" r="236" fill="none" stroke="url(#goldGrad)" stroke-width="4" opacity="0.6" />
+  <circle cx="256" cy="256" r="226" fill="none" stroke="url(#goldGrad)" stroke-width="7" stroke-linecap="round" stroke-dasharray="14 8" opacity="0.85" />
+  <circle cx="256" cy="256" r="214" fill="none" stroke="#2dd4bf" stroke-width="2" opacity="0.5" />
+
+  <!-- Sunburst Rays radiating from behind chakki -->
+  <g opacity="0.18" stroke="url(#goldGrad)" stroke-width="3">
+    <line x1="256" y1="40" x2="256" y2="110" />
+    <line x1="256" y1="472" x2="256" y2="402" />
+    <line x1="40" y1="256" x2="110" y2="256" />
+    <line x1="472" y1="256" x2="402" y2="256" />
+    <line x1="103" y1="103" x2="153" y2="153" />
+    <line x1="409" y1="409" x2="359" y2="359" />
+    <line x1="409" y1="103" x2="359" y2="153" />
+    <line x1="103" y1="409" x2="153" y2="359" />
+  </g>
+
+  <!-- Traditional Stone Chakki (Flour Mill Wheel) Emblem in Center -->
+  <g filter="url(#goldGlow)">
+    <!-- Outer Chakki Stone Base Ring -->
+    <circle cx="256" cy="216" r="106" fill="#032120" stroke="url(#goldGrad)" stroke-width="6" />
+    <circle cx="256" cy="216" r="92" fill="#053331" stroke="url(#goldGrad)" stroke-width="2.5" opacity="0.7" />
+
+    <!-- Chakki Milling Stone Texture & Grooves -->
+    <g stroke="url(#goldGrad)" stroke-width="3" opacity="0.45" stroke-linecap="round">
+      <path d="M 256,128 A 88,88 0 0,1 324,160" />
+      <path d="M 344,216 A 88,88 0 0,1 324,272" />
+      <path d="M 256,304 A 88,88 0 0,1 188,272" />
+      <path d="M 168,216 A 88,88 0 0,1 188,160" />
+    </g>
+
+    <!-- Center Pivot Hub (Chakki ki Keel / Eye) -->
+    <circle cx="256" cy="216" r="28" fill="url(#goldGrad)" />
+    <circle cx="256" cy="216" r="14" fill="#042f2e" />
+    <circle cx="256" cy="216" r="6" fill="#fef08a" />
+
+    <!-- Chakki Traditional Grinding Wooden Handle (Hatha) -->
+    <circle cx="312" cy="180" r="12" fill="url(#goldGrad)" filter="url(#softGlow)" />
+    <circle cx="312" cy="180" r="6" fill="#78350f" />
+  </g>
+
+  <!-- Left Golden Wheat Stalk (Baali) -->
+  <g filter="url(#goldGlow)">
+    <!-- Stem -->
+    <path d="M 256,345 Q 170,300 156,155" fill="none" stroke="url(#goldGrad)" stroke-width="5" stroke-linecap="round" />
+    
+    <!-- Left Wheat Grains -->
+    <path d="M 156,155 C 145,140 150,120 162,118 C 174,120 176,140 166,152 Z" fill="url(#goldLight)" />
+    <line x1="162" y1="118" x2="168" y2="88" stroke="url(#goldGrad)" stroke-width="2" />
+    <path d="M 152,175 C 135,165 138,145 150,140 C 162,142 165,162 158,172 Z" fill="url(#goldGrad)" />
+    <line x1="148" y1="140" x2="132" y2="112" stroke="url(#goldGrad)" stroke-width="2" />
+    <path d="M 162,170 C 178,162 188,172 182,185 C 175,195 162,190 158,175 Z" fill="url(#goldLight)" />
+    <line x1="185" y1="172" x2="208" y2="150" stroke="url(#goldGrad)" stroke-width="2" />
+    <path d="M 152,205 C 132,198 135,178 148,172 C 160,175 162,195 156,203 Z" fill="url(#goldGrad)" />
+    <line x1="145" y1="172" x2="125" y2="148" stroke="url(#goldGrad)" stroke-width="2" />
+    <path d="M 168,198 C 185,192 194,204 188,216 C 180,225 166,220 162,205 Z" fill="url(#goldLight)" />
+    <line x1="192" y1="202" x2="218" y2="185" stroke="url(#goldGrad)" stroke-width="2" />
+    <path d="M 160,235 C 140,230 142,210 154,205 C 166,208 168,226 163,234 Z" fill="url(#goldGrad)" />
+    <line x1="150" y1="205" x2="130" y2="185" stroke="url(#goldGrad)" stroke-width="2" />
+    <path d="M 178,228 C 196,224 204,236 198,248 C 190,256 176,250 172,236 Z" fill="url(#goldLight)" />
+    <line x1="202" y1="234" x2="228" y2="220" stroke="url(#goldGrad)" stroke-width="2" />
+    <path d="M 175,265 C 155,262 156,244 168,238 C 178,242 180,258 176,265 Z" fill="url(#goldGrad)" />
+    <line x1="165" y1="238" x2="145" y2="220" stroke="url(#goldGrad)" stroke-width="2" />
+    <path d="M 195,258 C 212,256 218,268 212,279 C 204,286 192,280 188,266 Z" fill="url(#goldLight)" />
+  </g>
+
+  <!-- Right Golden Wheat Stalk (Baali) -->
+  <g filter="url(#goldGlow)">
+    <!-- Stem -->
+    <path d="M 256,345 Q 342,300 356,155" fill="none" stroke="url(#goldGrad)" stroke-width="5" stroke-linecap="round" />
+    
+    <!-- Right Wheat Grains -->
+    <path d="M 356,155 C 367,140 362,120 350,118 C 338,120 336,140 346,152 Z" fill="url(#goldLight)" />
+    <line x1="350" y1="118" x2="344" y2="88" stroke="url(#goldGrad)" stroke-width="2" />
+    <path d="M 360,175 C 377,165 374,145 362,140 C 350,142 347,162 354,172 Z" fill="url(#goldGrad)" />
+    <line x1="364" y1="140" x2="380" y2="112" stroke="url(#goldGrad)" stroke-width="2" />
+    <path d="M 350,170 C 334,162 324,172 330,185 C 337,195 350,190 354,175 Z" fill="url(#goldLight)" />
+    <line x1="327" y1="172" x2="304" y2="150" stroke="url(#goldGrad)" stroke-width="2" />
+    <path d="M 360,205 C 380,198 377,178 364,172 C 352,175 350,195 356,203 Z" fill="url(#goldGrad)" />
+    <line x1="367" y1="172" x2="387" y2="148" stroke="url(#goldGrad)" stroke-width="2" />
+    <path d="M 344,198 C 327,192 318,204 324,216 C 332,225 346,220 350,205 Z" fill="url(#goldLight)" />
+    <line x1="320" y1="202" x2="294" y2="185" stroke="url(#goldGrad)" stroke-width="2" />
+    <path d="M 352,235 C 372,230 370,210 358,205 C 346,208 344,226 349,234 Z" fill="url(#goldGrad)" />
+    <line x1="362" y1="205" x2="382" y2="185" stroke="url(#goldGrad)" stroke-width="2" />
+    <path d="M 334,228 C 316,224 308,236 314,248 C 322,256 336,250 340,236 Z" fill="url(#goldLight)" />
+    <line x1="310" y1="234" x2="284" y2="220" stroke="url(#goldGrad)" stroke-width="2" />
+    <path d="M 337,265 C 357,262 356,244 344,238 C 334,242 332,258 336,265 Z" fill="url(#goldGrad)" />
+    <line x1="347" y1="238" x2="367" y2="220" stroke="url(#goldGrad)" stroke-width="2" />
+    <path d="M 317,258 C 300,256 294,268 300,279 C 308,286 320,280 324,266 Z" fill="url(#goldLight)" />
+  </g>
+
+  <!-- Ribbon / Banner at Bottom -->
+  <g filter="url(#goldGlow)">
+    <path d="M 80,380 L 125,355 L 125,395 Z" fill="#78350f" />
+    <path d="M 432,380 L 387,355 L 387,395 Z" fill="#78350f" />
+    
+    <path d="M 95,360 Q 256,346 417,360 L 405,422 Q 256,438 107,422 Z" fill="#032120" stroke="url(#goldGrad)" stroke-width="4.5" />
+    <path d="M 103,366 Q 256,352 409,366" fill="none" stroke="url(#goldLight)" stroke-width="1.5" opacity="0.8" />
+    <path d="M 115,416 Q 256,432 397,416" fill="none" stroke="url(#goldGrad)" stroke-width="1" opacity="0.6" />
+
+    <text x="256" y="396" 
+          font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
+          font-size="28" 
+          font-weight="900" 
+          letter-spacing="3.5" 
+          fill="url(#goldLight)" 
+          text-anchor="middle"
+          filter="url(#softGlow)">VISHWAKARMA</text>
+
+    <text x="256" y="415" 
+          font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
+          font-size="12" 
+          font-weight="800" 
+          letter-spacing="2.5" 
+          fill="#5eead4" 
+          text-anchor="middle">ATTA CHAKKI • 100% PURE</text>
+  </g>
+
+  <!-- Golden Star -->
+  <polygon points="256,58 261,72 276,74 264,84 268,98 256,89 244,98 248,84 236,74 251,72" fill="url(#goldLight)" filter="url(#softGlow)" />
+  ${contentWrapperClose}
+</svg>`;
+};
+
+async function main() {
+  const publicDir = path.join(process.cwd(), 'public');
+  const appDir = path.join(process.cwd(), 'src', 'app');
+  const imagesDir = path.join(publicDir, 'images');
+
+  if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir, { recursive: true });
+
+  const standardSvg = getSvg(false);
+  const maskableSvg = getSvg(true);
+
+  fs.writeFileSync(path.join(publicDir, 'logo.svg'), standardSvg, 'utf8');
+
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+
+  const renderSvg = async (svg, outFile, width, height) => {
+    const html = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;background:transparent;overflow:hidden;display:flex;align-items:center;justify-content:center;}svg{width:100%;height:100%;display:block;}</style></head><body>${svg}</body></html>`;
+    await page.setContent(html);
+    await page.setViewportSize({ width, height });
+    await page.screenshot({ path: outFile, omitBackground: true });
+    console.log(`Rendered: ${outFile} (${width}x${height})`);
+  };
+
+  // Standard icons
+  await renderSvg(standardSvg, path.join(publicDir, 'icon-512.png'), 512, 512);
+  await renderSvg(standardSvg, path.join(publicDir, 'icon-192.png'), 192, 192);
+  await renderSvg(standardSvg, path.join(publicDir, 'apple-touch-icon.png'), 180, 180);
+  await renderSvg(standardSvg, path.join(publicDir, 'favicon-48.png'), 48, 48);
+  await renderSvg(standardSvg, path.join(publicDir, 'favicon-32.png'), 32, 32);
+  await renderSvg(standardSvg, path.join(publicDir, 'images', 'logo.png'), 512, 512);
+  await renderSvg(standardSvg, path.join(appDir, 'icon.png'), 512, 512);
+  await renderSvg(standardSvg, path.join(appDir, 'apple-icon.png'), 180, 180);
+
+  // Maskable icon for Android adaptive home screen icon
+  await renderSvg(maskableSvg, path.join(publicDir, 'icon-maskable-512.png'), 512, 512);
+
+  // Favicon
+  const favicon32 = path.join(publicDir, 'favicon-32.png');
+  fs.copyFileSync(favicon32, path.join(publicDir, 'favicon.ico'));
+  fs.copyFileSync(favicon32, path.join(appDir, 'favicon.ico'));
+
+  await browser.close();
+  console.log('Finished rendering all logo assets!');
+}
+
+main().catch(err => {
+  console.error(err);
+  process.exit(1);
+});

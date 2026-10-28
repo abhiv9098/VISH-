@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Wheat, Home, ShoppingBag, User, ShieldCheck } from 'lucide-react';
+import { Home, ShoppingBag, User, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useOrders } from '@/context/OrderContext';
 
@@ -27,9 +28,16 @@ export default function Header() {
           
           {/* Left: Brand */}
           <div className="flex items-center shrink-0">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="bg-teal-800/60 p-1.5 rounded-lg border border-teal-600/50 group-hover:bg-teal-700/60 transition shrink-0">
-                <Wheat size={22} className="text-teal-300" />
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-teal-500/50 shadow-xs shrink-0 bg-[#042f2e] group-hover:border-teal-400 transition">
+                <Image 
+                  src="/images/logo.png" 
+                  alt="Vishwakarma Atta Chakki Logo" 
+                  fill 
+                  sizes="40px"
+                  className="object-cover" 
+                  priority 
+                />
               </div>
               <div className="flex flex-col justify-center">
                 <h1 className="text-base sm:text-lg font-black tracking-wide leading-tight text-white">
@@ -99,13 +107,14 @@ export default function Header() {
           {/* Right: Mobile Admin Button */}
           <div className="flex items-center gap-1.5 sm:gap-2">
             
-            {/* Mobile Admin Icon Button */}
+            {/* Mobile Admin Icon Button with comfortable touch target */}
             <Link
               href="/admin"
-              className="md:hidden flex items-center gap-1 bg-teal-900/90 text-teal-100 border border-teal-700/70 p-1.5 rounded-lg text-xs font-bold hover:text-white hover:bg-teal-800 transition cursor-pointer"
+              className="md:hidden flex items-center gap-1.5 bg-teal-900/90 text-teal-100 border border-teal-700/70 p-2 rounded-xl text-xs font-bold hover:text-white active:bg-teal-800 transition cursor-pointer touch-manipulation active:scale-95 shadow-xs"
               title="Admin Panel"
             >
-              <ShieldCheck size={15} className="text-teal-300" />
+              <ShieldCheck size={16} className="text-teal-300" />
+              <span className="text-[11px] font-bold">Admin</span>
             </Link>
           </div>
 

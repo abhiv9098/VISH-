@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, ShoppingBag, Users, Settings, LogOut, Package, Menu, X, Bell } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
@@ -90,31 +91,43 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className="flex h-screen bg-[#f3f4f6] text-gray-900 overflow-hidden relative w-full font-sans antialiased">
-      {/* Mobile Sidebar Overlay */}
+    <div className="flex h-screen h-[100dvh] bg-[#f3f4f6] text-gray-900 overflow-hidden relative w-full font-sans antialiased">
+      {/* Mobile Sidebar Overlay with guaranteed touch & click handling */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 md:hidden transition-opacity" 
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 md:hidden transition-opacity cursor-pointer" 
           onClick={() => setSidebarOpen(false)}
+          onTouchEnd={() => setSidebarOpen(false)}
+          role="button"
+          tabIndex={0}
+          aria-label="Close sidebar"
         />
       )}
 
       {/* Sidebar - Matching Reference Image Ref3 with Forest Green Background */}
       <aside 
         className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#062e1e] text-white flex flex-col transform transition-transform duration-300 ease-in-out shrink-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          sidebarOpen 
+            ? 'translate-x-0 pointer-events-auto visible' 
+            : '-translate-x-full pointer-events-none invisible md:translate-x-0 md:pointer-events-auto md:visible'
         }`}
       >
         {/* Brand Header */}
         <div className="p-4 border-b border-[#0b482d] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-[#f59e0b] rounded-lg flex items-center justify-center font-black text-[#062e1e] text-lg shadow-sm">
-              V
+            <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-teal-500/40 shadow-xs shrink-0 bg-[#042f2e]">
+              <Image 
+                src="/images/logo.png" 
+                alt="Vishwakarma Logo" 
+                fill 
+                sizes="36px"
+                className="object-cover" 
+              />
             </div>
             <span className="font-bold text-lg tracking-wide text-white">Atta Admin</span>
           </div>
           <button 
-            className="md:hidden text-gray-300 hover:text-white p-1 rounded-lg transition" 
+            className="md:hidden text-gray-300 hover:text-white p-2 rounded-xl active:bg-white/10 transition touch-manipulation cursor-pointer" 
             onClick={() => setSidebarOpen(false)}
             aria-label="Close Sidebar"
           >
@@ -132,7 +145,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <Link 
                     href={item.href} 
                     onClick={() => setSidebarOpen(false)} 
-                    className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all group ${
+                    className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all group touch-manipulation ${
                       item.active 
                         ? 'bg-[#0b482d] text-white shadow-xs' 
                         : 'text-emerald-100/75 hover:bg-[#093a25] hover:text-white'
@@ -159,19 +172,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </ul>
         </nav>
         
-        {/* Logout Button */}
+        {/* Logout / Storefront Button */}
         <div className="p-4 border-t border-[#0b482d]">
-          <button 
-            onClick={() => {
-              if (confirm('Logout of Admin Panel?')) {
-                window.location.href = '/';
-              }
-            }}
-            className="flex items-center gap-3 px-3.5 py-2 w-full rounded-xl hover:bg-red-900/40 text-red-300/90 hover:text-red-200 text-sm font-medium transition cursor-pointer"
+          <Link 
+            href="/"
+            onClick={() => setSidebarOpen(false)}
+            className="flex items-center gap-3 px-3.5 py-2.5 w-full rounded-xl hover:bg-red-900/40 text-red-300/90 hover:text-red-200 text-sm font-medium transition cursor-pointer touch-manipulation"
           >
             <LogOut size={18} />
-            <span>Logout</span>
-          </button>
+            <span>Customer Storefront</span>
+          </Link>
         </div>
       </aside>
 
@@ -181,7 +191,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <header className="h-14 sm:h-16 bg-white border-b border-gray-200/80 flex items-center justify-between px-3.5 sm:px-6 shrink-0 shadow-2xs z-10">
           <div className="flex items-center gap-3 min-w-0">
             <button 
-              className="md:hidden text-gray-700 hover:text-gray-900 p-1.5 -ml-1 rounded-lg hover:bg-gray-100 transition" 
+              className="md:hidden text-gray-700 hover:text-gray-900 p-2 -ml-1 rounded-xl hover:bg-gray-100 active:bg-gray-200 transition touch-manipulation cursor-pointer" 
               onClick={() => setSidebarOpen(true)}
               aria-label="Open menu"
             >
@@ -197,7 +207,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {newOrdersCount > 0 && (
               <Link
                 href="/admin"
-                className="inline-flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-black animate-pulse shadow-2xs"
+                className="inline-flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-black animate-pulse shadow-2xs touch-manipulation"
                 title={`${newOrdersCount} orders waiting for confirmation`}
               >
                 <Bell size={13} className="text-red-600 fill-red-600" />
@@ -216,9 +226,42 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Scrollable Main Viewport (Zero horizontal overflow) */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 md:p-6 w-full max-w-full min-w-0 bg-[#f8fafc]">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 md:p-6 pb-20 md:pb-6 w-full max-w-full min-w-0 bg-[#f8fafc]">
           {children}
         </div>
+
+        {/* Admin Mobile Bottom Navigation Bar (Visible on mobile screens) */}
+        <nav 
+          aria-label="Admin Mobile Navigation" 
+          className="md:hidden fixed bottom-0 left-0 right-0 bg-[#062e1e] border-t border-[#0b482d] z-30 px-1 py-1 shadow-lg pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))]"
+        >
+          <div className="flex justify-around items-center max-w-lg mx-auto">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition-all relative touch-manipulation ${
+                    item.active
+                      ? 'text-amber-400 font-black bg-[#0b482d]'
+                      : 'text-emerald-200/80 hover:text-white font-medium'
+                  }`}
+                >
+                  <div className="relative">
+                    <Icon size={19} className={item.active ? 'stroke-[2.5]' : 'stroke-[1.8]'} />
+                    {item.badge && (
+                      <span className="absolute -top-1 -right-2.5 bg-[#f59e0b] text-[#062e1e] font-black text-[9px] min-w-3.5 h-3.5 px-1 rounded-full flex items-center justify-center shadow-xs">
+                        {newOrdersCount}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] mt-0.5 tracking-tight leading-none">{item.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
       </main>
     </div>
   );

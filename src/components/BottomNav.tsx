@@ -35,7 +35,7 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center py-1 px-3 sm:px-4 rounded-xl transition-all relative ${
+              className={`flex flex-col items-center py-1 px-3 sm:px-4 rounded-xl transition-all relative touch-manipulation active:scale-95 ${
                 isActive
                   ? 'text-teal-950 font-black bg-teal-50/90 shadow-2xs'
                   : 'text-stone-500 hover:text-teal-900 font-semibold'

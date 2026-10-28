@@ -261,8 +261,16 @@ export default function CustomersPage() {
             >
               {/* Customer Row Header */}
               <div 
-                className="p-3.5 sm:p-4.5 flex flex-col md:flex-row md:items-center justify-between gap-3 cursor-pointer hover:bg-gray-50/50 transition"
+                className="p-3.5 sm:p-4.5 flex flex-col md:flex-row md:items-center justify-between gap-3 cursor-pointer hover:bg-gray-50/50 active:bg-gray-100 transition touch-manipulation select-none"
                 onClick={() => setExpandedCustomer(isExpanded ? null : customer.phone)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setExpandedCustomer(isExpanded ? null : customer.phone);
+                  }
+                }}
               >
                 <div className="flex items-start gap-3 min-w-0">
                   <div className="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-900 font-black flex items-center justify-center text-base shrink-0 border border-emerald-300 shadow-2xs">
