@@ -171,10 +171,17 @@ export async function DELETE(request: Request) {
   try {
     const url = new URL(request.url);
     const id = url.searchParams.get('id');
+    const all = url.searchParams.get('all');
     
+    ensureDataFile();
+
+    if (all === 'true' || all === 'all') {
+      fs.writeFileSync(dataFilePath, JSON.stringify([], null, 2), 'utf8');
+      return NextResponse.json({ success: true, message: 'All orders cleared' });
+    }
+
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
 
-    ensureDataFile();
     const data = fs.readFileSync(dataFilePath, 'utf8');
     let orders: any[] = [];
     try {

@@ -39,6 +39,7 @@ type OrderContextType = {
   verifyDeliveryCode: (orderId: string, inputCode: string) => Promise<{ success: boolean; error?: string }>;
   sendEtaNotification: (orderId: string, eta: string) => Promise<boolean>;
   deleteOrder: (orderId: string) => Promise<boolean>;
+  clearAllOrders: () => Promise<boolean>;
   fetchOrders: () => Promise<void>;
   deliverySettings: DeliverySettings;
   updateDeliverySettings: (settings: DeliverySettings) => void;
@@ -369,6 +370,24 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const clearAllOrders = async (): Promise<boolean> => {
+    try {
+      setOrders([]);
+      const res = await fetch('/api/orders?all=true', {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        broadcastOrderUpdate();
+        await fetchOrders();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.error('Error clearing all orders:', e);
+      return false;
+    }
+  };
+
   const updateDeliverySettings = (settings: DeliverySettings) => {
     setDeliverySettings(settings);
     if (typeof window !== 'undefined') {
@@ -405,6 +424,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       verifyDeliveryCode,
       sendEtaNotification,
       deleteOrder,
+      clearAllOrders,
       fetchOrders,
       deliverySettings, 
       updateDeliverySettings,

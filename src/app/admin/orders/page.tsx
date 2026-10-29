@@ -33,6 +33,7 @@ export default function OrdersPage() {
     orders, 
     updateOrderStatus, 
     deleteOrder, 
+    clearAllOrders,
     addOrder, 
     markOrdersAsSeen 
   } = useOrders();
@@ -182,13 +183,28 @@ export default function OrdersPage() {
             Manage live orders, progress status, and track delivery synchronization
           </p>
         </div>
-        <button
-          onClick={createQuickTestOrder}
-          className="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold text-xs px-3.5 py-2 rounded-xl transition cursor-pointer self-start sm:self-auto shadow-2xs"
-        >
-          <PlusCircle size={15} />
-          <span>+ Create Test Order</span>
-        </button>
+        <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
+          {uniqueOrders.length > 0 && (
+            <button
+              onClick={() => {
+                if (confirm('Are you sure you want to remove all test orders? This will clear all orders.')) {
+                  clearAllOrders();
+                }
+              }}
+              className="inline-flex items-center gap-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-xs px-3 py-2 rounded-xl transition cursor-pointer shadow-2xs"
+            >
+              <Trash2 size={14} />
+              <span>Clear All Orders</span>
+            </button>
+          )}
+          <button
+            onClick={createQuickTestOrder}
+            className="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold text-xs px-3.5 py-2 rounded-xl transition cursor-pointer shadow-2xs"
+          >
+            <PlusCircle size={15} />
+            <span>+ Create Test Order</span>
+          </button>
+        </div>
       </div>
 
       {/* Search and Status Filters Toolbar */}
