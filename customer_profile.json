@@ -1,20 +1,17 @@
 {
-  "name": "Test Customer Raj",
-  "phone": "9876543210",
+  "name": "abhishek",
+  "phone": "9893249212",
   "email": "",
   "country": "India",
   "state": "Madhya Pradesh",
   "district": "Dewas",
-  "city": "Gurugram",
+  "city": "Sonkach",
   "locality": "",
-  "pincode": "122001",
-  "address": "Flat 102, Sharbati Greens, Sector 21",
+  "pincode": "455118",
+  "address": "Sonkach, Sonkatch Tahsil, Dewas, Madhya Pradesh, 455118, India",
   "coordinates": {
     "lat": 22.974466679070655,
     "lng": 76.35954900596344
   },
-  "liveLocationUrl": "https://www.google.com/maps?q=22.974466679070655,76.35954900596344",
-  "avatar": "",
-  "isVerified": true,
-  "hasDetectedGps": true
+  "isVerified": true
 }

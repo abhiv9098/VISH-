@@ -24,9 +24,13 @@ import {
   Compass, 
   AlertTriangle, 
   Loader2, 
-  ExternalLink 
+  ExternalLink, 
+  Copy, 
+  Check, 
+  Smartphone 
 } from 'lucide-react';
 import Image from 'next/image';
+import QRCode from 'qrcode';
 import { products } from '@/lib/data';
 import { checkDeliveryFeasibility } from '@/lib/delivery';
 
@@ -81,6 +85,8 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
   const [paymentChoice, setPaymentChoice] = useState<'online' | 'cod'>('online');
   const [txnId, setTxnId] = useState('');
   const [txnError, setTxnError] = useState('');
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
+  const [copiedUpi, setCopiedUpi] = useState(false);
 
   // Delivery charge calculation
   const defaultFeasibility = {
@@ -104,6 +110,34 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
   const subtotal = getCartTotal();
   const deliveryCharge = subtotal >= (deliverySettings.threshold || 500) ? 0 : (deliverySettings.chargeBelow || 50);
   const total = subtotal + deliveryCharge;
+
+  const upiId = '9893249212@mbk';
+  const payeeName = 'Vishwakarma Atta Chakki';
+  const upiPayUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${total}&cu=INR&tn=${encodeURIComponent(`Vishwakarma Atta Order Rs.${total}`)}`;
+
+  useEffect(() => {
+    if (total > 0) {
+      QRCode.toDataURL(upiPayUrl, {
+        width: 320,
+        margin: 2,
+        color: {
+          dark: '#062e1e',
+          light: '#ffffff',
+        },
+        errorCorrectionLevel: 'M',
+      })
+        .then((url) => setQrCodeUrl(url))
+        .catch((err) => console.error('Failed to generate UPI QR:', err));
+    }
+  }, [total, upiPayUrl]);
+
+  const handleCopyUpi = () => {
+    try {
+      navigator.clipboard.writeText(upiId);
+      setCopiedUpi(true);
+      setTimeout(() => setCopiedUpi(false), 2000);
+    } catch {}
+  };
 
   // Sync with customerProfile when loaded
   useEffect(() => {
@@ -796,15 +830,87 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
             </div>
 
             {paymentChoice === 'online' && (
-              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 text-center space-y-3">
-                <QrCode size={56} className="mx-auto text-emerald-950" />
-                <p className="font-black text-slate-900 text-sm">
-                  {language === 'hi' ? `₹${total} भुगतान के लिए क्यूआर कोड स्कैन करें` : `Scan QR Code to Pay ₹${total}`}
-                </p>
-                <p className="text-xs text-slate-600 font-mono bg-white inline-block px-3 py-1 rounded-lg border border-slate-200 select-all font-bold">
-                  UPI ID: 9893249212@mbk
-                </p>
-                <div className="max-w-xs mx-auto text-left pt-2">
+              <div className="bg-gradient-to-b from-slate-50 to-white p-4 sm:p-5 rounded-2xl border-2 border-emerald-800/20 text-center space-y-3.5 shadow-2xs">
+                
+                {/* Header Badge */}
+                <div className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-950 px-3 py-1 rounded-full text-xs font-black">
+                  <QrCode size={14} className="text-emerald-800" />
+                  <span>{language === 'hi' ? 'UPI क्यूआर कोड स्कैन करके भुगतान करें' : 'Scan QR Code with Any UPI App'}</span>
+                </div>
+
+                {/* Amount to Pay */}
+                <div>
+                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
+                    {language === 'hi' ? 'भुगतान राशि' : 'Amount to Pay'}
+                  </p>
+                  <p className="text-2xl sm:text-3xl font-black text-emerald-950 tracking-tight">
+                    ₹{total}
+                  </p>
+                </div>
+
+                {/* Scannable Real QR Code */}
+                <div className="relative inline-block mx-auto bg-white p-3 rounded-2xl border-2 border-emerald-700/20 shadow-md">
+                  {qrCodeUrl ? (
+                    <img 
+                      src={qrCodeUrl} 
+                      alt={`UPI QR Code to Pay ₹${total} to ${upiId}`}
+                      className="w-48 h-48 sm:w-56 sm:h-56 mx-auto rounded-xl object-contain block"
+                    />
+                  ) : (
+                    <div className="w-48 h-48 sm:w-56 sm:h-56 flex flex-col items-center justify-center text-slate-400 gap-2">
+                      <Loader2 size={28} className="animate-spin text-emerald-700" />
+                      <span className="text-xs font-bold">Generating QR Code...</span>
+                    </div>
+                  )}
+
+                  {/* Centered Small Brand Badge */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded-lg border border-emerald-700/30 shadow-xs pointer-events-none">
+                    <span className="text-[10px] font-black text-emerald-950">🌾 VISHWAKARMA</span>
+                  </div>
+                </div>
+
+                {/* Direct Tap-to-Pay button on Mobile Phone */}
+                <div>
+                  <a
+                    href={upiPayUrl}
+                    className="inline-flex items-center justify-center gap-2 bg-emerald-900 hover:bg-emerald-950 active:scale-95 text-amber-300 px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-sm transition touch-manipulation w-full sm:w-auto"
+                  >
+                    <Smartphone size={16} />
+                    <span>{language === 'hi' ? 'सीधे UPI ऐप से भुगतान करें' : 'Pay Directly via UPI App'}</span>
+                  </a>
+                  <p className="text-[10.5px] text-slate-500 mt-1">
+                    {language === 'hi' ? 'Google Pay, PhonePe, Paytm या BHIM से स्कैन या पे करें' : 'Compatible with GPay, PhonePe, Paytm, BHIM & all UPI apps'}
+                  </p>
+                </div>
+
+                {/* UPI ID with 1-click Copy */}
+                <div className="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 flex flex-wrap items-center justify-center gap-2 max-w-sm mx-auto">
+                  <span className="text-xs text-slate-600 font-bold">UPI ID:</span>
+                  <span className="font-mono text-xs font-black text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-300 select-all">
+                    {upiId}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCopyUpi}
+                    className="inline-flex items-center gap-1 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-900 border border-slate-300 px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer active:scale-95 shadow-2xs"
+                    title="Copy UPI ID"
+                  >
+                    {copiedUpi ? (
+                      <>
+                        <Check size={13} className="text-emerald-700" />
+                        <span className="text-emerald-700 font-black">{language === 'hi' ? 'कॉपी हो गया' : 'Copied!'}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={13} />
+                        <span>{language === 'hi' ? 'कॉपी करें' : 'Copy'}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Transaction ID / UTR Input */}
+                <div className="max-w-xs mx-auto text-left pt-2 border-t border-slate-200">
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     {language === 'hi' ? 'ट्रांजेक्शन आईडी / UTR *' : 'Transaction ID / UTR *'}
                   </label>
@@ -812,11 +918,17 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
                     type="text" 
                     value={txnId} 
                     onChange={(e) => { setTxnId(e.target.value); setTxnError(''); }}
-                    className="w-full border border-slate-300 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-emerald-700 font-semibold"
+                    className="w-full border border-slate-300 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-emerald-700 font-semibold bg-white"
                     placeholder="e.g. 123456789012"
                   />
                   {txnError && <p className="text-xs text-red-600 mt-1 font-bold">{txnError}</p>}
+                  <p className="text-[10.5px] text-slate-500 mt-1 leading-tight">
+                    {language === 'hi'
+                      ? 'भुगतान पूरा होने के बाद 12-अंकों का UTR / Transaction ID यहाँ डालें।'
+                      : 'Enter the 12-digit UTR or Transaction ID after completing payment.'}
+                  </p>
                 </div>
+
               </div>
             )}
 
