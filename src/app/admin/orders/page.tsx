@@ -221,7 +221,7 @@ export default function OrdersPage() {
         </div>
 
         {/* Status Filter Tabs (All, New, Confirmed, Preparing, Out for Delivery, Delivered, Cancelled) */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 lg:pb-0 scrollbar-none -mx-1 px-1 sm:mx-0 sm:px-0">
           {filterTabs.map((tab) => {
             const isSelected = statusFilter === tab.id;
             return (
@@ -285,34 +285,46 @@ export default function OrdersPage() {
               }`}
             >
               {/* 1. Header Bar: Order ID, Status, Speed, Date */}
-              <div className="flex flex-wrap items-center justify-between border-b border-gray-100 px-3.5 sm:px-4 py-2 sm:py-2.5 gap-2 bg-gray-50/60 rounded-t-2xl">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 px-3.5 sm:px-4 py-2.5 gap-2 bg-gray-50/70 rounded-t-2xl">
                 
-                <div className="flex flex-wrap items-center gap-2 min-w-0">
-                  <span className="font-mono font-black text-gray-900 text-xs sm:text-sm tracking-tight">{order.id}</span>
-                  
-                  {isNewOrder && (
-                    <span className="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse flex items-center gap-1 shrink-0 shadow-2xs">
-                      <Bell size={10} className="fill-white" /> NEW
-                    </span>
-                  )}
+                {/* Mobile Top Row: Order ID + Date */}
+                <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-2.5 w-full sm:w-auto">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-black text-gray-900 text-xs sm:text-sm tracking-tight">{order.id}</span>
+                    
+                    {isNewOrder && (
+                      <span className="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse flex items-center gap-1 shrink-0 shadow-2xs">
+                        <Bell size={10} className="fill-white" /> NEW
+                      </span>
+                    )}
+                  </div>
 
+                  {/* Date on mobile right corner */}
+                  <div className="text-[11px] sm:hidden text-gray-500 font-semibold flex items-center gap-1 shrink-0">
+                    <span>📅</span> {formattedDate}, {formattedTime}
+                  </div>
+                </div>
+
+                {/* Badges Row: Status + Speed & ETA (Full Text, Never Truncated) */}
+                <div className="flex flex-wrap items-center gap-2">
                   <span className={`text-[10.5px] font-black px-2.5 py-0.5 rounded-lg border shrink-0 ${getStatusBadge(order.status)}`}>
                     {canonical === 'Pending' ? 'Preparing' : canonical === 'Delivered' ? 'Delivered' : canonical}
                   </span>
 
-                  {/* Speed & ETA Pill */}
-                  <span className={`inline-flex items-center gap-1 text-[10.5px] font-bold px-2 py-0.5 rounded-lg border ${
+                  {/* Speed & ETA Pill - Fully Visible */}
+                  <span className={`inline-flex items-center gap-1 text-[10.5px] font-bold px-2.5 py-0.5 rounded-lg border shrink-0 ${
                     isExpress 
                       ? 'bg-amber-100 text-amber-950 border-amber-300' 
                       : 'bg-blue-50 text-blue-900 border-blue-200'
                   }`}>
-                    {isExpress ? <Zap size={11} className="text-amber-700" /> : <Clock size={11} className="text-blue-700" />}
-                    <span className="truncate max-w-[130px] sm:max-w-none">{currentEta}</span>
+                    {isExpress ? <Zap size={11} className="text-amber-700 shrink-0" /> : <Clock size={11} className="text-blue-700 shrink-0" />}
+                    <span>{currentEta}</span>
                   </span>
-                </div>
 
-                <div className="text-xs text-gray-500 font-semibold shrink-0">
-                  📅 {formattedDate}, {formattedTime}
+                  {/* Date on desktop right corner */}
+                  <div className="hidden sm:flex text-xs text-gray-500 font-semibold items-center gap-1 ml-auto shrink-0">
+                    <span>📅</span> {formattedDate}, {formattedTime}
+                  </div>
                 </div>
 
               </div>
@@ -335,7 +347,7 @@ export default function OrdersPage() {
                     {safePhone && (
                       <a 
                         href={`tel:${safePhone}`} 
-                        className="bg-emerald-50 hover:bg-emerald-100 text-emerald-950 text-[10px] font-bold px-2 py-0.5 rounded-md border border-emerald-300 transition flex items-center gap-0.5"
+                        className="bg-emerald-50 hover:bg-emerald-100 text-emerald-950 text-[10px] font-bold px-2 py-0.5 rounded-md border border-emerald-300 transition flex items-center gap-0.5 active:scale-95"
                         title="Call customer"
                       >
                         <Phone size={10} /> Call
@@ -346,7 +358,7 @@ export default function OrdersPage() {
                         href={`https://wa.me/${phoneClean.length === 10 ? `91${phoneClean}` : phoneClean}`} 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className="bg-green-50 hover:bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-md border border-green-300 transition flex items-center gap-0.5"
+                        className="bg-green-50 hover:bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-md border border-green-300 transition flex items-center gap-0.5 active:scale-95"
                         title="WhatsApp customer"
                       >
                         <MessageCircle size={10} /> WA
@@ -366,7 +378,7 @@ export default function OrdersPage() {
                     )}
                   </div>
 
-                  <p className="text-[11px] text-gray-800 font-medium leading-snug line-clamp-2">
+                  <p className="text-[11px] text-gray-800 font-medium leading-snug break-words">
                     {order.customerInfo?.address || 'N/A'}
                   </p>
 
@@ -381,20 +393,20 @@ export default function OrdersPage() {
                 </div>
 
                 {/* Col 3: Items & Payment Breakdown */}
-                <div className="space-y-1 bg-gray-50/90 p-2.5 rounded-xl border border-gray-100 min-w-0">
+                <div className="space-y-1.5 bg-gray-50/90 p-2.5 rounded-xl border border-gray-100 min-w-0">
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Items & Payment</p>
                   
-                  <div className="space-y-0.5 text-[11px]">
-                    <div className="truncate text-gray-800 font-medium">
+                  <div className="space-y-1 text-[11px]">
+                    <div className="text-gray-800 font-medium space-y-0.5">
                       {order.items?.map((item, i) => (
-                        <span key={i}>
-                          {i > 0 && ', '}
-                          {item.quantity}× {item.product?.name || 'Atta'}
-                        </span>
+                        <div key={i} className="flex items-baseline justify-between gap-1 leading-snug">
+                          <span className="break-words">{item.quantity}× {item.product?.name || 'Atta'}</span>
+                          {item.product?.weight && <span className="text-[10px] text-gray-500 font-normal shrink-0">({item.product.weight})</span>}
+                        </div>
                       ))}
                     </div>
                     
-                    <div className="flex items-center justify-between pt-1 border-t border-gray-200">
+                    <div className="flex items-center justify-between pt-1.5 border-t border-gray-200">
                       <span className="font-black text-sm text-emerald-950">₹{order.total}</span>
                       <span className={`text-[10px] font-black px-2 py-0.5 rounded-md border ${
                         order.advancePaid >= order.total 
@@ -416,16 +428,16 @@ export default function OrdersPage() {
               </div>
 
               {/* 3. Bottom Toolbar: 1-Click Order Stage Progression & Status Selector */}
-              <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 sm:px-4 py-2 border-t border-gray-100 bg-gray-50/60 rounded-b-2xl">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 px-3.5 sm:px-4 py-2.5 border-t border-gray-100 bg-gray-50/70 rounded-b-2xl">
                 
                 {/* One-Click Sequential Action Progression */}
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                   {canonical === 'New' && (
                     <button
                       onClick={() => updateOrderStatus(order.id, 'Order Confirmed')}
-                      className="bg-[#062e1e] hover:bg-[#0b482d] text-white font-black text-xs px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                      className="flex-1 sm:flex-none justify-center bg-[#062e1e] hover:bg-[#0b482d] text-white font-black text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
                     >
-                      <CheckCircle2 size={13} className="text-amber-400" />
+                      <CheckCircle2 size={14} className="text-amber-400" />
                       <span>1. Accept & Confirm Order</span>
                     </button>
                   )}
@@ -433,9 +445,9 @@ export default function OrdersPage() {
                   {canonical === 'Confirmed' && (
                     <button
                       onClick={() => updateOrderStatus(order.id, 'Preparing Your Order')}
-                      className="bg-purple-800 hover:bg-purple-900 text-white font-black text-xs px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                      className="flex-1 sm:flex-none justify-center bg-purple-800 hover:bg-purple-900 text-white font-black text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
                     >
-                      <ChefHat size={13} />
+                      <ChefHat size={14} />
                       <span>2. Start Preparing / Milling</span>
                     </button>
                   )}
@@ -443,9 +455,9 @@ export default function OrdersPage() {
                   {canonical === 'Pending' && (
                     <button
                       onClick={() => updateOrderStatus(order.id, 'Out for Delivery')}
-                      className="bg-blue-700 hover:bg-blue-800 text-white font-black text-xs px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                      className="flex-1 sm:flex-none justify-center bg-blue-700 hover:bg-blue-800 text-white font-black text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
                     >
-                      <Truck size={13} />
+                      <Truck size={14} />
                       <span>3. Dispatch (Out for Delivery)</span>
                     </button>
                   )}
@@ -453,23 +465,23 @@ export default function OrdersPage() {
                   {canonical === 'Out for Delivery' && (
                     <button
                       onClick={() => updateOrderStatus(order.id, 'Delivered')}
-                      className="bg-emerald-800 hover:bg-emerald-900 text-white font-black text-xs px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                      className="flex-1 sm:flex-none justify-center bg-emerald-800 hover:bg-emerald-900 text-white font-black text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
                     >
-                      <CheckCircle2 size={13} />
+                      <CheckCircle2 size={14} />
                       <span>4. Mark as Delivered</span>
                     </button>
                   )}
 
                   {canonical === 'Delivered' && (
-                    <span className="text-emerald-900 font-bold text-xs flex items-center gap-1.5 bg-emerald-100 px-3 py-1 rounded-xl border border-emerald-300">
-                      <CheckCircle2 size={13} className="text-emerald-700" />
+                    <span className="text-emerald-900 font-bold text-xs flex items-center gap-1.5 bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-300">
+                      <CheckCircle2 size={14} className="text-emerald-700" />
                       <span>Completed & Delivered</span>
                     </span>
                   )}
 
                   {canonical === 'Cancelled' && (
-                    <span className="text-red-900 font-bold text-xs flex items-center gap-1.5 bg-red-100 px-3 py-1 rounded-xl border border-red-300">
-                      <XCircle size={13} className="text-red-700" />
+                    <span className="text-red-900 font-bold text-xs flex items-center gap-1.5 bg-red-100 px-3 py-1.5 rounded-xl border border-red-300">
+                      <XCircle size={14} className="text-red-700" />
                       <span>Cancelled Order</span>
                     </span>
                   )}
@@ -481,21 +493,21 @@ export default function OrdersPage() {
                           updateOrderStatus(order.id, 'Cancelled');
                         }
                       }}
-                      className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 cursor-pointer"
+                      className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-xs px-2.5 py-2 rounded-xl transition flex items-center justify-center gap-1 cursor-pointer shrink-0 active:scale-95"
                     >
-                      <XCircle size={12} /> Cancel
+                      <XCircle size={13} /> Cancel
                     </button>
                   )}
                 </div>
 
-                {/* Status Selector Dropdown & Actions */}
-                <div className="flex items-center gap-2 ml-auto">
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] font-bold text-gray-500 uppercase">Status:</span>
+                {/* Status Selector Dropdown & Utility Actions */}
+                <div className="flex items-center justify-between sm:justify-end gap-2 pt-1.5 sm:pt-0 border-t sm:border-t-0 border-gray-200/60 w-full sm:w-auto">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] font-bold text-gray-500 uppercase tracking-tight">Status:</span>
                     <select
                       value={order.status}
                       onChange={(e) => updateOrderStatus(order.id, e.target.value as Order['status'])}
-                      className={`text-xs font-bold border rounded-xl px-2.5 py-1 outline-none cursor-pointer ${getStatusBadge(order.status)}`}
+                      className={`text-xs font-bold border rounded-xl px-2 py-1 outline-none cursor-pointer ${getStatusBadge(order.status)}`}
                     >
                       <option value="Order Placed">New (Placed)</option>
                       <option value="Order Confirmed">Confirmed</option>
@@ -506,25 +518,27 @@ export default function OrdersPage() {
                     </select>
                   </div>
 
-                  <button
-                    onClick={() => setSelectedOrder(order)}
-                    className="p-1.5 text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded-xl border border-gray-200 transition cursor-pointer"
-                    title="View Full Details"
-                  >
-                    <Eye size={15} />
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setSelectedOrder(order)}
+                      className="p-1.5 text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded-xl border border-gray-200 transition cursor-pointer active:scale-95"
+                      title="View Full Details"
+                    >
+                      <Eye size={15} />
+                    </button>
 
-                  <button
-                    onClick={() => {
-                      if (confirm(`Delete order ${order.id}?`)) {
-                        deleteOrder(order.id);
-                      }
-                    }}
-                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl border border-gray-200 transition cursor-pointer"
-                    title="Delete Order"
-                  >
-                    <Trash2 size={15} />
-                  </button>
+                    <button
+                      onClick={() => {
+                        if (confirm(`Delete order ${order.id}?`)) {
+                          deleteOrder(order.id);
+                        }
+                      }}
+                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl border border-gray-200 transition cursor-pointer active:scale-95"
+                      title="Delete Order"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
                 </div>
               </div>
 

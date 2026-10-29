@@ -1,1 +1,59 @@
-[]
+[
+  {
+    "id": "ORD-5775723868",
+    "date": "2026-10-29T15:26:17.572Z",
+    "status": "Order Confirmed",
+    "total": 560,
+    "advancePaid": 0,
+    "remainingAmount": 560,
+    "deliveryType": "standard",
+    "estimatedDelivery": "Tomorrow Morning by 11:30 AM",
+    "paymentMethod": "cod",
+    "items": [
+      {
+        "product": {
+          "id": "p1",
+          "name": "Gehu ka Atta (Whole Wheat Flour)",
+          "nameHi": "गेहूं का आटा (होल व्हीट)",
+          "weight": "5 KG",
+          "price": 280,
+          "originalPrice": 330,
+          "discount": 15,
+          "rating": 4.8,
+          "reviews": 1245,
+          "image": "/images/wheat_flour.jpg",
+          "description": "Freshly milled from premium MP Sharbati wheat. Our chakki fresh gehu atta makes the softest rotis.",
+          "descriptionHi": "प्रीमियम एमपी शरबती गेहूं से ताज़ा पीसा गया। हमारा चक्की फ्रेश आटा सबसे नरम रोटियां बनाता है।",
+          "benefits": [
+            "High in fiber",
+            "No added preservatives",
+            "Milled upon order for freshness"
+          ],
+          "ingredients": [
+            "100% Sharbati Whole Wheat"
+          ],
+          "category": "Gehu Atta",
+          "inStock": true
+        },
+        "quantity": 2
+      }
+    ],
+    "customerInfo": {
+      "name": "Test Customer Raj",
+      "phone": "9876543210",
+      "email": "",
+      "address": "Flat 102, Sharbati Greens, Sector 21, Gurugram, Dewas, Madhya Pradesh, 122001, India",
+      "locality": "",
+      "city": "Gurugram",
+      "district": "Dewas",
+      "state": "Madhya Pradesh",
+      "pincode": "122001",
+      "country": "India",
+      "coordinates": {
+        "lat": 22.974466679070655,
+        "lng": 76.35954900596344
+      },
+      "liveLocationUrl": "https://www.google.com/maps?q=22.974466679070655,76.35954900596344"
+    }
+  }
+]

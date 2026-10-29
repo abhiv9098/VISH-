@@ -104,7 +104,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         />
       )}
 
-      {/* Sidebar - Matching Reference Image Ref3 with Forest Green Background */}
+      {/* Sidebar - Forest Green Background */}
       <aside 
         className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#062e1e] text-white flex flex-col transform transition-transform duration-300 ease-in-out shrink-0 ${
           sidebarOpen 
@@ -187,9 +187,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col overflow-hidden w-full max-w-full min-w-0">
-        {/* Top Header / App Bar - Inspired by Reference Image Ref2 */}
+        {/* Top Header / App Bar */}
         <header className="h-14 sm:h-16 bg-white border-b border-gray-200/80 flex items-center justify-between px-3.5 sm:px-6 shrink-0 shadow-2xs z-10">
           <div className="flex items-center gap-3 min-w-0">
+            {/* Mobile Hamburger Menu Button */}
             <button 
               className="md:hidden text-gray-700 hover:text-gray-900 p-2 -ml-1 rounded-xl hover:bg-gray-100 active:bg-gray-200 transition touch-manipulation cursor-pointer" 
               onClick={() => setSidebarOpen(true)}
@@ -215,7 +216,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </Link>
             )}
 
-            {/* Admin Avatar Circle - Mint Green with 'A' as in Reference Ref2 */}
+            {/* Admin Avatar Circle */}
             <div 
               className="w-9 h-9 rounded-full bg-[#d1fae5] text-[#065f46] font-bold flex items-center justify-center text-sm shadow-2xs border border-emerald-200 shrink-0 select-none"
               title="Vishwakarma Admin"
@@ -225,43 +226,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </header>
 
-        {/* Scrollable Main Viewport (Zero horizontal overflow) */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 md:p-6 pb-20 md:pb-6 w-full max-w-full min-w-0 bg-[#f8fafc]">
+        {/* Scrollable Main Viewport */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 md:p-6 pb-6 w-full max-w-full min-w-0 bg-[#f8fafc]">
           {children}
         </div>
-
-        {/* Admin Mobile Bottom Navigation Bar (Visible on mobile screens) */}
-        <nav 
-          aria-label="Admin Mobile Navigation" 
-          className="md:hidden fixed bottom-0 left-0 right-0 bg-[#062e1e] border-t border-[#0b482d] z-30 px-1 py-1 shadow-lg pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))]"
-        >
-          <div className="flex justify-around items-center max-w-lg mx-auto">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition-all relative touch-manipulation ${
-                    item.active
-                      ? 'text-amber-400 font-black bg-[#0b482d]'
-                      : 'text-emerald-200/80 hover:text-white font-medium'
-                  }`}
-                >
-                  <div className="relative">
-                    <Icon size={19} className={item.active ? 'stroke-[2.5]' : 'stroke-[1.8]'} />
-                    {item.badge && (
-                      <span className="absolute -top-1 -right-2.5 bg-[#f59e0b] text-[#062e1e] font-black text-[9px] min-w-3.5 h-3.5 px-1 rounded-full flex items-center justify-center shadow-xs">
-                        {newOrdersCount}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[10px] mt-0.5 tracking-tight leading-none">{item.name}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
       </main>
     </div>
   );

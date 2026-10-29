@@ -341,25 +341,32 @@ export default function AdminDashboard() {
                   className="bg-white p-3.5 sm:p-4 rounded-2xl border-2 border-amber-300 ring-1 ring-amber-400/30 shadow-xs hover:shadow-md transition-all space-y-3 bg-gradient-to-b from-amber-50/25 to-white"
                 >
                   {/* Top Bar: Order ID, Pulse NEW badge, Speed pill, Date */}
-                  <div className="flex flex-wrap items-center justify-between border-b border-amber-100/80 pb-2 gap-2">
-                    <div className="flex flex-wrap items-center gap-2 min-w-0">
-                      <span className="font-mono font-black text-gray-900 text-xs sm:text-sm tracking-tight">{order.id}</span>
-                      <span className="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse flex items-center gap-1 shadow-2xs">
-                        <Bell size={10} className="fill-white" /> NEW
-                      </span>
-
-                      {/* Speed Badge */}
-                      <span className={`inline-flex items-center gap-1 text-[10.5px] font-bold px-2 py-0.5 rounded-lg border ${
-                        isExpress ? 'bg-amber-100 text-amber-950 border-amber-300' : 'bg-blue-50 text-blue-900 border-blue-200'
-                      }`}>
-                        {isExpress ? <Zap size={11} className="text-amber-700" /> : <Clock size={11} className="text-blue-700" />}
-                        <span className="truncate max-w-[120px] sm:max-w-none">{currentEta}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-amber-100/80 pb-2.5 gap-2">
+                    <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-black text-gray-900 text-xs sm:text-sm tracking-tight">{order.id}</span>
+                        <span className="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse flex items-center gap-1 shadow-2xs">
+                          <Bell size={10} className="fill-white" /> NEW
+                        </span>
+                      </div>
+                      <span className="text-[11px] sm:hidden text-gray-500 font-semibold shrink-0">
+                        📅 {orderDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}, {orderDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
 
-                    <span className="text-[11px] text-gray-500 font-semibold shrink-0">
-                      📅 {orderDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}, {orderDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {/* Speed Badge */}
+                      <span className={`inline-flex items-center gap-1 text-[10.5px] font-bold px-2 py-0.5 rounded-lg border shrink-0 ${
+                        isExpress ? 'bg-amber-100 text-amber-950 border-amber-300' : 'bg-blue-50 text-blue-900 border-blue-200'
+                      }`}>
+                        {isExpress ? <Zap size={11} className="text-amber-700 shrink-0" /> : <Clock size={11} className="text-blue-700 shrink-0" />}
+                        <span>{currentEta}</span>
+                      </span>
+
+                      <span className="hidden sm:inline text-[11px] text-gray-500 font-semibold shrink-0 ml-auto">
+                        📅 {orderDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}, {orderDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
                   </div>
 
                   {/* 3-Column Info: Customer, Delivery Address, Items & Total */}
