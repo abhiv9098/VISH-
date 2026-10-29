@@ -796,6 +796,31 @@ export default function ProfilePage() {
         )}
       </div>
 
+      {/* 6. ADMIN PANEL SHORTCUT */}
+      <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-2xs border border-slate-200 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-center shrink-0">
+            <ShieldCheck size={18} className="text-teal-700" />
+          </div>
+          <div>
+            <h3 className="text-xs font-black uppercase tracking-wider text-slate-900">
+              {language === 'hi' ? 'एडमिन पैनल' : 'Admin Panel'}
+            </h3>
+            <p className="text-[11px] text-slate-500">
+              {language === 'hi' ? 'ऑर्डर व स्टोर प्रबंधन' : 'Manage orders & store settings'}
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href="/admin"
+          className="bg-teal-900 hover:bg-teal-950 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow-xs flex items-center gap-1 active:scale-95"
+        >
+          <span>{language === 'hi' ? 'खोलें' : 'Open'}</span>
+          <ChevronRight size={14} />
+        </Link>
+      </div>
+
       {/* 5. APP SETTINGS CARD (Small, Working Hindi/English Toggle) */}
       <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-2xs border border-slate-200 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">

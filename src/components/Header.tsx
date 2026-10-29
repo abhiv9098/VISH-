@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Home, ShoppingBag, User } from 'lucide-react';
+import { Home, ShoppingBag, User, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useOrders } from '@/context/OrderContext';
 
@@ -92,7 +92,29 @@ export default function Header() {
               <User size={15} />
               <span>{t('profile') || 'Profile'}</span>
             </Link>
+
+            {/* Quick Link to Admin Panel on Desktop */}
+            <Link 
+              href="/admin" 
+              className="ml-2 px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 bg-teal-900/90 hover:bg-teal-400 hover:text-teal-950 text-teal-100 border border-teal-600/50 shadow-xs cursor-pointer group"
+              title="Open Admin Panel"
+            >
+              <ShieldCheck size={14} className="text-teal-300 group-hover:text-teal-950 transition-colors" />
+              <span>{language === 'hi' ? 'एडमिन' : 'Admin'}</span>
+            </Link>
           </nav>
+
+          {/* Right: Mobile Admin Button (Always visible on mobile) */}
+          <div className="flex md:hidden items-center">
+            <Link
+              href="/admin"
+              className="flex items-center gap-1.5 bg-teal-900/90 text-teal-100 border border-teal-700/70 px-2.5 py-1.5 rounded-xl text-xs font-bold hover:text-white active:bg-teal-800 transition cursor-pointer touch-manipulation active:scale-95 shadow-xs"
+              title="Admin Panel"
+            >
+              <ShieldCheck size={15} className="text-teal-300" />
+              <span className="text-[11px] font-bold">Admin</span>
+            </Link>
+          </div>
 
         </div>
       </div>
