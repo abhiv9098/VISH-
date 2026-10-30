@@ -1,9 +1,17 @@
 import { test, expect } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
+
+const dataFilePath = path.join(process.cwd(), 'orders_data.json');
 
 test.describe('E2E Customer Buy Flow & Admin Panel Synchronization', () => {
   test.describe.configure({ mode: 'serial' });
 
   let placedOrderId = '';
+
+  test.afterAll(() => {
+    fs.writeFileSync(dataFilePath, '[]', 'utf8');
+  });
 
   test.beforeEach(async ({ context }) => {
     await context.addInitScript(() => {

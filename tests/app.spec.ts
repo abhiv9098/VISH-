@@ -1,6 +1,19 @@
 import { test, expect } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
+
+const dataFilePath = path.join(process.cwd(), 'orders_data.json');
+const profileFilePath = path.join(process.cwd(), 'customer_profile.json');
 
 test.describe('Vishwakarma Atta Chakki E2E Tests', () => {
+  let backupProfile = '';
+
+  test.beforeAll(() => {
+    if (fs.existsSync(profileFilePath)) {
+      backupProfile = fs.readFileSync(profileFilePath, 'utf8');
+    }
+  });
+
   test.beforeEach(async ({ context }) => {
     await context.addInitScript(() => {
       localStorage.setItem('vishwakarma_admin_session', JSON.stringify({
@@ -10,6 +23,13 @@ test.describe('Vishwakarma Atta Chakki E2E Tests', () => {
     });
   });
   test.describe.configure({ mode: 'serial' });
+
+  test.afterAll(() => {
+    fs.writeFileSync(dataFilePath, '[]', 'utf8');
+    if (backupProfile) {
+      fs.writeFileSync(profileFilePath, backupProfile, 'utf8');
+    }
+  });
   
   test('1. Home Page UI/UX Redesign: Should display branding, hero banner, categories, and 5 KG packs', async ({ page }) => {
     await page.goto('/');
