@@ -92,8 +92,6 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
 
   const [paymentChoice, setPaymentChoice] = useState<'online' | 'cod'>('online');
   const [paymentSplit, setPaymentSplit] = useState<'full' | 'half'>('full');
-  const [txnId, setTxnId] = useState('');
-  const [txnError, setTxnError] = useState('');
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [copiedUpi, setCopiedUpi] = useState(false);
 
@@ -239,10 +237,6 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
   const placeOrder = async () => {
     if (isSubmittingRef.current || isSubmitting) return;
 
-    if (paymentChoice === 'online' && txnId.trim().length > 0 && txnId.trim().length < 6) {
-      setTxnError('Please enter a valid Transaction / UTR ID.');
-      return;
-    }
 
     isSubmittingRef.current = true;
     setIsSubmitting(true);
@@ -287,7 +281,7 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
         deliveryType: chosenSpeed,
         estimatedDelivery: chosenEta,
         paymentMethod: paymentChoice,
-        transactionId: paymentChoice === 'online' ? (txnId || undefined) : undefined,
+        transactionId: undefined,
         items: cart,
         customerInfo: {
           name: customerInfo.name,
@@ -985,26 +979,6 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
                       </>
                     )}
                   </button>
-                </div>
-
-                {/* Transaction ID / UTR Input */}
-                <div className="max-w-xs mx-auto text-left pt-2 border-t border-slate-200">
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    {language === 'hi' ? 'ट्रांजेक्शन आईडी / UTR (वैकल्पिक)' : 'Transaction ID / UTR (Optional)'}
-                  </label>
-                  <input 
-                    type="text" 
-                    value={txnId} 
-                    onChange={(e) => { setTxnId(e.target.value); setTxnError(''); }}
-                    className="w-full border border-slate-300 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-emerald-700 font-semibold bg-white"
-                    placeholder="e.g. 123456789012"
-                  />
-                  {txnError && <p className="text-xs text-red-600 mt-1 font-bold">{txnError}</p>}
-                  <p className="text-[10.5px] text-slate-500 mt-1 leading-tight">
-                    {language === 'hi'
-                      ? 'भुगतान पूरा होने के बाद 12-अंकों का UTR / Transaction ID यहाँ डालें।'
-                      : 'Enter the 12-digit UTR or Transaction ID after completing payment.'}
-                  </p>
                 </div>
 
               </div>

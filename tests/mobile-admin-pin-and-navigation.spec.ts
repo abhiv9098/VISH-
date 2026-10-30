@@ -52,6 +52,13 @@ test.describe('Mobile Admin Panel with 6-Digit PIN & Navigation', () => {
     await page.locator('aside nav a[href="/admin/orders"]').first().click();
     await expect(page.locator('h1:has-text("Orders")')).toBeVisible({ timeout: 8000 });
 
+    // If no orders, create test order
+    const createTestOrderBtn = page.locator('button:has-text("Create Test Order")').first();
+    if (await createTestOrderBtn.isVisible()) {
+      await createTestOrderBtn.click();
+      await page.waitForTimeout(1000);
+    }
+
     // Verify Call, WhatsApp, and GPS navigation buttons exist on mobile orders
     const callBtn = page.locator('a[href^="tel:"]').first();
     await expect(callBtn).toBeVisible();
