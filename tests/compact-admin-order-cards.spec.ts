@@ -82,12 +82,18 @@ test.describe('Compact Admin Order Cards Test Suite', () => {
     }
   });
 
-  test.beforeEach(() => {
+  test.beforeEach(async ({ context }) => {
     resetOrders();
+    await context.addInitScript(() => {
+      localStorage.setItem('vishwakarma_admin_session', JSON.stringify({
+        token: 'test-session',
+        expiresAt: Date.now() + 86400000 * 30
+      }));
+    });
   });
 
   test.afterAll(() => {
-    fs.writeFileSync(dataFilePath, originalOrders, 'utf8');
+    fs.writeFileSync(dataFilePath, '[]', 'utf8');
   });
 
   test('Verify compact order cards on desktop viewport', async ({ page }) => {

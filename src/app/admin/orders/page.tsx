@@ -14,7 +14,6 @@ import {
   Truck,
   ChefHat,
   MessageCircle,
-  PlusCircle,
   ExternalLink,
   Eye,
   X,
@@ -240,45 +239,10 @@ export default function OrdersPage() {
     return order.deliveryType === 'express' ? feasibility.estimatedDeliveryTime : feasibility.standardDeliveryTime;
   };
 
-  const createQuickTestOrder = () => {
-    const testId = `ORD-${Math.floor(1000000000 + Math.random() * 9000000000)}`;
-    const randomLat = 22.9745 + (Math.random() - 0.5) * 0.05;
-    const randomLng = 76.3595 + (Math.random() - 0.5) * 0.05;
-    
-    addOrder({
-      id: testId,
-      date: new Date().toISOString(),
-      status: 'Order Placed',
-      total: 280,
-      advancePaid: 0,
-      remainingAmount: 280,
-      deliveryType: 'express',
-      estimatedDelivery: 'within 2 hours',
-      paymentMethod: 'cod',
-      items: [{ product: products[0], quantity: 1 }],
-      customerInfo: {
-        name: 'Suresh Patel (Test Customer)',
-        phone: '9893200111',
-        email: 'suresh.patel@example.com',
-        address: 'Station Road, Main Market, Sonkach, Dewas, Madhya Pradesh, 455118',
-        city: 'Sonkach',
-        district: 'Dewas',
-        state: 'Madhya Pradesh',
-        pincode: '455118',
-        country: 'India',
-        coordinates: {
-          lat: parseFloat(randomLat.toFixed(5)),
-          lng: parseFloat(randomLng.toFixed(5))
-        },
-        liveLocationUrl: `https://www.google.com/maps?q=${randomLat.toFixed(5)},${randomLng.toFixed(5)}`
-      }
-    });
-  };
-
   return (
     <div className="space-y-4 max-w-7xl mx-auto pb-12 w-full min-w-0">
 
-      {/* Header Row: Title & Quick Test Order Button */}
+      {/* Header Row: Title & Clear Orders */}
       <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-base sm:text-lg font-bold text-gray-900">
@@ -302,13 +266,6 @@ export default function OrdersPage() {
               <span>Clear All Orders</span>
             </button>
           )}
-          <button
-            onClick={createQuickTestOrder}
-            className="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold text-xs px-3.5 py-2 rounded-xl transition cursor-pointer shadow-2xs"
-          >
-            <PlusCircle size={15} />
-            <span>+ Create Test Order</span>
-          </button>
         </div>
       </div>
 

@@ -1,6 +1,14 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Vishwakarma Atta Chakki E2E Tests', () => {
+  test.beforeEach(async ({ context }) => {
+    await context.addInitScript(() => {
+      localStorage.setItem('vishwakarma_admin_session', JSON.stringify({
+        token: 'test-session',
+        expiresAt: Date.now() + 86400000 * 30
+      }));
+    });
+  });
   test.describe.configure({ mode: 'serial' });
   
   test('1. Home Page UI/UX Redesign: Should display branding, hero banner, categories, and 5 KG packs', async ({ page }) => {
@@ -66,7 +74,7 @@ test.describe('Vishwakarma Atta Chakki E2E Tests', () => {
     if (await codOption.isVisible()) {
       await codOption.check();
     } else {
-      await page.click('text="Cash on Delivery", text="कैश ऑन डिलीवरी"');
+      await page.getByText(/Cash on Delivery|कैश ऑन डिलीवरी/i).first().click();
     }
     await page.click('button:has-text("Confirm & Place Order"), button:has-text("ऑर्डर कन्फ़र्म करें")');
 

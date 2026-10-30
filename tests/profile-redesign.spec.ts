@@ -22,7 +22,7 @@ test.describe('Profile Page Two Small Buttons Redesign & Verification', () => {
 
   test.afterAll(() => {
     fs.writeFileSync(profileFilePath, backupProfile, 'utf8');
-    fs.writeFileSync(ordersFilePath, backupOrders, 'utf8');
+    fs.writeFileSync(ordersFilePath, '[]', 'utf8');
   });
 
   test('Verify two small clean buttons: Personal Details and Delivery Address, edit options, GPS auto-fill, and database persistence', async ({ browser }) => {

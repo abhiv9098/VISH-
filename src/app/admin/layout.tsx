@@ -21,6 +21,7 @@ import {
 import { useState, useEffect, useRef } from 'react';
 import { useOrders } from '@/context/OrderContext';
 import AdminPinScreen from '@/components/AdminPinScreen';
+import AdminBottomNav from '@/components/AdminBottomNav';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -325,11 +326,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </header>
 
-        {/* Scrollable Main Viewport */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 md:p-6 pb-6 w-full max-w-full min-w-0 bg-[#f8fafc]">
+        {/* Scrollable Main Viewport with pb-28 on mobile for bottom navigation bar */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 md:p-6 pb-28 md:pb-6 w-full max-w-full min-w-0 bg-[#f8fafc]">
           {children}
         </div>
       </main>
+
+      {/* Mobile-Friendly Bottom Navigation Bar */}
+      <AdminBottomNav />
     </div>
   );
 }

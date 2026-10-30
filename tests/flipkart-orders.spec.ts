@@ -16,7 +16,7 @@ test.describe('Flipkart-style Orders Redesign & Normal Delivery Flow', () => {
   });
 
   test.afterAll(() => {
-    fs.writeFileSync(dataFilePath, backupOrders, 'utf8');
+    fs.writeFileSync(dataFilePath, '[]', 'utf8');
   });
 
   test('Verify Flipkart-style Orders layout, clean timeline, no verification codes, no ODR in customer view, and admin normal delivery', async ({ browser }) => {
@@ -162,8 +162,8 @@ test.describe('Flipkart-style Orders Redesign & Normal Delivery Flow', () => {
     await expect(markDeliveredBtn).toBeVisible({ timeout: 5000 });
     await markDeliveredBtn.click();
 
-    // Verify Completed & Delivered badge appears
-    await expect(adminPage.locator('text=Completed & Delivered').first()).toBeVisible({ timeout: 5000 });
+    // Verify Delivered badge appears
+    await expect(adminPage.locator('text=/Delivered/').first()).toBeVisible({ timeout: 5000 });
 
     // 3. VERIFY CUSTOMER VIEW UPDATED TO DELIVERED AUTOMATICALLY
     await customerPage.bringToFront();

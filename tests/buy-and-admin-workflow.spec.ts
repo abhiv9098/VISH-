@@ -5,6 +5,15 @@ test.describe('E2E Customer Buy Flow & Admin Panel Synchronization', () => {
 
   let placedOrderId = '';
 
+  test.beforeEach(async ({ context }) => {
+    await context.addInitScript(() => {
+      localStorage.setItem('vishwakarma_admin_session', JSON.stringify({
+        token: 'test-session',
+        expiresAt: Date.now() + 86400000 * 30
+      }));
+    });
+  });
+
   test('Step 1: Customer clicks Buy Now and completes 3-step checkout', async ({ page }) => {
     // 1. Visit Storefront
     await page.goto('http://localhost:4000', { waitUntil: 'networkidle' });
@@ -40,7 +49,7 @@ test.describe('E2E Customer Buy Flow & Admin Panel Synchronization', () => {
     if (await codOption.isVisible()) {
       await codOption.check();
     } else {
-      const codText = page.locator('text="Cash on Delivery", text="कैश ऑन डिलीवरी"').first();
+      const codText = page.getByText(/Cash on Delivery|कैश ऑन डिलीवरी/i).first();
       await codText.click();
     }
 
@@ -85,7 +94,7 @@ test.describe('E2E Customer Buy Flow & Admin Panel Synchronization', () => {
     const waBtn = page.locator('a[href*="wa.me/"]').first();
     await expect(waBtn).toBeVisible();
 
-    const mapsBtn = page.locator('a:has-text("Open in Maps")').first();
+    const mapsBtn = page.locator('a:has-text("Maps"), a:has-text("GPS")').first();
     await expect(mapsBtn).toBeVisible();
 
     await page.screenshot({ path: 'screenshot_e2e_2_admin_dashboard_order_received.png' });

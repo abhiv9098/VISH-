@@ -29,6 +29,7 @@ test.describe('Mobile Admin Panel with 6-Digit PIN & Bottom Nav', () => {
     }
     const errorMsg = page.locator('text=Incorrect PIN');
     await expect(errorMsg).toBeVisible({ timeout: 5000 });
+    await page.waitForTimeout(600);
 
     // 3. Test Correct Default PIN (123456)
     for (const d of ['1', '2', '3', '4', '5', '6']) {
