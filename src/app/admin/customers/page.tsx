@@ -314,31 +314,34 @@ export default function CustomersPage() {
                     {customer.phone && customer.phone !== 'N/A' && (
                       <a 
                         href={`tel:${customer.phone}`}
-                        className="p-2 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 rounded-xl border border-emerald-200 transition"
-                        title="Call Customer"
+                        className="px-2.5 py-1.5 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 rounded-xl border border-emerald-200 transition flex items-center gap-1 text-xs font-bold active:scale-95 touch-manipulation shadow-2xs"
+                        title="Direct Call Customer"
                       >
-                        <Phone size={14} />
+                        <Phone size={13} className="text-emerald-700" />
+                        <span className="hidden sm:inline">Call</span>
                       </a>
                     )}
                     {phoneClean && (
                       <a 
-                        href={`https://wa.me/${phoneClean.length === 10 ? `91${phoneClean}` : phoneClean}`}
+                        href={`https://wa.me/${phoneClean.length === 10 ? `91${phoneClean}` : phoneClean}?text=${encodeURIComponent(`नमस्ते ${customer.name}, विश्वकर्मा आटा चक्की से आपसे संपर्क किया जा रहा है।`)}`}
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="p-2 text-green-700 bg-green-50 hover:bg-green-100 rounded-xl border border-green-200 transition"
+                        className="px-2.5 py-1.5 text-green-900 bg-green-50 hover:bg-green-100 rounded-xl border border-green-200 transition flex items-center gap-1 text-xs font-bold active:scale-95 touch-manipulation shadow-2xs"
                         title="WhatsApp Customer"
                       >
-                        <MessageCircle size={14} />
+                        <MessageCircle size={13} className="text-green-700" />
+                        <span className="hidden sm:inline">WhatsApp</span>
                       </a>
                     )}
                     <a 
-                      href={mapsUrl}
+                      href={customer.coordinates ? `https://www.google.com/maps/dir/?api=1&destination=${customer.coordinates.lat},${customer.coordinates.lng}` : mapsUrl}
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="p-2 text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl border border-blue-200 transition"
-                      title="Open in Google Maps"
+                      className="px-2.5 py-1.5 text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-xl border border-blue-200 transition flex items-center gap-1 text-xs font-bold active:scale-95 touch-manipulation shadow-2xs"
+                      title={customer.coordinates ? 'Navigate via GPS' : 'Open in Google Maps'}
                     >
-                      <Navigation size={14} />
+                      <Navigation size={13} className="text-blue-700" />
+                      <span className="hidden sm:inline">{customer.coordinates ? 'GPS' : 'Maps'}</span>
                     </a>
                     <button 
                       onClick={() => setExpandedCustomer(isExpanded ? null : customer.phone)}

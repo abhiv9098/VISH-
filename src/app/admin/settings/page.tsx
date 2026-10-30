@@ -14,7 +14,11 @@ import {
   CreditCard, 
   Truck, 
   Volume2,
-  RefreshCw
+  RefreshCw,
+  Lock,
+  KeyRound,
+  ShieldCheck,
+  AlertCircle
 } from 'lucide-react';
 import { useOrders } from '@/context/OrderContext';
 
@@ -66,6 +70,27 @@ export default function SettingsPage() {
 
   const [savedSuccess, setSavedSuccess] = useState(false);
 
+  // Security & 6-Digit PIN state
+  const [currentPin, setCurrentPin] = useState('');
+  const [newPin, setNewPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
+  const [pinLoading, setPinLoading] = useState(false);
+  const [pinSuccess, setPinSuccess] = useState<string | null>(null);
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [isDefaultPin, setIsDefaultPin] = useState<boolean>(true);
+
+  useEffect(() => {
+    // Fetch PIN status
+    fetch('/api/admin/auth', { cache: 'no-store' })
+      .then(res => res.json())
+      .then(data => {
+        if (data && typeof data.isDefaultPin === 'boolean') {
+          setIsDefaultPin(data.isDefaultPin);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   useEffect(() => {
     // Sync free delivery threshold from OrderContext if present
     if (deliverySettings && deliverySettings.threshold) {
@@ -106,6 +131,107 @@ export default function SettingsPage() {
     }
   };
 
+  const handleUpdatePin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPinError(null);
+    setPinSuccess(null);
+
+    if (newPin.length !== 6 || !/^\d{6}$/.test(newPin)) {
+      setPinError('New PIN must be exactly 6 digits (numbers only).');
+      return;
+    }
+
+    if (newPin !== confirmPin) {
+      setPinError('New PIN and Confirm PIN do not match.');
+      return;
+    }
+
+    setPinLoading(true);
+    try {
+      const res = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'change_pin',
+          currentPin,
+          newPin,
+          confirmPin
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setPinSuccess('Admin 6-digit PIN updated successfully!');
+        setIsDefaultPin(false);
+        setCurrentPin('');
+        setNewPin('');
+        setConfirmPin('');
+
+        // Update local session
+        if (data.token) {
+          const sessionData = {
+            token: data.token,
+            expiresAt: data.expiresAt,
+            savedAt: Date.now()
+          };
+          localStorage.setItem('vishwakarma_admin_session', JSON.stringify(sessionData));
+        }
+
+        setTimeout(() => setPinSuccess(null), 4000);
+      } else {
+        setPinError(data.error || 'Failed to update PIN. Please verify your current PIN.');
+      }
+    } catch {
+      setPinError('Connection error. Please try again.');
+    } finally {
+      setPinLoading(false);
+    }
+  };
+
+  const handleLockAdmin = () => {
+    if (confirm('Lock admin panel now? You will need your 6-digit PIN to access again.')) {
+      try {
+        localStorage.removeItem('vishwakarma_admin_session');
+      } catch {}
+      window.location.reload();
+    }
+  };
+
+  const handleResetPinToDefault = async () => {
+    if (confirm('Reset admin PIN back to factory default: 123456?')) {
+      setPinLoading(true);
+      try {
+        const res = await fetch('/api/admin/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'reset_pin',
+            confirmText: 'RESET_PIN'
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setPinSuccess('PIN reset to default: 123456');
+          setIsDefaultPin(true);
+          if (data.token) {
+            localStorage.setItem('vishwakarma_admin_session', JSON.stringify({
+              token: data.token,
+              expiresAt: data.expiresAt,
+              savedAt: Date.now()
+            }));
+          }
+          setTimeout(() => setPinSuccess(null), 4000);
+        } else {
+          setPinError(data.error || 'Failed to reset PIN.');
+        }
+      } catch {
+        setPinError('Network error resetting PIN.');
+      } finally {
+        setPinLoading(false);
+      }
+    }
+  };
+
   return (
     <div className="space-y-4 max-w-4xl mx-auto pb-14 w-full min-w-0">
 
@@ -117,7 +243,7 @@ export default function SettingsPage() {
             <span>Store Configuration & Settings</span>
           </h2>
           <p className="text-xs text-gray-500 mt-0.5">
-            Manage your store information, delivery pricing, payment gateways, and real-time alerts
+            Manage your store information, delivery pricing, 6-digit PIN security, and payment gateways
           </p>
         </div>
 
@@ -127,6 +253,135 @@ export default function SettingsPage() {
             <span>Settings saved successfully!</span>
           </div>
         )}
+      </div>
+
+      {/* 0. Dedicated Admin Security & 6-Digit PIN Section */}
+      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-emerald-600/30 ring-1 ring-emerald-500/10 shadow-2xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-[#062e1e] text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
+              <ShieldCheck size={20} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-gray-900">Admin Security & 6-Digit PIN</h3>
+                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
+                  isDefaultPin 
+                    ? 'bg-amber-100 text-amber-900 border-amber-300' 
+                    : 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                }`}>
+                  {isDefaultPin ? 'Default PIN Active (123456)' : 'Custom PIN Active'}
+                </span>
+              </div>
+              <p className="text-[11px] text-gray-500">
+                Protect your admin panel with a 6-digit PIN code. Session stays securely active for 30 days.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleLockAdmin}
+              className="flex items-center gap-1.5 text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 px-3 py-1.5 rounded-xl transition cursor-pointer active:scale-95"
+            >
+              <Lock size={13} />
+              <span>Lock Panel Now</span>
+            </button>
+          </div>
+        </div>
+
+        {pinSuccess && (
+          <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold flex items-center gap-2 animate-fadeIn">
+            <CheckCircle2 size={16} className="text-emerald-700 shrink-0" />
+            <span>{pinSuccess}</span>
+          </div>
+        )}
+
+        {pinError && (
+          <div className="p-3 rounded-xl bg-red-50 border border-red-300 text-red-900 text-xs font-bold flex items-center gap-2 animate-fadeIn">
+            <AlertCircle size={16} className="text-red-600 shrink-0" />
+            <span>{pinError}</span>
+          </div>
+        )}
+
+        {/* Change PIN Form */}
+        <form onSubmit={handleUpdatePin} className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div>
+              <label className="block font-bold text-gray-700 mb-1">
+                Current 6-Digit PIN *
+              </label>
+              <input
+                type="password"
+                maxLength={6}
+                value={currentPin}
+                onChange={e => setCurrentPin(e.target.value.replace(/[^0-9]/g, ''))}
+                placeholder={isDefaultPin ? '123456' : 'Enter current PIN'}
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl font-mono text-center tracking-widest text-sm focus:ring-2 focus:ring-emerald-700 outline-none"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block font-bold text-gray-700 mb-1">
+                New 6-Digit PIN *
+              </label>
+              <input
+                type="password"
+                maxLength={6}
+                value={newPin}
+                onChange={e => setNewPin(e.target.value.replace(/[^0-9]/g, ''))}
+                placeholder="6 new digits"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl font-mono text-center tracking-widest text-sm focus:ring-2 focus:ring-emerald-700 outline-none"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block font-bold text-gray-700 mb-1">
+                Confirm New PIN *
+              </label>
+              <input
+                type="password"
+                maxLength={6}
+                value={confirmPin}
+                onChange={e => setConfirmPin(e.target.value.replace(/[^0-9]/g, ''))}
+                placeholder="Re-enter 6 digits"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl font-mono text-center tracking-widest text-sm focus:ring-2 focus:ring-emerald-700 outline-none"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 text-xs">
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500 text-[11px]">
+                Session duration: <strong>30 Days</strong> (Don&apos;t have to enter PIN repeatedly on your phone)
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleResetPinToDefault}
+                disabled={pinLoading}
+                className="text-[11px] font-bold text-gray-500 hover:text-gray-800 underline cursor-pointer"
+              >
+                Reset to Default (123456)
+              </button>
+
+              <button
+                type="submit"
+                disabled={pinLoading}
+                className="flex items-center gap-1.5 bg-[#062e1e] hover:bg-[#0b482d] text-amber-300 font-bold px-4 py-2 rounded-xl text-xs transition shadow-2xs cursor-pointer active:scale-95 disabled:opacity-50"
+              >
+                {pinLoading ? <RefreshCw size={13} className="animate-spin" /> : <KeyRound size={13} />}
+                <span>Update 6-Digit PIN</span>
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
 
       <form onSubmit={handleSave} className="space-y-4">

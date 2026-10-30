@@ -3,6 +3,7 @@
 import React from "react";
 import { Check, Truck, Clock, XCircle, PackageCheck, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useOrderCountdown } from "@/lib/useOrderCountdown";
 
 export type TrackingStage = "Order Placed" | "Confirmed" | "Out for Delivery" | "Delivered";
 
@@ -17,14 +18,20 @@ export default function OrderTracking({
   currentStatus, 
   city = "Gurugram",
   estimatedDelivery,
-  deliveryType
+  deliveryType,
+  order
 }: { 
   currentStatus: string; 
   city?: string;
   estimatedDelivery?: string;
   deliveryType?: 'express' | 'standard';
+  order?: any;
 }) {
   const { language } = useLanguage();
+  const countdown = useOrderCountdown(
+    order || { status: currentStatus, estimatedDelivery, deliveryType }, 
+    language
+  );
 
   if (currentStatus === 'Cancelled') {
     return (
@@ -78,7 +85,7 @@ export default function OrderTracking({
   return (
     <div className="bg-white rounded-xl p-3 sm:p-3.5 border border-slate-200/90 shadow-2xs">
       
-      {/* Top Status & ETA Pill */}
+      {/* Top Status & Delivery Countdown */}
       <div className="flex flex-wrap items-center justify-between gap-1.5 pb-2.5 mb-2.5 border-b border-slate-100 text-xs">
         <div className="flex items-center gap-1.5">
           <span className="relative flex h-2 w-2">
@@ -99,10 +106,22 @@ export default function OrderTracking({
           </span>
         </div>
 
-        {estimatedDelivery && (
-          <div className="flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200">
-            <Clock size={11} className="text-emerald-700" />
-            <span className="truncate">{estimatedDelivery}</span>
+        {countdown.isDelivered ? (
+          <div className="flex items-center gap-1.5 text-[11px] font-black text-emerald-950 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-300 shadow-2xs">
+            <Check size={11} className="text-emerald-700 stroke-[3] shrink-0" />
+            <span className="font-extrabold text-emerald-900">
+              {countdown.displayText}
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 text-[11px] font-black text-amber-950 bg-amber-50/90 px-2.5 py-0.5 rounded-md border border-amber-300 shadow-2xs">
+            <Clock size={11} className="text-amber-700 shrink-0" />
+            <span className="text-[10px] font-bold text-amber-800 uppercase">
+              {language === 'hi' ? 'डिलीवरी:' : 'Delivery:'}
+            </span>
+            <span className="font-extrabold text-amber-950 font-mono">
+              {countdown.displayText}
+            </span>
           </div>
         )}
       </div>

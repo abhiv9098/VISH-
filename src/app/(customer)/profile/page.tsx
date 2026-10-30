@@ -221,7 +221,7 @@ export default function ProfilePage() {
     : null;
 
   return (
-    <div className="min-h-[85vh] bg-[#f8f9fa] py-4 sm:py-6 px-3 sm:px-6 lg:px-8 max-w-3xl mx-auto space-y-3.5 pb-24 md:pb-12">
+    <div className="min-h-[85vh] bg-[#fcfaf5] py-4 sm:py-6 px-3 sm:px-6 lg:px-8 max-w-3xl mx-auto space-y-3.5 pb-24 md:pb-12">
       
       {/* Hidden File Input for Avatar Photo Upload */}
       <input 
@@ -234,9 +234,9 @@ export default function ProfilePage() {
 
       {/* Success Toast Notification */}
       {saveSuccessNotification && (
-        <div className="bg-cyan-700 text-white p-3 rounded-xl shadow-md border border-cyan-600 flex items-center justify-between gap-3 text-xs sm:text-sm font-bold animate-fadeIn">
+        <div className="bg-teal-900 text-white p-3 rounded-xl shadow-md border border-teal-800 flex items-center justify-between gap-3 text-xs sm:text-sm font-bold animate-fadeIn">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="text-cyan-200 shrink-0" size={17} />
+            <CheckCircle2 className="text-amber-400 shrink-0" size={17} />
             <span>{successText}</span>
           </div>
           <button 
@@ -250,17 +250,17 @@ export default function ProfilePage() {
       )}
 
       {/* 1. SIMPLE PROFILE HEADER: Avatar, Name, Mobile Number, Edit Button */}
-      <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-2xs border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-2xs border border-stone-200 flex flex-wrap items-center justify-between gap-3">
         
         {/* User Identity & Avatar */}
         <div className="flex items-center gap-3.5 min-w-0">
           <div className="relative group shrink-0">
             {formData.avatar ? (
-              <div className="relative w-14 h-14 rounded-2xl overflow-hidden border-2 border-cyan-600 shadow-xs">
+              <div className="relative w-14 h-14 rounded-2xl overflow-hidden border-2 border-teal-700 shadow-xs">
                 <Image src={formData.avatar} alt="Profile Photo" fill className="object-cover" />
               </div>
             ) : (
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-700 text-white ring-2 ring-cyan-100 font-black text-2xl flex items-center justify-center shadow-xs">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-800 to-teal-950 text-amber-300 ring-2 ring-teal-700/30 font-black text-2xl flex items-center justify-center shadow-xs">
                 {displayName ? displayName.charAt(0).toUpperCase() : 'C'}
               </div>
             )}
@@ -269,24 +269,24 @@ export default function ProfilePage() {
             <button 
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="absolute -bottom-1 -right-1 bg-white hover:bg-slate-100 text-slate-800 p-1 rounded-full shadow-md border border-slate-200 transition cursor-pointer"
+              className="absolute -bottom-1 -right-1 bg-white hover:bg-stone-100 text-stone-800 p-1 rounded-full shadow-md border border-stone-200 transition cursor-pointer"
               title="Change Profile Photo"
             >
-              <Camera size={12} className="text-cyan-700" />
+              <Camera size={12} className="text-teal-800" />
             </button>
           </div>
 
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-base sm:text-lg font-black text-slate-900 truncate">{displayName}</h1>
-              <span className="bg-cyan-50 text-cyan-800 border border-cyan-200 text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-0.5">
-                <ShieldCheck size={11} className="text-cyan-600" /> {language === 'hi' ? 'सत्यापित ग्राहक' : 'Verified'}
+              <span className="bg-teal-50 text-teal-800 border border-teal-200 text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-0.5">
+                <ShieldCheck size={11} className="text-teal-600" /> {language === 'hi' ? 'सत्यापित ग्राहक' : 'Verified'}
               </span>
             </div>
             
             {displayPhone ? (
               <p className="text-xs text-slate-600 font-semibold flex items-center gap-1 mt-0.5">
-                <Phone size={11} className="text-cyan-700 shrink-0" />
+                <Phone size={11} className="text-teal-800 shrink-0" />
                 <span>+91 {displayPhone.replace(/^\+91/, '')}</span>
               </p>
             ) : (
@@ -307,18 +307,18 @@ export default function ProfilePage() {
             }}
             className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer active:scale-95 ${
               isEditing 
-                ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200' 
-                : 'bg-cyan-600 hover:bg-cyan-700 text-white shadow-xs'
+                ? 'bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-200' 
+                : 'bg-teal-900 hover:bg-teal-950 text-white shadow-xs'
             }`}
           >
-            <Edit3 size={13} className={isEditing ? 'text-slate-600' : 'text-cyan-100'} />
+            <Edit3 size={13} className={isEditing ? 'text-stone-600' : 'text-teal-200'} />
             <span>{isEditing ? (language === 'hi' ? 'रद्द करें' : 'Cancel') : (language === 'hi' ? 'एडिट करें' : 'Edit Profile')}</span>
           </button>
         </div>
 
       </div>
 
-      {/* 2. TWO SMALL CLEAN BUTTONS (MODERN CYAN & CLEAN WHITE STYLE) */}
+      {/* 2. TWO SMALL CLEAN BUTTONS (THEME TEAL & CLEAN WHITE STYLE) */}
       <div className="grid grid-cols-2 gap-2 sm:gap-3">
         
         {/* BUTTON 1: Personal Details */}
@@ -335,13 +335,13 @@ export default function ProfilePage() {
           }}
           className={`py-2 px-3 sm:px-4 rounded-xl border text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 ${
             activeSection === 'personal'
-              ? 'bg-cyan-600 hover:bg-cyan-700 text-white border-cyan-600 ring-2 ring-cyan-500/25 shadow-sm'
-              : 'bg-white hover:bg-cyan-50/70 text-slate-800 border-slate-200 hover:border-cyan-300'
+              ? 'bg-teal-900 hover:bg-teal-950 text-white border-teal-900 ring-2 ring-teal-700/25 shadow-sm'
+              : 'bg-white hover:bg-teal-50/70 text-slate-800 border-stone-200 hover:border-teal-300'
           }`}
         >
-          <User size={15} className={activeSection === 'personal' ? 'text-cyan-100' : 'text-cyan-700'} />
+          <User size={15} className={activeSection === 'personal' ? 'text-teal-200' : 'text-teal-800'} />
           <span>{language === 'hi' ? 'व्यक्तिगत विवरण' : 'Personal Details'}</span>
-          {activeSection === 'personal' ? <ChevronUp size={13} className="text-cyan-100" /> : <ChevronDown size={13} className="text-slate-400" />}
+          {activeSection === 'personal' ? <ChevronUp size={13} className="text-teal-200" /> : <ChevronDown size={13} className="text-slate-400" />}
         </button>
 
         {/* BUTTON 2: Delivery Address */}
@@ -358,13 +358,13 @@ export default function ProfilePage() {
           }}
           className={`py-2 px-3 sm:px-4 rounded-xl border text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 ${
             activeSection === 'address'
-              ? 'bg-cyan-600 hover:bg-cyan-700 text-white border-cyan-600 ring-2 ring-cyan-500/25 shadow-sm'
-              : 'bg-white hover:bg-cyan-50/70 text-slate-800 border-slate-200 hover:border-cyan-300'
+              ? 'bg-teal-900 hover:bg-teal-950 text-white border-teal-900 ring-2 ring-teal-700/25 shadow-sm'
+              : 'bg-white hover:bg-teal-50/70 text-slate-800 border-stone-200 hover:border-teal-300'
           }`}
         >
-          <MapPin size={15} className={activeSection === 'address' ? 'text-cyan-100' : 'text-cyan-700'} />
+          <MapPin size={15} className={activeSection === 'address' ? 'text-teal-200' : 'text-teal-800'} />
           <span>{language === 'hi' ? 'डिलीवरी पता' : 'Delivery Address'}</span>
-          {activeSection === 'address' ? <ChevronUp size={13} className="text-cyan-100" /> : <ChevronDown size={13} className="text-slate-400" />}
+          {activeSection === 'address' ? <ChevronUp size={13} className="text-teal-200" /> : <ChevronDown size={13} className="text-slate-400" />}
         </button>
 
       </div>
@@ -373,11 +373,11 @@ export default function ProfilePage() {
 
       {/* SECTION 1: PERSONAL DETAILS (Opened by Button 1) */}
       {activeSection === 'personal' && (
-        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-2xs border border-slate-200 space-y-3 animate-fadeIn">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-2xs border border-stone-200 space-y-3 animate-fadeIn">
           
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div className="flex items-center gap-2">
-              <User size={16} className="text-cyan-700" />
+              <User size={16} className="text-teal-800" />
               <h2 className="text-xs font-black uppercase tracking-wider text-slate-900">
                 {language === 'hi' ? 'व्यक्तिगत विवरण' : 'Personal Details'}
               </h2>
@@ -386,7 +386,7 @@ export default function ProfilePage() {
             <button 
               type="button" 
               onClick={() => setIsEditing(!isEditing)} 
-              className="text-[11px] font-bold text-cyan-800 hover:text-cyan-950 transition flex items-center gap-1 cursor-pointer bg-cyan-50 hover:bg-cyan-100 px-2.5 py-1 rounded-lg border border-cyan-200"
+              className="text-[11px] font-bold text-teal-900 hover:text-teal-950 transition flex items-center gap-1 cursor-pointer bg-teal-50 hover:bg-teal-100 px-2.5 py-1 rounded-lg border border-teal-200"
             >
               <Edit3 size={11} />
               <span>{isEditing ? (language === 'hi' ? 'रद्द' : 'Cancel') : (language === 'hi' ? 'एडिट' : 'Edit')}</span>
@@ -436,7 +436,7 @@ export default function ProfilePage() {
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. Rahul Sharma"
-                    className="w-full border border-slate-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-cyan-600 font-semibold"
+                    className="w-full border border-stone-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-teal-700 font-semibold"
                   />
                 </div>
 
@@ -450,7 +450,7 @@ export default function ProfilePage() {
                     value={formData.phone}
                     onChange={e => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="10-digit mobile number"
-                    className="w-full border border-slate-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-cyan-600 font-semibold"
+                    className="w-full border border-stone-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-teal-700 font-semibold"
                   />
                 </div>
 
@@ -463,7 +463,7 @@ export default function ProfilePage() {
                     value={formData.email}
                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                     placeholder="name@example.com"
-                    className="w-full border border-slate-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-cyan-600 font-semibold"
+                    className="w-full border border-stone-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-teal-700 font-semibold"
                   />
                 </div>
               </div>
@@ -479,9 +479,9 @@ export default function ProfilePage() {
 
                 <button
                   type="submit"
-                  className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs px-4 py-1.5 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  className="bg-teal-900 hover:bg-teal-950 text-white font-bold text-xs px-4 py-1.5 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer active:scale-95"
                 >
-                  <Save size={13} className="text-cyan-100" />
+                  <Save size={13} className="text-teal-200" />
                   <span>{language === 'hi' ? 'बदलाव सेव करें' : 'Save Changes'}</span>
                 </button>
               </div>
@@ -493,11 +493,11 @@ export default function ProfilePage() {
 
       {/* SECTION 2: DELIVERY ADDRESS (Opened by Button 2) */}
       {activeSection === 'address' && (
-        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-2xs border border-slate-200 space-y-3 animate-fadeIn">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-2xs border border-stone-200 space-y-3 animate-fadeIn">
           
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div className="flex items-center gap-2">
-              <MapPin size={16} className="text-cyan-700" />
+              <MapPin size={16} className="text-teal-800" />
               <h2 className="text-xs font-black uppercase tracking-wider text-slate-900">
                 {language === 'hi' ? 'डिलीवरी पता' : 'Delivery Address'}
               </h2>
@@ -509,21 +509,21 @@ export default function ProfilePage() {
                 type="button"
                 onClick={handleUseCurrentLocation}
                 disabled={isLocating}
-                className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition inline-flex items-center gap-1 cursor-pointer shadow-xs ${
+                className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition inline-flex items-center gap-1 cursor-pointer shadow-xs active:scale-95 ${
                   isLocating
-                    ? 'bg-cyan-100 text-cyan-900 cursor-not-allowed border border-cyan-200'
-                    : 'bg-cyan-600 hover:bg-cyan-700 text-white border border-cyan-600'
+                    ? 'bg-teal-100 text-teal-900 cursor-not-allowed border border-teal-200'
+                    : 'bg-teal-900 hover:bg-teal-950 text-white border border-teal-900'
                 }`}
                 title="Detect GPS & Auto-fill Address"
               >
                 {isLocating ? (
                   <>
-                    <Loader2 size={11} className="animate-spin text-cyan-700" />
+                    <Loader2 size={11} className="animate-spin text-teal-700" />
                     <span>{language === 'hi' ? 'लोकेशन...' : 'Locating...'}</span>
                   </>
                 ) : (
                   <>
-                    <Navigation size={11} className="text-cyan-100" />
+                    <Navigation size={11} className="text-teal-200" />
                     <span>{language === 'hi' ? 'GPS से भरें' : 'Use Current Location'}</span>
                   </>
                 )}
@@ -532,7 +532,7 @@ export default function ProfilePage() {
               <button 
                 type="button" 
                 onClick={() => setIsEditing(!isEditing)} 
-                className="text-[11px] font-bold text-cyan-800 hover:text-cyan-950 transition flex items-center gap-1 cursor-pointer bg-cyan-50 hover:bg-cyan-100 px-2.5 py-1 rounded-lg border border-cyan-200"
+                className="text-[11px] font-bold text-teal-900 hover:text-teal-950 transition flex items-center gap-1 cursor-pointer bg-teal-50 hover:bg-teal-100 px-2.5 py-1 rounded-lg border border-teal-200"
               >
                 <Edit3 size={11} />
                 <span>{isEditing ? (language === 'hi' ? 'रद्द' : 'Cancel') : (language === 'hi' ? 'एडिट' : 'Edit')}</span>
@@ -583,8 +583,8 @@ export default function ProfilePage() {
               {/* GPS Coordinates & Google Maps Link */}
               {currentCoords && (
                 <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px]">
-                  <div className="flex items-center gap-1.5 text-cyan-800 font-bold">
-                    <span className="w-2 h-2 rounded-full bg-cyan-600 animate-pulse" />
+                  <div className="flex items-center gap-1.5 text-teal-800 font-bold">
+                    <span className="w-2 h-2 rounded-full bg-teal-600 animate-pulse" />
                     <span>GPS: {currentCoords.lat.toFixed(4)}, {currentCoords.lng.toFixed(4)}</span>
                   </div>
 
@@ -624,7 +624,7 @@ export default function ProfilePage() {
                     value={formData.address}
                     onChange={e => setFormData({ ...formData, address: e.target.value })}
                     placeholder="House / Flat No., Society / Building, Street, Area"
-                    className="w-full border border-slate-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-cyan-600 font-semibold"
+                    className="w-full border border-stone-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-teal-700 font-semibold"
                   />
                 </div>
 
@@ -637,7 +637,7 @@ export default function ProfilePage() {
                     value={formData.locality}
                     onChange={e => setFormData({ ...formData, locality: e.target.value })}
                     placeholder="e.g. Near Metro Station / Main Market"
-                    className="w-full border border-slate-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-cyan-600 font-semibold"
+                    className="w-full border border-stone-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-teal-700 font-semibold"
                   />
                 </div>
 
@@ -651,7 +651,7 @@ export default function ProfilePage() {
                     value={formData.city}
                     onChange={e => setFormData({ ...formData, city: e.target.value })}
                     placeholder="e.g. Gurugram"
-                    className="w-full border border-slate-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-cyan-600 font-semibold"
+                    className="w-full border border-stone-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-teal-700 font-semibold"
                   />
                 </div>
 
@@ -664,7 +664,7 @@ export default function ProfilePage() {
                     value={formData.district}
                     onChange={e => setFormData({ ...formData, district: e.target.value })}
                     placeholder="e.g. Dewas"
-                    className="w-full border border-slate-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-cyan-600 font-semibold"
+                    className="w-full border border-stone-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-teal-700 font-semibold"
                   />
                 </div>
 
@@ -677,7 +677,7 @@ export default function ProfilePage() {
                     value={formData.state}
                     onChange={e => setFormData({ ...formData, state: e.target.value })}
                     placeholder="e.g. Madhya Pradesh"
-                    className="w-full border border-slate-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-cyan-600 font-semibold"
+                    className="w-full border border-stone-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-teal-700 font-semibold"
                   />
                 </div>
 
@@ -691,7 +691,7 @@ export default function ProfilePage() {
                     value={formData.pincode}
                     onChange={e => setFormData({ ...formData, pincode: e.target.value })}
                     placeholder="e.g. 122001"
-                    className="w-full border border-slate-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-cyan-600 font-semibold"
+                    className="w-full border border-stone-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-teal-700 font-semibold"
                   />
                 </div>
 
@@ -705,7 +705,7 @@ export default function ProfilePage() {
                     value={formData.country}
                     onChange={e => setFormData({ ...formData, country: e.target.value })}
                     placeholder="India"
-                    className="w-full border border-slate-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-cyan-600 font-semibold"
+                    className="w-full border border-stone-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-teal-700 font-semibold"
                   />
                 </div>
               </div>
@@ -721,9 +721,9 @@ export default function ProfilePage() {
 
                 <button
                   type="submit"
-                  className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs px-4 py-1.5 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  className="bg-teal-900 hover:bg-teal-950 text-white font-bold text-xs px-4 py-1.5 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer active:scale-95"
                 >
-                  <Save size={13} className="text-cyan-100" />
+                  <Save size={13} className="text-teal-200" />
                   <span>{language === 'hi' ? 'बदलाव सेव करें' : 'Save Changes'}</span>
                 </button>
               </div>
@@ -734,21 +734,21 @@ export default function ProfilePage() {
       )}
 
       {/* 4. MY ORDERS CARD (Clean, Non-duplicate summary) */}
-      <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-2xs border border-slate-200 space-y-3">
+      <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-2xs border border-stone-200 space-y-3">
         <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
           <div className="flex items-center gap-2">
-            <ShoppingBag size={16} className="text-cyan-700" />
+            <ShoppingBag size={16} className="text-teal-800" />
             <h2 className="text-xs font-black uppercase tracking-wider text-slate-900">
               {language === 'hi' ? 'मेरे ऑर्डर' : 'My Orders'}
             </h2>
-            <span className="bg-slate-100 text-slate-700 text-[10.5px] font-bold px-2 py-0.2 rounded-full border border-slate-200">
+            <span className="bg-stone-100 text-stone-700 text-[10.5px] font-bold px-2 py-0.2 rounded-full border border-stone-200">
               {uniqueOrders.length}
             </span>
           </div>
 
           <Link 
             href="/order"
-            className="text-xs font-black text-cyan-700 hover:text-cyan-900 flex items-center gap-0.5 transition cursor-pointer"
+            className="text-xs font-black text-teal-800 hover:text-teal-950 flex items-center gap-0.5 transition cursor-pointer"
           >
             <span>{language === 'hi' ? 'सभी ऑर्डर देखें' : 'View All'}</span>
             <ChevronRight size={13} />
@@ -757,9 +757,9 @@ export default function ProfilePage() {
 
         {/* Latest Order Preview or Clean Empty State */}
         {uniqueOrders.length > 0 && latestOrder ? (
-          <div className="bg-slate-50/70 p-3 rounded-xl border border-slate-200/80 flex items-center justify-between gap-3 text-xs">
+          <div className="bg-stone-50/70 p-3 rounded-xl border border-stone-200/80 flex items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="relative w-11 h-11 rounded-lg bg-white border border-slate-200 overflow-hidden shrink-0">
+              <div className="relative w-11 h-11 rounded-lg bg-white border border-stone-200 overflow-hidden shrink-0">
                 <Image 
                   src={latestOrder.items?.[0]?.product?.image || '/images/wheat_flour.jpg'} 
                   alt="Product" 
@@ -774,14 +774,14 @@ export default function ProfilePage() {
                     : (latestOrder.items?.[0]?.product?.name || 'Fresh Chakki Atta')}
                 </p>
                 <p className="text-[11px] text-slate-500">
-                  ₹{latestOrder.total} • {latestOrder.status}
+                  ₹{latestOrder.total} • {latestOrder.status}{latestOrder.estimatedDelivery ? ` • ⏱️ ${latestOrder.estimatedDelivery}` : ''}
                 </p>
               </div>
             </div>
 
             <Link
               href="/order"
-              className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-[11px] px-2.5 py-1 rounded-lg shrink-0 transition shadow-xs"
+              className="bg-teal-900 hover:bg-teal-950 text-white font-bold text-[11px] px-2.5 py-1 rounded-lg shrink-0 transition shadow-xs active:scale-95"
             >
               {language === 'hi' ? 'ट्रैक करें' : 'Track'}
             </Link>
@@ -789,7 +789,7 @@ export default function ProfilePage() {
         ) : (
           <div className="text-center py-4 text-xs text-slate-500">
             <p>{language === 'hi' ? 'आपने अभी तक कोई ऑर्डर नहीं दिया है।' : 'No orders placed yet.'}</p>
-            <Link href="/" className="text-cyan-700 font-bold hover:underline mt-1 inline-block">
+            <Link href="/" className="text-teal-800 font-bold hover:underline mt-1 inline-block">
               {language === 'hi' ? 'ताज़ा आटा ऑर्डर करें' : 'Order Fresh Atta'}
             </Link>
           </div>
@@ -797,7 +797,7 @@ export default function ProfilePage() {
       </div>
 
       {/* 6. ADMIN PANEL SHORTCUT */}
-      <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-2xs border border-slate-200 flex items-center justify-between gap-3">
+      <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-2xs border border-stone-200 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-center shrink-0">
             <ShieldCheck size={18} className="text-teal-700" />
@@ -822,9 +822,9 @@ export default function ProfilePage() {
       </div>
 
       {/* 5. APP SETTINGS CARD (Small, Working Hindi/English Toggle) */}
-      <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-2xs border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-2xs border border-stone-200 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <Globe size={16} className="text-cyan-700" />
+          <Globe size={16} className="text-teal-800" />
           <div>
             <h3 className="text-xs font-black uppercase tracking-wider text-slate-900">
               {language === 'hi' ? 'ऐप की भाषा' : 'App Language'}
@@ -837,7 +837,7 @@ export default function ProfilePage() {
 
         {/* Small Segmented Language Toggle Button */}
         <div 
-          className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200"
+          className="flex items-center bg-stone-100 p-0.5 rounded-xl border border-stone-200"
           role="group"
           aria-label="Language selector"
         >
@@ -846,8 +846,8 @@ export default function ProfilePage() {
             onClick={() => setLanguage('en')}
             className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               language === 'en'
-                ? 'bg-cyan-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-teal-900 text-white shadow-xs'
+                : 'text-stone-600 hover:text-stone-900'
             }`}
           >
             English
@@ -857,8 +857,8 @@ export default function ProfilePage() {
             onClick={() => setLanguage('hi')}
             className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               language === 'hi'
-                ? 'bg-cyan-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-teal-900 text-white shadow-xs'
+                : 'text-stone-600 hover:text-stone-900'
             }`}
           >
             हिंदी

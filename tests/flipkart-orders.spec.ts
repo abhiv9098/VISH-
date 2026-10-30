@@ -151,6 +151,12 @@ test.describe('Flipkart-style Orders Redesign & Normal Delivery Flow', () => {
     await expect(adminPage.locator('button:has-text("3. Dispatch (Out for Delivery)")').first()).toBeVisible({ timeout: 5000 });
     await adminPage.locator('button:has-text("3. Dispatch (Out for Delivery)")').first().click();
 
+    // If custom ETA sync modal appears, save & sync to customer app
+    const saveEtaBtn = adminPage.locator('button:has-text("Save & Sync to App")').first();
+    if (await saveEtaBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await saveEtaBtn.click();
+    }
+
     // Verify step 4 is normal "Mark as Delivered" without any verification code prompt
     const markDeliveredBtn = adminPage.locator('button:has-text("4. Mark as Delivered")').first();
     await expect(markDeliveredBtn).toBeVisible({ timeout: 5000 });

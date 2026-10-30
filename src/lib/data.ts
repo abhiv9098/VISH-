@@ -208,9 +208,44 @@ export function canonicalToDbStatus(canonical: CanonicalStatus): OrderStatus {
   }
 }
 
+export type StatusDeliveryTiming = {
+  estimatedDelivery: string;
+  durationMs: number | null;
+};
+
+export function getStatusDeliveryTiming(status: string): StatusDeliveryTiming | null {
+  const canonical = getCanonicalStatus(status);
+  switch (canonical) {
+    case 'Confirmed':
+      return {
+        estimatedDelivery: '2 hours',
+        durationMs: 2 * 60 * 60 * 1000,
+      };
+    case 'Pending': // Preparing Your Order / Milling
+      return {
+        estimatedDelivery: '1 hour',
+        durationMs: 1 * 60 * 60 * 1000,
+      };
+    case 'Out for Delivery':
+      return {
+        estimatedDelivery: '30 minutes',
+        durationMs: 30 * 60 * 1000,
+      };
+    case 'Delivered':
+      return {
+        estimatedDelivery: 'Delivered Successfully.',
+        durationMs: null,
+      };
+    default:
+      return null;
+  }
+}
+
 export type Order = {
   deliveryType?: 'express' | 'standard';
   estimatedDelivery?: string;
+  estimatedDeliveryTarget?: string;
+  statusUpdatedAt?: string;
   paymentMethod?: 'online' | 'cod';
   transactionId?: string;
   id: string;

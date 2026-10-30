@@ -3,23 +3,59 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, ShoppingBag, Users, Settings, LogOut, Package, Menu, X, Bell } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  ShoppingBag, 
+  Users, 
+  Settings, 
+  LogOut, 
+  Package, 
+  Menu, 
+  X, 
+  Bell, 
+  Lock, 
+  KeyRound,
+  ShieldCheck,
+  RefreshCw 
+} from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useOrders } from '@/context/OrderContext';
+import AdminPinScreen from '@/components/AdminPinScreen';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const pathname = usePathname();
   const { newOrdersCount } = useOrders();
   const prevCountRef = useRef(newOrdersCount);
 
+  // Set page title
   useEffect(() => {
     document.title = "Vishwakarma Atta Chakki - Admin Panel";
   }, []);
 
+  // Check persistent session on initial mount
+  useEffect(() => {
+    try {
+      const sessionStr = localStorage.getItem('vishwakarma_admin_session');
+      if (sessionStr) {
+        const session = JSON.parse(sessionStr);
+        if (session && session.expiresAt && Date.now() < session.expiresAt) {
+          setIsAuthenticated(true);
+          return;
+        } else {
+          localStorage.removeItem('vishwakarma_admin_session');
+        }
+      }
+    } catch {
+      localStorage.removeItem('vishwakarma_admin_session');
+    }
+    setIsAuthenticated(false);
+  }, []);
+
   // Play subtle chime when a new order arrives
   useEffect(() => {
-    if (newOrdersCount > prevCountRef.current) {
+    if (isAuthenticated && newOrdersCount > prevCountRef.current) {
       try {
         const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
         const osc = audioCtx.createOscillator();
@@ -36,8 +72,42 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       } catch {}
     }
     prevCountRef.current = newOrdersCount;
-  }, [newOrdersCount]);
+  }, [newOrdersCount, isAuthenticated]);
 
+  const handleLockSession = () => {
+    try {
+      localStorage.removeItem('vishwakarma_admin_session');
+    } catch {}
+    setIsAuthenticated(false);
+  };
+
+  // 1. Loading splash while verifying local storage session
+  if (isAuthenticated === null) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#062e1e] text-white">
+        <div className="relative w-16 h-16 rounded-2xl overflow-hidden border border-emerald-400/40 shadow-xl mb-4 bg-[#042f2e] animate-pulse">
+          <Image 
+            src="/images/logo.png" 
+            alt="Vishwakarma Logo" 
+            fill 
+            sizes="64px"
+            className="object-cover" 
+          />
+        </div>
+        <p className="text-sm font-bold text-emerald-200 flex items-center gap-2">
+          <RefreshCw size={15} className="animate-spin text-amber-400" />
+          <span>Verifying Admin Access...</span>
+        </p>
+      </div>
+    );
+  }
+
+  // 2. 6-Digit PIN Screen if not authenticated
+  if (!isAuthenticated) {
+    return <AdminPinScreen onSuccess={() => setIsAuthenticated(true)} />;
+  }
+
+  // 3. Authenticated Admin View
   const isDashboardActive = pathname === '/admin' || pathname === '/admin/';
   const isOrdersActive = pathname.startsWith('/admin/orders');
   const isProductsActive = pathname.startsWith('/admin/products');
@@ -104,7 +174,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         />
       )}
 
-      {/* Sidebar - Forest Green Background */}
+      {/* Sidebar - Forest Green Background (Desktop & Drawer) */}
       <aside 
         className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#062e1e] text-white flex flex-col transform transition-transform duration-300 ease-in-out shrink-0 ${
           sidebarOpen 
@@ -124,7 +194,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 className="object-cover" 
               />
             </div>
-            <span className="font-bold text-lg tracking-wide text-white">Atta Admin</span>
+            <div>
+              <span className="font-bold text-base tracking-wide text-white block leading-tight">Atta Admin</span>
+              <span className="text-[10px] text-amber-300/80 font-medium">PIN Secured</span>
+            </div>
           </div>
           <button 
             className="md:hidden text-gray-300 hover:text-white p-2 rounded-xl active:bg-white/10 transition touch-manipulation cursor-pointer" 
@@ -172,15 +245,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </ul>
         </nav>
         
-        {/* Logout / Storefront Button */}
-        <div className="p-4 border-t border-[#0b482d]">
+        {/* Footer Actions: Lock & Storefront Button */}
+        <div className="p-4 border-t border-[#0b482d] space-y-2">
+          {/* Lock Admin Button */}
+          <button
+            onClick={handleLockSession}
+            className="flex items-center gap-3 px-3.5 py-2.5 w-full rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-400/20 text-xs font-bold transition cursor-pointer touch-manipulation"
+            title="Lock Admin Panel (PIN Required)"
+          >
+            <Lock size={16} />
+            <span>Lock Admin Panel</span>
+          </button>
+
           <Link 
             href="/"
             onClick={() => setSidebarOpen(false)}
-            className="flex items-center gap-3 px-3.5 py-2.5 w-full rounded-xl hover:bg-red-900/40 text-red-300/90 hover:text-red-200 text-sm font-medium transition cursor-pointer touch-manipulation"
+            className="flex items-center gap-3 px-3.5 py-2.5 w-full rounded-xl hover:bg-red-900/40 text-red-300/90 hover:text-red-200 text-xs font-medium transition cursor-pointer touch-manipulation"
           >
-            <LogOut size={18} />
-            <span>Customer Storefront</span>
+            <LogOut size={16} />
+            <span>Go to Storefront</span>
           </Link>
         </div>
       </aside>
@@ -189,7 +272,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <main className="flex-1 flex flex-col overflow-hidden w-full max-w-full min-w-0">
         {/* Top Header / App Bar */}
         <header className="h-14 sm:h-16 bg-white border-b border-gray-200/80 flex items-center justify-between px-3.5 sm:px-6 shrink-0 shadow-2xs z-10">
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             {/* Mobile Hamburger Menu Button */}
             <button 
               className="md:hidden text-gray-700 hover:text-gray-900 p-2 -ml-1 rounded-xl hover:bg-gray-100 active:bg-gray-200 transition touch-manipulation cursor-pointer" 
@@ -198,27 +281,43 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             >
               <Menu size={22} />
             </button>
-            <h1 className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight truncate">
-              {getTitle()}
-            </h1>
+            
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-xl font-bold text-gray-900 tracking-tight truncate leading-tight">
+                {getTitle()}
+              </h1>
+              <span className="hidden xs:inline-block text-[10px] text-emerald-800 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                Vishwakarma Chakki
+              </span>
+            </div>
           </div>
           
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Real-time Incoming New Order Pill */}
             {newOrdersCount > 0 && (
               <Link
-                href="/admin"
+                href="/admin/orders"
                 className="inline-flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-black animate-pulse shadow-2xs touch-manipulation"
                 title={`${newOrdersCount} orders waiting for confirmation`}
               >
                 <Bell size={13} className="text-red-600 fill-red-600" />
-                <span className="hidden xs:inline">{newOrdersCount} New</span>
+                <span>{newOrdersCount} New</span>
               </Link>
             )}
 
+            {/* Quick Lock Button */}
+            <button
+              onClick={handleLockSession}
+              className="p-2 text-gray-600 hover:text-amber-800 hover:bg-amber-50 rounded-xl border border-gray-200 active:bg-amber-100 transition cursor-pointer touch-manipulation"
+              title="Lock Admin Panel"
+              aria-label="Lock Admin"
+            >
+              <Lock size={16} />
+            </button>
+
             {/* Admin Avatar Circle */}
             <div 
-              className="w-9 h-9 rounded-full bg-[#d1fae5] text-[#065f46] font-bold flex items-center justify-center text-sm shadow-2xs border border-emerald-200 shrink-0 select-none"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#d1fae5] text-[#065f46] font-black flex items-center justify-center text-xs sm:text-sm shadow-2xs border border-emerald-300 shrink-0 select-none"
               title="Vishwakarma Admin"
             >
               A

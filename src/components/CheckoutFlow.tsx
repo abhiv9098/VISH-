@@ -27,7 +27,8 @@ import {
   ExternalLink, 
   Copy, 
   Check, 
-  Smartphone 
+  Smartphone,
+  ChevronRight
 } from 'lucide-react';
 import Image from 'next/image';
 import QRCode from 'qrcode';
@@ -67,6 +68,13 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSubmittingRef = useRef(false);
 
+  // Smooth scroll to top on step transition
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [step]);
+
   const [customerInfo, setCustomerInfo] = useState({
     name: customerProfile?.name || '',
     phone: customerProfile?.phone || '',
@@ -83,6 +91,7 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
   });
 
   const [paymentChoice, setPaymentChoice] = useState<'online' | 'cod'>('online');
+  const [paymentSplit, setPaymentSplit] = useState<'full' | 'half'>('full');
   const [txnId, setTxnId] = useState('');
   const [txnError, setTxnError] = useState('');
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
@@ -111,12 +120,17 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
   const deliveryCharge = subtotal >= (deliverySettings.threshold || 500) ? 0 : (deliverySettings.chargeBelow || 50);
   const total = subtotal + deliveryCharge;
 
+  // Split amounts (Full vs Half Advance)
+  const halfAmount = Math.round(total / 2);
+  const payableAmount = paymentSplit === 'half' ? halfAmount : total;
+  const remainingOnDelivery = total - payableAmount;
+
   const upiId = '9893249212@mbk';
   const payeeName = 'Vishwakarma Atta Chakki';
-  const upiPayUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${total}&cu=INR&tn=${encodeURIComponent(`Vishwakarma Atta Order Rs.${total}`)}`;
+  const upiPayUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${payableAmount}&cu=INR&tn=${encodeURIComponent(`Vishwakarma Atta Order Rs.${payableAmount}`)}`;
 
   useEffect(() => {
-    if (total > 0) {
+    if (payableAmount > 0) {
       QRCode.toDataURL(upiPayUrl, {
         width: 320,
         margin: 2,
@@ -129,7 +143,7 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
         .then((url) => setQrCodeUrl(url))
         .catch((err) => console.error('Failed to generate UPI QR:', err));
     }
-  }, [total, upiPayUrl]);
+  }, [payableAmount, upiPayUrl]);
 
   const handleCopyUpi = () => {
     try {
@@ -225,7 +239,7 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
   const placeOrder = async () => {
     if (isSubmittingRef.current || isSubmitting) return;
 
-    if (paymentChoice === 'online' && txnId.trim().length < 6) {
+    if (paymentChoice === 'online' && txnId.trim().length > 0 && txnId.trim().length < 6) {
       setTxnError('Please enter a valid Transaction / UTR ID.');
       return;
     }
@@ -260,17 +274,20 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
       const chosenSpeed = (feasibility.isExpressAvailable && deliverySpeed === 'express') ? 'express' : 'standard';
       const chosenEta = chosenSpeed === 'express' ? feasibility.estimatedDeliveryTime : feasibility.standardDeliveryTime;
 
+      const actualPaid = paymentChoice === 'online' ? payableAmount : 0;
+      const actualRemaining = paymentChoice === 'online' ? remainingOnDelivery : total;
+
       await addOrder({
         id: newOrderId,
         date: new Date().toISOString(),
         status: 'Order Placed',
         total: total,
-        advancePaid: paymentChoice === 'online' ? total : 0,
-        remainingAmount: paymentChoice === 'cod' ? total : 0,
+        advancePaid: actualPaid,
+        remainingAmount: actualRemaining,
         deliveryType: chosenSpeed,
         estimatedDelivery: chosenEta,
         paymentMethod: paymentChoice,
-        transactionId: paymentChoice === 'online' ? txnId : undefined,
+        transactionId: paymentChoice === 'online' ? (txnId || undefined) : undefined,
         items: cart,
         customerInfo: {
           name: customerInfo.name,
@@ -336,7 +353,7 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
     : title;
 
   return (
-    <div className="min-h-[85vh] bg-[#fdfbf7] py-8 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+    <div className="min-h-[85vh] bg-[#fdfbf7] pt-4 sm:pt-6 pb-32 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
       
       {/* Page Title */}
       <div className="flex justify-between items-center mb-6">
@@ -548,7 +565,7 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
 
             <button 
               onClick={() => setStep(2)}
-              className="w-full bg-amber-500 hover:bg-amber-600 text-emerald-950 font-black text-sm py-3.5 rounded-xl transition flex justify-center items-center gap-2 cursor-pointer shadow-md"
+              className="w-full bg-amber-500 hover:bg-amber-600 text-emerald-950 font-black text-sm py-3.5 rounded-xl transition flex justify-center items-center gap-2 cursor-pointer shadow-md active:scale-95"
             >
               {language === 'hi' ? 'पते पर आगे बढ़ें' : 'Proceed to Address'} <ArrowRight size={16} />
             </button>
@@ -770,7 +787,7 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
 
               <button 
                 type="submit" 
-                className="w-full mt-4 bg-amber-500 hover:bg-amber-600 text-emerald-950 font-black text-sm py-3.5 rounded-xl transition flex justify-center items-center gap-2 cursor-pointer shadow-md"
+                className="w-full mt-4 bg-amber-500 hover:bg-amber-600 text-emerald-950 font-black text-sm py-3.5 rounded-xl transition flex justify-center items-center gap-2 cursor-pointer shadow-md active:scale-95"
               >
                 {language === 'hi' ? 'भुगतान पर आगे बढ़ें' : 'Proceed to Payment'} <ArrowRight size={16} />
               </button>
@@ -780,62 +797,123 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
 
         {/* STEP 3: PAYMENT */}
         {step === 3 && (
-          <div className="p-5 sm:p-8 space-y-6">
+          <div className="p-4 sm:p-8 space-y-5">
             <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
-              <button onClick={handleBack} className="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
-                <ArrowLeft size={16} />
+              <button 
+                onClick={handleBack} 
+                className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer"
+                title="Go back"
+              >
+                <ArrowLeft size={18} />
               </button>
               <div>
-                <h2 className="text-lg font-black text-slate-900">{t('selectPaymentMode')}</h2>
+                <h2 className="text-lg sm:text-xl font-black text-slate-900">{t('selectPaymentMode')}</h2>
                 <p className="text-xs text-slate-500">
                   {language === 'hi' ? 'ऑनलाइन भुगतान करें या कैश ऑन डिलीवरी चुनें' : 'Pay securely online or choose Cash on Delivery'}
                 </p>
               </div>
             </div>
 
+            {/* Payment Method Option Cards (Matching Screenshot 2026-10-30 211057.png) */}
             <div className="space-y-3">
-              <label className={`flex items-center gap-3 p-4 border rounded-2xl cursor-pointer transition ${paymentChoice === 'online' ? 'border-emerald-800 bg-emerald-50/50 ring-2 ring-emerald-800/20' : 'border-slate-200'}`}>
-                <input 
-                  type="radio" 
-                  name="paymentChoice" 
-                  value="online" 
-                  checked={paymentChoice === 'online'} 
-                  onChange={() => setPaymentChoice('online')}
-                  className="w-4 h-4 text-emerald-800"
-                />
-                <div>
-                  <p className="font-black text-slate-900 text-xs sm:text-sm">{t('upiOnline')}</p>
-                  <p className="text-[11px] text-slate-500">
-                    {language === 'hi' ? '100% सुरक्षित तुरंत डिजिटल भुगतान' : '100% Secure instant contactless payment'}
-                  </p>
+              {/* Option 1: UPI / Online Payment */}
+              <div 
+                onClick={() => setPaymentChoice('online')}
+                className={`p-3.5 sm:p-4 rounded-2xl cursor-pointer transition flex items-center justify-between border-2 select-none ${
+                  paymentChoice === 'online' 
+                    ? 'border-[#0f6848] bg-[#f0f9f4] shadow-xs' 
+                    : 'border-slate-200 bg-white hover:border-slate-300'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${paymentChoice === 'online' ? 'bg-[#0f6848]/10 text-[#0f6848]' : 'bg-slate-100 text-slate-600'}`}>
+                    <QrCode size={22} />
+                  </div>
+                  <div>
+                    <p className="font-black text-slate-900 text-xs sm:text-sm">{t('upiOnline')}</p>
+                    <p className="text-[11px] text-slate-500">
+                      {language === 'hi' ? '(आधा / पूरा भुगतान)' : '(Half / Full Payment)'}
+                    </p>
+                  </div>
                 </div>
-              </label>
+                <ChevronRight size={18} className={paymentChoice === 'online' ? 'text-[#0f6848]' : 'text-slate-400'} />
+              </div>
 
-              <label className={`flex items-center gap-3 p-4 border rounded-2xl cursor-pointer transition ${paymentChoice === 'cod' ? 'border-emerald-800 bg-emerald-50/50 ring-2 ring-emerald-800/20' : 'border-slate-200'}`}>
-                <input 
-                  type="radio" 
-                  name="paymentChoice" 
-                  value="cod" 
-                  checked={paymentChoice === 'cod'} 
-                  onChange={() => setPaymentChoice('cod')}
-                  className="w-4 h-4 text-emerald-800"
-                />
-                <div>
-                  <p className="font-black text-slate-900 text-xs sm:text-sm">{t('cod')}</p>
-                  <p className="text-[11px] text-slate-500">
-                    {language === 'hi' ? `डिलीवरी के समय ₹${total} नकद भुगतान करें` : `Pay ₹${total} in cash upon order delivery`}
-                  </p>
+              {/* Option 2: Cash on Delivery */}
+              <div 
+                onClick={() => setPaymentChoice('cod')}
+                className={`p-3.5 sm:p-4 rounded-2xl cursor-pointer transition flex items-center justify-between border-2 select-none ${
+                  paymentChoice === 'cod' 
+                    ? 'border-[#0f6848] bg-[#f0f9f4] shadow-xs' 
+                    : 'border-slate-200 bg-white hover:border-slate-300'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${paymentChoice === 'cod' ? 'bg-[#0f6848]/10 text-[#0f6848]' : 'bg-slate-100 text-slate-600'}`}>
+                    <Banknote size={22} />
+                  </div>
+                  <div>
+                    <p className="font-black text-slate-900 text-xs sm:text-sm">{t('cod')}</p>
+                    <p className="text-[11px] text-slate-500">
+                      {language === 'hi' ? `(डिलीवरी के समय ₹${total} नकद भुगतान)` : '(Available after payment)'}
+                    </p>
+                  </div>
                 </div>
-              </label>
+                {paymentChoice === 'cod' ? (
+                  <div className="w-5 h-5 rounded-full bg-[#0f6848] text-white flex items-center justify-center shadow-2xs">
+                    <Check size={12} strokeWidth={3} />
+                  </div>
+                ) : (
+                  <div className="w-5 h-5 rounded-full border border-slate-300" />
+                )}
+              </div>
             </div>
 
             {paymentChoice === 'online' && (
-              <div className="bg-gradient-to-b from-slate-50 to-white p-4 sm:p-5 rounded-2xl border-2 border-emerald-800/20 text-center space-y-3.5 shadow-2xs">
+              <div className="bg-gradient-to-b from-slate-50 to-white p-4 sm:p-5 rounded-2xl border-2 border-emerald-800/20 text-center space-y-3.5 shadow-2xs animate-in fade-in">
                 
                 {/* Header Badge */}
                 <div className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-950 px-3 py-1 rounded-full text-xs font-black">
                   <QrCode size={14} className="text-emerald-800" />
                   <span>{language === 'hi' ? 'UPI क्यूआर कोड स्कैन करके भुगतान करें' : 'Scan QR Code with Any UPI App'}</span>
+                </div>
+
+                {/* Half / Full Payment Selection Toggle */}
+                <div className="bg-white p-3 rounded-xl border border-emerald-800/15 text-left space-y-2">
+                  <label className="text-xs font-bold text-slate-700 block">
+                    {language === 'hi' ? 'भुगतान का विकल्प चुनें:' : 'Select Payment Option:'}
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentSplit('full')}
+                      className={`p-2.5 rounded-xl border text-left transition cursor-pointer ${
+                        paymentSplit === 'full'
+                          ? 'border-[#0f6848] bg-[#f0f9f4] ring-2 ring-[#0f6848]/20'
+                          : 'border-slate-200 bg-white hover:bg-slate-50'
+                      }`}
+                    >
+                      <p className="text-xs font-bold text-slate-900">{language === 'hi' ? 'पूरा भुगतान' : 'Full Payment'}</p>
+                      <p className="text-base font-black text-[#0f6848]">₹{total}</p>
+                      <p className="text-[10px] text-slate-500">{language === 'hi' ? '100% ऑनलाइन' : '100% Online'}</p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPaymentSplit('half')}
+                      className={`p-2.5 rounded-xl border text-left transition cursor-pointer ${
+                        paymentSplit === 'half'
+                          ? 'border-[#0f6848] bg-[#f0f9f4] ring-2 ring-[#0f6848]/20'
+                          : 'border-slate-200 bg-white hover:bg-slate-50'
+                      }`}
+                    >
+                      <p className="text-xs font-bold text-slate-900">{language === 'hi' ? 'आधा एडवांस (50%)' : 'Half Advance (50%)'}</p>
+                      <p className="text-base font-black text-[#0f6848]">₹{halfAmount}</p>
+                      <p className="text-[10px] text-slate-500">
+                        {language === 'hi' ? `बाकी ₹${total - halfAmount} डिलीवरी पर` : `Bal. ₹${total - halfAmount} on Delivery`}
+                      </p>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Amount to Pay */}
@@ -844,7 +922,7 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
                     {language === 'hi' ? 'भुगतान राशि' : 'Amount to Pay'}
                   </p>
                   <p className="text-2xl sm:text-3xl font-black text-emerald-950 tracking-tight">
-                    ₹{total}
+                    ₹{payableAmount}
                   </p>
                 </div>
 
@@ -853,7 +931,7 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
                   {qrCodeUrl ? (
                     <img 
                       src={qrCodeUrl} 
-                      alt={`UPI QR Code to Pay ₹${total} to ${upiId}`}
+                      alt={`UPI QR Code to Pay ₹${payableAmount} to ${upiId}`}
                       className="w-48 h-48 sm:w-56 sm:h-56 mx-auto rounded-xl object-contain block"
                     />
                   ) : (
@@ -912,7 +990,7 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
                 {/* Transaction ID / UTR Input */}
                 <div className="max-w-xs mx-auto text-left pt-2 border-t border-slate-200">
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    {language === 'hi' ? 'ट्रांजेक्शन आईडी / UTR *' : 'Transaction ID / UTR *'}
+                    {language === 'hi' ? 'ट्रांजेक्शन आईडी / UTR (वैकल्पिक)' : 'Transaction ID / UTR (Optional)'}
                   </label>
                   <input 
                     type="text" 
@@ -936,6 +1014,11 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
               <div>
                 <span className="text-xs text-slate-500">{t('grandTotal')}:</span>
                 <p className="text-xl font-black text-emerald-950">₹{total}</p>
+                {paymentChoice === 'online' && paymentSplit === 'half' && (
+                  <p className="text-[11px] text-[#0f6848] font-bold">
+                    (₹{payableAmount} Now + ₹{remainingOnDelivery} COD)
+                  </p>
+                )}
               </div>
 
               <button 
@@ -944,7 +1027,7 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
                 className={`w-full sm:w-auto px-8 py-3.5 rounded-xl font-black text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-md ${
                   isSubmitting 
                     ? 'bg-slate-300 text-slate-500 cursor-not-allowed pointer-events-none' 
-                    : 'bg-emerald-950 hover:bg-emerald-900 text-amber-400 cursor-pointer'
+                    : 'bg-emerald-950 hover:bg-emerald-900 text-amber-400 cursor-pointer active:scale-95'
                 }`}
               >
                 {isSubmitting 

@@ -2,7 +2,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Order } from '@/lib/data';
+import { Order, getStatusDeliveryTiming } from '@/lib/data';
 
 export type DeliverySettings = {
   threshold: number;
@@ -34,7 +34,7 @@ export type CustomerProfile = {
 type OrderContextType = {
   orders: Order[];
   addOrder: (order: Order) => Promise<boolean>;
-  updateOrderStatus: (orderId: string, status: Order['status'], estimatedDelivery?: string) => Promise<boolean>;
+  updateOrderStatus: (orderId: string, status: Order['status'], estimatedDelivery?: string, estimatedDeliveryTarget?: string) => Promise<boolean>;
   updateOrderEstimatedDelivery: (orderId: string, estimatedDelivery: string) => Promise<boolean>;
   verifyDeliveryCode: (orderId: string, inputCode: string) => Promise<{ success: boolean; error?: string }>;
   sendEtaNotification: (orderId: string, eta: string) => Promise<boolean>;
@@ -65,6 +65,8 @@ function areOrderListsEqual(listA: Order[], listB: Order[]): boolean {
       a.total !== b.total ||
       a.date !== b.date ||
       a.estimatedDelivery !== b.estimatedDelivery ||
+      a.estimatedDeliveryTarget !== b.estimatedDeliveryTarget ||
+      a.statusUpdatedAt !== b.statusUpdatedAt ||
       a.advancePaid !== b.advancePaid ||
       a.remainingAmount !== b.remainingAmount ||
       a.deliveryType !== b.deliveryType ||
@@ -266,21 +268,48 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateOrderStatus = async (orderId: string, status: Order['status'], estimatedDelivery?: string): Promise<boolean> => {
+  const updateOrderStatus = async (
+    orderId: string, 
+    status: Order['status'], 
+    estimatedDelivery?: string,
+    estimatedDeliveryTarget?: string
+  ): Promise<boolean> => {
     try {
+      const timing = getStatusDeliveryTiming(status);
+      const now = Date.now();
+      
+      let finalEta = estimatedDelivery;
+      let finalTarget = estimatedDeliveryTarget;
+
+      if (!finalEta && timing) {
+        finalEta = timing.estimatedDelivery;
+      }
+      if (finalTarget === undefined && timing) {
+        finalTarget = timing.durationMs ? new Date(now + timing.durationMs).toISOString() : '';
+      }
+
+      const statusUpdatedAt = new Date(now).toISOString();
+
       setOrders(prev => deduplicateOrders(prev.map(o => {
         if (o.id === orderId) {
           return {
             ...o,
             status,
-            ...(estimatedDelivery !== undefined ? { estimatedDelivery } : {})
+            statusUpdatedAt,
+            ...(finalEta !== undefined ? { estimatedDelivery: finalEta } : {}),
+            ...(finalTarget !== undefined ? { estimatedDeliveryTarget: finalTarget } : {})
           };
         }
         return o;
       })));
       
-      const payload: any = { id: orderId, status };
-      if (estimatedDelivery !== undefined) payload.estimatedDelivery = estimatedDelivery;
+      const payload: any = { 
+        id: orderId, 
+        status,
+        statusUpdatedAt
+      };
+      if (finalEta !== undefined) payload.estimatedDelivery = finalEta;
+      if (finalTarget !== undefined) payload.estimatedDeliveryTarget = finalTarget;
 
       const res = await fetch('/api/orders', {
         method: 'PUT',
@@ -302,12 +331,36 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
 
   const updateOrderEstimatedDelivery = async (orderId: string, estimatedDelivery: string): Promise<boolean> => {
     try {
-      setOrders(prev => deduplicateOrders(prev.map(o => o.id === orderId ? { ...o, estimatedDelivery } : o)));
+      let durationMs: number | null = null;
+      const lower = (estimatedDelivery || '').toLowerCase();
+      if (lower.includes('15 min')) durationMs = 15 * 60 * 1000;
+      else if (lower.includes('20 min')) durationMs = 20 * 60 * 1000;
+      else if (lower.includes('30 min')) durationMs = 30 * 60 * 1000;
+      else if (lower.includes('45 min')) durationMs = 45 * 60 * 1000;
+      else if (lower.includes('1.5 hour') || lower.includes('1.5 hr')) durationMs = 90 * 60 * 1000;
+      else if (lower.includes('1 hour') || lower.includes('1 hr')) durationMs = 60 * 60 * 1000;
+      else if (lower.includes('2 hour') || lower.includes('2 hr')) durationMs = 120 * 60 * 1000;
+      else if (lower.includes('3-4 hour')) durationMs = 210 * 60 * 1000;
+
+      const estimatedDeliveryTarget = durationMs ? new Date(Date.now() + durationMs).toISOString() : '';
+      const statusUpdatedAt = new Date().toISOString();
+
+      setOrders(prev => deduplicateOrders(prev.map(o => o.id === orderId ? { 
+        ...o, 
+        estimatedDelivery,
+        estimatedDeliveryTarget,
+        statusUpdatedAt
+      } : o)));
 
       const res = await fetch('/api/orders', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: orderId, estimatedDelivery })
+        body: JSON.stringify({ 
+          id: orderId, 
+          estimatedDelivery,
+          estimatedDeliveryTarget,
+          statusUpdatedAt
+        })
       });
 
       if (res.ok) {

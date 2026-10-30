@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import fs from 'fs';
 import path from 'path';
+import { getStatusDeliveryTiming } from '@/lib/data';
 
 const dataFilePath = path.join(process.cwd(), 'orders_data.json');
 
@@ -127,9 +128,24 @@ export async function PUT(request: Request) {
       return NextResponse.json({ success: true });
     }
 
-    const { id, status, estimatedDelivery, etaNotifiedAt } = body;
+    let { id, status, estimatedDelivery, estimatedDeliveryTarget, statusUpdatedAt, etaNotifiedAt } = body;
     if (!id) {
       return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+    }
+
+    if (status !== undefined) {
+      const timing = getStatusDeliveryTiming(status);
+      if (timing) {
+        if (estimatedDelivery === undefined) {
+          estimatedDelivery = timing.estimatedDelivery;
+        }
+        if (estimatedDeliveryTarget === undefined) {
+          estimatedDeliveryTarget = timing.durationMs ? new Date(Date.now() + timing.durationMs).toISOString() : '';
+        }
+      }
+      if (statusUpdatedAt === undefined) {
+        statusUpdatedAt = new Date().toISOString();
+      }
     }
 
     const data = fs.readFileSync(dataFilePath, 'utf8');
@@ -151,6 +167,8 @@ export async function PUT(request: Request) {
         const updated = { ...o };
         if (status !== undefined) updated.status = status;
         if (estimatedDelivery !== undefined) updated.estimatedDelivery = estimatedDelivery;
+        if (estimatedDeliveryTarget !== undefined) updated.estimatedDeliveryTarget = estimatedDeliveryTarget;
+        if (statusUpdatedAt !== undefined) updated.statusUpdatedAt = statusUpdatedAt;
         if (etaNotifiedAt !== undefined) updated.etaNotifiedAt = etaNotifiedAt;
         return updated;
       }

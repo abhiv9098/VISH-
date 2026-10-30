@@ -29,6 +29,227 @@ import {
 } from 'lucide-react';
 import OrderTracking from '@/components/OrderTracking';
 import CheckoutFlow from '@/components/CheckoutFlow';
+import { useOrderCountdown } from '@/lib/useOrderCountdown';
+
+function ActiveOrderCard({
+  order,
+  isNew,
+  isDetailsOpen,
+  onToggleDetails,
+  language,
+  customerProfile,
+  formatOrderDate,
+  formatOrderTime,
+  getStatusBadge
+}: {
+  order: any;
+  isNew: boolean;
+  isDetailsOpen: boolean;
+  onToggleDetails: () => void;
+  language: string;
+  customerProfile: any;
+  formatOrderDate: (date?: string) => string;
+  formatOrderTime: (date?: string) => string;
+  getStatusBadge: (status: string) => { label: string; bg: string; dot: string };
+}) {
+  const countdown = useOrderCountdown(order, language);
+  const statusMeta = getStatusBadge(order.status);
+
+  const safeName = order.customerInfo?.name || customerProfile?.name || 'Customer';
+  const safePhone = order.customerInfo?.phone || customerProfile?.phone || '';
+  const safeAddress = order.customerInfo?.address || customerProfile?.address || 'N/A';
+  const coords = order.customerInfo?.coordinates;
+  const mapsUrl = order.customerInfo?.liveLocationUrl || (coords ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(safeAddress)}`);
+
+  const isOnlinePaid = order.paymentMethod === 'online' || (order.advancePaid > 0 && order.advancePaid >= order.total);
+  const estDelivery = order.estimatedDelivery || (order.deliveryType === 'express' ? 'Within 2 hours' : 'Today in 3-4 hours');
+
+  return (
+    <div 
+      className={`bg-white rounded-xl border transition-all duration-300 shadow-2xs overflow-hidden ${
+        isNew 
+          ? 'border-emerald-500 ring-2 ring-emerald-500/20' 
+          : 'border-slate-200 hover:border-slate-300'
+      }`}
+    >
+      {/* 1. Header: Date & Status Badge with Live Countdown */}
+      <div className="bg-slate-50/80 px-3.5 py-2.5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-slate-600">
+            {language === 'hi' ? 'ऑर्डर की तारीख:' : 'Ordered on'}{' '}
+            <strong className="text-slate-900">{formatOrderDate(order.date)}, {formatOrderTime(order.date)}</strong>
+          </span>
+          {isNew && (
+            <span className="bg-emerald-600 text-white text-[9.5px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-2xs">
+              <Sparkles size={10} className="fill-white" />
+              <span>{language === 'hi' ? 'नया ऑर्डर' : 'New Order'}</span>
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {countdown.isDelivered ? (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-950 border border-emerald-300 shadow-2xs">
+              <Check size={11} className="text-emerald-700 stroke-[3]" />
+              <span><strong>{countdown.displayText}</strong></span>
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-50 text-amber-950 border border-amber-300 shadow-2xs">
+              <Clock size={11} className="text-amber-700" />
+              <span>{language === 'hi' ? 'समय:' : 'ETA:'} <strong className="font-mono">{countdown.displayText}</strong></span>
+            </span>
+          )}
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border ${statusMeta.bg}`}>
+            <span className={`w-2 h-2 rounded-full ${statusMeta.dot}`} />
+            <span>{statusMeta.label}</span>
+          </span>
+        </div>
+      </div>
+
+      {/* 2. Items List (Flipkart E-Commerce Product Rows) */}
+      <div className="p-3.5 space-y-3">
+        <div className="divide-y divide-slate-100">
+          {order.items?.map((item: any, idx: number) => {
+            const itemName = language === 'hi' && item.product?.nameHi ? item.product.nameHi : (item.product?.name || 'Chakki Fresh Atta');
+            const itemWeight = item.product?.weight || '5 KG';
+            const itemPrice = item.product?.price || 0;
+            const itemImage = item.product?.image || '/images/wheat_flour.jpg';
+
+            return (
+              <div key={idx} className="py-2 first:pt-0 last:pb-0 flex items-center gap-3">
+                <div className="relative w-14 h-14 rounded-lg bg-amber-50/40 border border-slate-200/80 overflow-hidden shrink-0">
+                  <Image 
+                    src={itemImage} 
+                    alt={itemName} 
+                    fill 
+                    className="object-cover" 
+                  />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-bold text-slate-900 text-xs sm:text-sm truncate">
+                    {itemName}
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    {language === 'hi' ? 'पैक:' : 'Pack:'} <span className="font-semibold text-slate-700">{itemWeight}</span>
+                    {' • '}
+                    {language === 'hi' ? 'मात्रा:' : 'Qty:'} <span className="font-bold text-emerald-800">{item.quantity}</span>
+                  </p>
+                  <p className="text-xs font-black text-slate-900 mt-0.5">
+                    ₹{itemPrice * item.quantity}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* 3. Flipkart 4-Stage Timeline Tracker */}
+        <div className="pt-2">
+          <OrderTracking 
+            currentStatus={order.status} 
+            city={order.customerInfo?.city || "Gurugram"} 
+            estimatedDelivery={estDelivery}
+            deliveryType={order.deliveryType}
+            order={order}
+          />
+        </div>
+
+        {/* 4. Delivery Address & Expected Arrival */}
+        <div className="bg-slate-50/70 rounded-xl p-3 border border-slate-200/80 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+          <div className="flex items-start gap-2 min-w-0 flex-1">
+            <MapPin size={14} className="text-emerald-700 shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <p className="font-bold text-slate-900 text-xs truncate">
+                {safeName} {safePhone ? `(${safePhone})` : ''}
+              </p>
+              <p className="text-[11px] text-slate-600 line-clamp-1 mt-0.5">
+                {safeAddress}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="bg-white px-2.5 py-1 rounded-lg border border-amber-300 text-[11px] flex items-center gap-1.5 shadow-2xs">
+              <Clock size={12} className="text-amber-700 shrink-0" />
+              <div>
+                <span className="text-[9px] font-bold text-slate-400 uppercase block leading-none">
+                  {language === 'hi' ? 'डिलीवरी समय' : 'Delivery Time'}
+                </span>
+                <span className="font-extrabold text-slate-900 leading-tight block">
+                  {countdown.isDelivered ? (
+                    <span className="text-emerald-800 font-bold">{countdown.displayText}</span>
+                  ) : (
+                    <span className="flex items-center gap-1">
+                      <span>{countdown.baseEstimate}</span>
+                      <span className="text-amber-700 font-mono text-[10.5px]">({countdown.displayText})</span>
+                    </span>
+                  )}
+                </span>
+              </div>
+            </div>
+
+            {mapsUrl && (
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline shrink-0 bg-white px-2 py-1.5 rounded-lg border border-slate-200"
+              >
+                <span>{language === 'hi' ? 'नक्शा देखें' : 'Map'}</span>
+                <ExternalLink size={10} />
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 5. Footer: Total, Payment Method & Toggle Details */}
+      <div className="bg-slate-50/60 px-3.5 py-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-slate-500 text-[11px]">
+            {language === 'hi' ? 'कुल राशि:' : 'Total Amount:'}
+          </span>
+          <span className="font-black text-sm text-slate-900">
+            ₹{order.total}
+          </span>
+          <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+            isOnlinePaid ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-900 border-amber-200'
+          }`}>
+            {isOnlinePaid ? <CreditCard size={10} /> : <Banknote size={10} />}
+            <span>{isOnlinePaid ? (language === 'hi' ? 'ऑनलाइन भुगतान' : 'Paid Online') : (language === 'hi' ? 'कैश ऑन डिलीवरी' : 'Cash on Delivery')}</span>
+          </span>
+        </div>
+
+        <button
+          onClick={onToggleDetails}
+          className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs hover:bg-slate-50 transition cursor-pointer"
+        >
+          <span>{isDetailsOpen ? (language === 'hi' ? 'कम विवरण' : 'Hide Details') : (language === 'hi' ? 'बिल विवरण' : 'Price Details')}</span>
+          {isDetailsOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+        </button>
+      </div>
+
+      {/* 6. Expandable Bill Details */}
+      {isDetailsOpen && (
+        <div className="p-3.5 bg-slate-50 border-t border-slate-200/80 space-y-1.5 text-xs">
+          <div className="flex justify-between text-slate-600">
+            <span>{language === 'hi' ? 'आइटम मूल्य:' : 'Items Subtotal:'}</span>
+            <span className="font-semibold text-slate-900">₹{order.total - 50 > 0 ? order.total - 50 : order.total}</span>
+          </div>
+          <div className="flex justify-between text-slate-600">
+            <span>{language === 'hi' ? 'डिलीवरी शुल्क:' : 'Delivery Charge:'}</span>
+            <span className="font-semibold text-emerald-800">{order.total - 50 > 0 ? '₹50' : (language === 'hi' ? 'मुफ्त' : 'FREE')}</span>
+          </div>
+          <div className="flex justify-between font-black text-xs text-slate-900 border-t border-slate-200 pt-1.5">
+            <span>{language === 'hi' ? 'अंतिम राशि:' : 'Final Payable:'}</span>
+            <span className="text-emerald-950 font-black">₹{order.total}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function MyOrdersContent() {
   const searchParams = useSearchParams();
@@ -151,175 +372,21 @@ function MyOrdersContent() {
     };
   };
 
-  // Render an individual Active / Current Purchase Card (Flipkart Style)
-  const renderActiveOrderCard = (order: any) => {
-    const isNew = newOrderId && order.id === newOrderId;
-    const isDetailsOpen = !!detailsVisible[order.id];
-    const statusMeta = getStatusBadge(order.status);
-
-    const safeName = order.customerInfo?.name || customerProfile?.name || 'Customer';
-    const safePhone = order.customerInfo?.phone || customerProfile?.phone || '';
-    const safeAddress = order.customerInfo?.address || customerProfile?.address || 'N/A';
-    const coords = order.customerInfo?.coordinates;
-    const mapsUrl = order.customerInfo?.liveLocationUrl || (coords ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(safeAddress)}`);
-
-    const isOnlinePaid = order.paymentMethod === 'online' || (order.advancePaid > 0 && order.advancePaid >= order.total);
-    const estDelivery = order.estimatedDelivery || (order.deliveryType === 'express' ? 'Within 2 hours' : 'Today in 3-4 hours');
-
-    return (
-      <div 
-        key={order.id} 
-        className={`bg-white rounded-xl border transition-all duration-300 shadow-2xs overflow-hidden ${
-          isNew 
-            ? 'border-emerald-500 ring-2 ring-emerald-500/20' 
-            : 'border-slate-200 hover:border-slate-300'
-        }`}
-      >
-        {/* 1. Header: Date & Status Badge (Clean, No ODR) */}
-        <div className="bg-slate-50/80 px-3.5 py-2.5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-600">
-              {language === 'hi' ? 'ऑर्डर की तारीख:' : 'Ordered on'}{' '}
-              <strong className="text-slate-900">{formatOrderDate(order.date)}, {formatOrderTime(order.date)}</strong>
-            </span>
-            {isNew && (
-              <span className="bg-emerald-600 text-white text-[9.5px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-2xs">
-                <Sparkles size={10} className="fill-white" />
-                <span>{language === 'hi' ? 'नया ऑर्डर' : 'New Order'}</span>
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border ${statusMeta.bg}`}>
-              <span className={`w-2 h-2 rounded-full ${statusMeta.dot}`} />
-              <span>{statusMeta.label}</span>
-            </span>
-          </div>
-        </div>
-
-        {/* 2. Items List (Flipkart E-Commerce Product Rows) */}
-        <div className="p-3.5 space-y-3">
-          <div className="divide-y divide-slate-100">
-            {order.items?.map((item: any, idx: number) => {
-              const itemName = language === 'hi' && item.product?.nameHi ? item.product.nameHi : (item.product?.name || 'Chakki Fresh Atta');
-              const itemWeight = item.product?.weight || '5 KG';
-              const itemPrice = item.product?.price || 0;
-              const itemImage = item.product?.image || '/images/wheat_flour.jpg';
-
-              return (
-                <div key={idx} className="py-2 first:pt-0 last:pb-0 flex items-center gap-3">
-                  <div className="relative w-14 h-14 rounded-lg bg-amber-50/40 border border-slate-200/80 overflow-hidden shrink-0">
-                    <Image 
-                      src={itemImage} 
-                      alt={itemName} 
-                      fill 
-                      className="object-cover" 
-                    />
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-slate-900 text-xs sm:text-sm truncate">
-                      {itemName}
-                    </h4>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
-                      {language === 'hi' ? 'पैक:' : 'Pack:'} <span className="font-semibold text-slate-700">{itemWeight}</span>
-                      {' • '}
-                      {language === 'hi' ? 'मात्रा:' : 'Qty:'} <span className="font-bold text-emerald-800">{item.quantity}</span>
-                    </p>
-                    <p className="text-xs font-black text-slate-900 mt-0.5">
-                      ₹{itemPrice * item.quantity}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* 3. Flipkart 4-Stage Timeline Tracker */}
-          <div className="pt-2">
-            <OrderTracking 
-              currentStatus={order.status} 
-              city={order.customerInfo?.city || "Gurugram"} 
-              estimatedDelivery={estDelivery}
-              deliveryType={order.deliveryType}
-            />
-          </div>
-
-          {/* 4. Delivery Address & Expected Arrival */}
-          <div className="bg-slate-50/70 rounded-xl p-3 border border-slate-200/80 flex flex-wrap items-center justify-between gap-2 text-xs">
-            <div className="flex items-start gap-2 min-w-0 flex-1">
-              <MapPin size={14} className="text-emerald-700 shrink-0 mt-0.5" />
-              <div className="min-w-0">
-                <p className="font-bold text-slate-900 text-xs truncate">
-                  {safeName} {safePhone ? `(${safePhone})` : ''}
-                </p>
-                <p className="text-[11px] text-slate-600 line-clamp-1 mt-0.5">
-                  {safeAddress}
-                </p>
-              </div>
-            </div>
-
-            {mapsUrl && (
-              <a
-                href={mapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline shrink-0"
-              >
-                <span>{language === 'hi' ? 'नक्शा देखें' : 'View on Map'}</span>
-                <ExternalLink size={10} />
-              </a>
-            )}
-          </div>
-        </div>
-
-        {/* 5. Footer: Total, Payment Method & Toggle Details */}
-        <div className="bg-slate-50/60 px-3.5 py-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-500 text-[11px]">
-              {language === 'hi' ? 'कुल राशि:' : 'Total Amount:'}
-            </span>
-            <span className="font-black text-sm text-slate-900">
-              ₹{order.total}
-            </span>
-            <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md border ${
-              isOnlinePaid ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-900 border-amber-200'
-            }`}>
-              {isOnlinePaid ? <CreditCard size={10} /> : <Banknote size={10} />}
-              <span>{isOnlinePaid ? (language === 'hi' ? 'ऑनलाइन भुगतान' : 'Paid Online') : (language === 'hi' ? 'कैश ऑन डिलीवरी' : 'Cash on Delivery')}</span>
-            </span>
-          </div>
-
-          <button
-            onClick={() => toggleDetails(order.id)}
-            className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs hover:bg-slate-50 transition cursor-pointer"
-          >
-            <span>{isDetailsOpen ? (language === 'hi' ? 'कम विवरण' : 'Hide Details') : (language === 'hi' ? 'बिल विवरण' : 'Price Details')}</span>
-            {isDetailsOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-          </button>
-        </div>
-
-        {/* 6. Expandable Bill Details */}
-        {isDetailsOpen && (
-          <div className="p-3.5 bg-slate-50 border-t border-slate-200/80 space-y-1.5 text-xs">
-            <div className="flex justify-between text-slate-600">
-              <span>{language === 'hi' ? 'आइटम मूल्य:' : 'Items Subtotal:'}</span>
-              <span className="font-semibold text-slate-900">₹{order.total - 50 > 0 ? order.total - 50 : order.total}</span>
-            </div>
-            <div className="flex justify-between text-slate-600">
-              <span>{language === 'hi' ? 'डिलीवरी शुल्क:' : 'Delivery Charge:'}</span>
-              <span className="font-semibold text-emerald-800">{order.total - 50 > 0 ? '₹50' : (language === 'hi' ? 'मुफ्त' : 'FREE')}</span>
-            </div>
-            <div className="flex justify-between font-black text-xs text-slate-900 border-t border-slate-200 pt-1.5">
-              <span>{language === 'hi' ? 'अंतिम राशि:' : 'Final Payable:'}</span>
-              <span className="text-emerald-950 font-black">₹{order.total}</span>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
+  // Render an individual Active / Current Purchase Card (Flipkart Style with Live Countdown)
+  const renderActiveOrderCard = (order: any) => (
+    <ActiveOrderCard
+      key={order.id}
+      order={order}
+      isNew={Boolean(newOrderId && order.id === newOrderId)}
+      isDetailsOpen={Boolean(detailsVisible[order.id])}
+      onToggleDetails={() => toggleDetails(order.id)}
+      language={language}
+      customerProfile={customerProfile}
+      formatOrderDate={formatOrderDate}
+      formatOrderTime={formatOrderTime}
+      getStatusBadge={getStatusBadge}
+    />
+  );
 
   // Render an individual Previous Purchase Card (Order History)
   const renderHistoryOrderCard = (order: any) => {
