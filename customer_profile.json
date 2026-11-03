@@ -6,12 +6,12 @@
   "state": "Madhya Pradesh",
   "district": "Dewas",
   "city": "Sonkach",
-  "locality": "",
+  "locality": "Chhatrasal Nagar",
   "pincode": "455118",
   "address": "Sonkach, Sonkatch Tahsil, Dewas, Madhya Pradesh, 455118, India",
   "coordinates": {
-    "lat": 22.974466679070655,
-    "lng": 76.35954900596344
+    "lat": 22.974471,
+    "lng": 76.359503
   },
   "isVerified": true
 }

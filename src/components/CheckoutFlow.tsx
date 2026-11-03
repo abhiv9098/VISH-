@@ -25,7 +25,6 @@ import {
   AlertTriangle, 
   Loader2, 
   ExternalLink, 
-  Copy, 
   Check, 
   Smartphone,
   ChevronRight
@@ -93,7 +92,6 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
   const [paymentChoice, setPaymentChoice] = useState<'online' | 'cod'>('online');
   const [paymentSplit, setPaymentSplit] = useState<'full' | 'half'>('full');
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
-  const [copiedUpi, setCopiedUpi] = useState(false);
 
   // Delivery charge calculation
   const defaultFeasibility = {
@@ -142,14 +140,6 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
         .catch((err) => console.error('Failed to generate UPI QR:', err));
     }
   }, [payableAmount, upiPayUrl]);
-
-  const handleCopyUpi = () => {
-    try {
-      navigator.clipboard.writeText(upiId);
-      setCopiedUpi(true);
-      setTimeout(() => setCopiedUpi(false), 2000);
-    } catch {}
-  };
 
   // Sync with customerProfile when loaded
   useEffect(() => {
@@ -955,31 +945,6 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
                   </p>
                 </div>
 
-                {/* UPI ID with 1-click Copy */}
-                <div className="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 flex flex-wrap items-center justify-center gap-2 max-w-sm mx-auto">
-                  <span className="text-xs text-slate-600 font-bold">UPI ID:</span>
-                  <span className="font-mono text-xs font-black text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-300 select-all">
-                    {upiId}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleCopyUpi}
-                    className="inline-flex items-center gap-1 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-900 border border-slate-300 px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer active:scale-95 shadow-2xs"
-                    title="Copy UPI ID"
-                  >
-                    {copiedUpi ? (
-                      <>
-                        <Check size={13} className="text-emerald-700" />
-                        <span className="text-emerald-700 font-black">{language === 'hi' ? 'कॉपी हो गया' : 'Copied!'}</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={13} />
-                        <span>{language === 'hi' ? 'कॉपी करें' : 'Copy'}</span>
-                      </>
-                    )}
-                  </button>
-                </div>
 
               </div>
             )}

@@ -306,16 +306,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </Link>
             )}
 
-            {/* Quick Lock Button */}
-            <button
-              onClick={handleLockSession}
-              className="p-2 text-gray-600 hover:text-amber-800 hover:bg-amber-50 rounded-xl border border-gray-200 active:bg-amber-100 transition cursor-pointer touch-manipulation"
-              title="Lock Admin Panel"
-              aria-label="Lock Admin"
-            >
-              <Lock size={16} />
-            </button>
-
             {/* Admin Avatar Circle */}
             <div 
               className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#d1fae5] text-[#065f46] font-black flex items-center justify-center text-xs sm:text-sm shadow-2xs border border-emerald-300 shrink-0 select-none"

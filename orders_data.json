@@ -1,1 +1,59 @@
-[]
+[
+  {
+    "id": "ORD-9628125709",
+    "date": "2026-11-03T10:32:42.812Z",
+    "status": "Order Placed",
+    "total": 330,
+    "advancePaid": 330,
+    "remainingAmount": 0,
+    "deliveryType": "standard",
+    "estimatedDelivery": "Today in 3-4 hrs (by 8:02 pm)",
+    "paymentMethod": "online",
+    "items": [
+      {
+        "product": {
+          "id": "p1",
+          "name": "Gehu ka Atta (Whole Wheat Flour)",
+          "nameHi": "गेहूं का आटा (होल व्हीट)",
+          "weight": "5 KG",
+          "price": 280,
+          "originalPrice": 330,
+          "discount": 15,
+          "rating": 4.8,
+          "reviews": 1245,
+          "image": "/images/wheat_flour.jpg",
+          "description": "Freshly milled from premium MP Sharbati wheat. Our chakki fresh gehu atta makes the softest rotis.",
+          "descriptionHi": "प्रीमियम एमपी शरबती गेहूं से ताज़ा पीसा गया। हमारा चक्की फ्रेश आटा सबसे नरम रोटियां बनाता है।",
+          "benefits": [
+            "High in fiber",
+            "No added preservatives",
+            "Milled upon order for freshness"
+          ],
+          "ingredients": [
+            "100% Sharbati Whole Wheat"
+          ],
+          "category": "Gehu Atta",
+          "inStock": true
+        },
+        "quantity": 1
+      }
+    ],
+    "customerInfo": {
+      "name": "abhishek",
+      "phone": "9893249212",
+      "email": "",
+      "address": "Sonkach, Sonkatch Tahsil, Dewas, Madhya Pradesh, 455118, India, Chhatrasal Nagar, Sonkach, Dewas, Madhya Pradesh, 455118, India",
+      "locality": "Chhatrasal Nagar",
+      "city": "Sonkach",
+      "district": "Dewas",
+      "state": "Madhya Pradesh",
+      "pincode": "455118",
+      "country": "India",
+      "coordinates": {
+        "lat": 22.974471,
+        "lng": 76.359503
+      },
+      "liveLocationUrl": "https://www.google.com/maps?q=22.974471,76.359503"
+    }
+  }
+]

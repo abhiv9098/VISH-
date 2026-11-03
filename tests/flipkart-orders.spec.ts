@@ -129,6 +129,12 @@ test.describe('Flipkart-style Orders Redesign & Normal Delivery Flow', () => {
 
     // 2. ADMIN VIEW & NORMAL DELIVER ACTION VERIFICATION
     const adminContext = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+    await adminContext.addInitScript(() => {
+      localStorage.setItem('vishwakarma_admin_session', JSON.stringify({
+        token: 'test-session',
+        expiresAt: Date.now() + 86400000 * 30
+      }));
+    });
     const adminPage = await adminContext.newPage();
     await adminPage.goto('/admin/orders');
     await adminPage.waitForLoadState('networkidle');
