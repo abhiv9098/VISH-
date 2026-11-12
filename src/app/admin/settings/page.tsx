@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { 
   Settings, 
   Store, 
@@ -18,7 +19,11 @@ import {
   Lock,
   KeyRound,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  Smartphone,
+  QrCode,
+  Copy,
+  Wifi
 } from 'lucide-react';
 import { useOrders } from '@/context/OrderContext';
 
@@ -78,6 +83,7 @@ export default function SettingsPage() {
   const [pinSuccess, setPinSuccess] = useState<string | null>(null);
   const [pinError, setPinError] = useState<string | null>(null);
   const [isDefaultPin, setIsDefaultPin] = useState<boolean>(true);
+  const [copiedLink, setCopiedLink] = useState<boolean>(false);
 
   useEffect(() => {
     // Fetch PIN status
@@ -382,6 +388,88 @@ export default function SettingsPage() {
             </div>
           </div>
         </form>
+      </div>
+
+      {/* 0.1 Dedicated Mobile Admin Panel Link & QR Code Section */}
+      <div className="bg-gradient-to-br from-[#062e1e] to-[#042015] text-white p-4 sm:p-5 rounded-2xl border border-emerald-500/30 shadow-md space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-emerald-800/60">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-amber-400 text-[#062e1e] flex items-center justify-center shrink-0 shadow-xs">
+              <Smartphone size={20} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-white">Mobile Admin Panel Link & QR Code</h3>
+                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                  Mobile Friendly
+                </span>
+              </div>
+              <p className="text-[11px] text-emerald-200/80">
+                Open Vishwakarma Admin directly on your smartphone (Android / iPhone)
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 bg-amber-400/10 px-2.5 py-1 rounded-lg border border-amber-400/20">
+              <Wifi size={13} /> Same Wi-Fi Required
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+          {/* QR Code */}
+          <div className="flex flex-col items-center justify-center p-3 bg-white rounded-xl shadow-xs">
+            <div className="relative w-36 h-36">
+              <Image 
+                src="/images/admin_qr_code.png" 
+                alt="Mobile Admin QR Code" 
+                fill 
+                className="object-contain" 
+              />
+            </div>
+            <span className="text-[10px] font-bold text-gray-700 mt-1 flex items-center gap-1">
+              <QrCode size={12} className="text-[#062e1e]" /> Scan with Phone Camera
+            </span>
+          </div>
+
+          {/* Direct Link & Instructions */}
+          <div className="md:col-span-2 space-y-3 text-xs">
+            <div>
+              <label className="block text-[11px] font-bold text-emerald-200/90 mb-1">Direct Mobile Browser Link:</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value="http://192.168.29.236:4000/admin"
+                  className="w-full px-3 py-2 bg-black/40 border border-emerald-500/40 rounded-xl text-amber-300 font-mono text-xs select-all outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard?.writeText('http://192.168.29.236:4000/admin');
+                    setCopiedLink(true);
+                    setTimeout(() => setCopiedLink(false), 3000);
+                  }}
+                  className="bg-amber-400 hover:bg-amber-300 text-[#062e1e] font-black px-3.5 py-2 rounded-xl text-xs transition shrink-0 cursor-pointer active:scale-95 flex items-center gap-1"
+                >
+                  <Copy size={13} />
+                  <span>{copiedLink ? 'Copied!' : 'Copy'}</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-black/30 p-3 rounded-xl border border-emerald-500/20 space-y-1.5 text-[11px] text-emerald-100/90 leading-relaxed">
+              <p className="font-bold text-amber-300">📱 Mobile पर चलाने के आसान स्टेप्स:</p>
+              <ol className="list-decimal list-inside space-y-1 text-emerald-200/80">
+                <li>सुनिश्चित करें कि आपका <strong>Mobile और Laptop एक ही Wi-Fi / Hotspot</strong> से जुड़े हैं।</li>
+                <li>ऊपर दिए गए लिंक <strong>http://192.168.29.236:4000/admin</strong> को अपने मोबाइल के Chrome/Safari में खोलें या QR कोड स्कैन करें।</li>
+                <li>Admin 6-digit PIN डालें: <strong className="text-amber-300">123456</strong></li>
+                <li>मोबाइल में <strong>"Add to Home screen"</strong> करें ताकि यह सीधे ऐप की तरह खुल सके!</li>
+              </ol>
+            </div>
+          </div>
+        </div>
       </div>
 
       <form onSubmit={handleSave} className="space-y-4">

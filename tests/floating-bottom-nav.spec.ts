@@ -16,9 +16,9 @@ test.describe('Modern Floating Bottom Navigation Bar', () => {
     await expect(bottomNav.getByText(/My Orders|मेरे ऑर्डर/i)).toBeVisible();
     await expect(bottomNav.getByText(/Profile|प्रोफ़ाइल/i)).toBeVisible();
 
-    // Verify Home tab is active on '/' (has soft light green background bg-[#e8f5ee])
+    // Verify Home tab is active on '/' (has brand warm cream background bg-[#FFF8ED])
     const homeTab = bottomNav.locator('a[href="/"]');
-    await expect(homeTab).toHaveClass(/bg-\[#e8f5ee\]/);
+    await expect(homeTab).toHaveClass(/bg-\[#FFF8ED\]/i);
 
     // Screenshot Home page mobile with floating nav
     await page.screenshot({ path: 'screenshots/bottom_nav_home_mobile.png' });
@@ -28,8 +28,8 @@ test.describe('Modern Floating Bottom Navigation Bar', () => {
     await ordersTab.click();
     await expect(page).toHaveURL(/\/order/);
 
-    // Verify My Orders tab is now active (has bg-[#e8f5ee])
-    await expect(ordersTab).toHaveClass(/bg-\[#e8f5ee\]/);
+    // Verify My Orders tab is now active (has bg-[#FFF8ED])
+    await expect(ordersTab).toHaveClass(/bg-\[#FFF8ED\]/i);
     await page.screenshot({ path: 'screenshots/bottom_nav_orders_mobile.png' });
 
     // 3. Click Profile tab
@@ -37,8 +37,8 @@ test.describe('Modern Floating Bottom Navigation Bar', () => {
     await profileTab.click();
     await expect(page).toHaveURL(/\/profile/);
 
-    // Verify Profile tab is now active (has bg-[#e8f5ee])
-    await expect(profileTab).toHaveClass(/bg-\[#e8f5ee\]/);
+    // Verify Profile tab is now active (has bg-[#FFF8ED])
+    await expect(profileTab).toHaveClass(/bg-\[#FFF8ED\]/i);
     await page.screenshot({ path: 'screenshots/bottom_nav_profile_mobile.png' });
   });
 });

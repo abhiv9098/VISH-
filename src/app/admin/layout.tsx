@@ -12,51 +12,56 @@ import {
   Package, 
   Menu, 
   X, 
-  Bell, 
-  Lock, 
-  KeyRound,
-  ShieldCheck,
-  RefreshCw 
+  Bell,
+  DoorOpen,
+  Store,
+  Sparkles
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useOrders } from '@/context/OrderContext';
-import AdminPinScreen from '@/components/AdminPinScreen';
-import AdminBottomNav from '@/components/AdminBottomNav';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const pathname = usePathname();
   const { newOrdersCount } = useOrders();
   const prevCountRef = useRef(newOrdersCount);
+  const [mounted, setMounted] = useState(false);
 
-  // Set page title
+  // Set page title & track client mount
   useEffect(() => {
+    setMounted(true);
     document.title = "Vishwakarma Atta Chakki - Admin Panel";
   }, []);
 
-  // Check persistent session on initial mount
+  // Close mobile sidebar on route change
   useEffect(() => {
-    try {
-      const sessionStr = localStorage.getItem('vishwakarma_admin_session');
-      if (sessionStr) {
-        const session = JSON.parse(sessionStr);
-        if (session && session.expiresAt && Date.now() < session.expiresAt) {
-          setIsAuthenticated(true);
-          return;
-        } else {
-          localStorage.removeItem('vishwakarma_admin_session');
-        }
-      }
-    } catch {
-      localStorage.removeItem('vishwakarma_admin_session');
-    }
-    setIsAuthenticated(false);
+    setSidebarOpen(false);
+  }, [pathname]);
+
+  // Close mobile sidebar on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSidebarOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Prevent background scrolling when mobile sidebar is open
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [sidebarOpen]);
 
   // Play subtle chime when a new order arrives
   useEffect(() => {
-    if (isAuthenticated && newOrdersCount > prevCountRef.current) {
+    if (newOrdersCount > prevCountRef.current) {
       try {
         const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
         const osc = audioCtx.createOscillator();
@@ -73,42 +78,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       } catch {}
     }
     prevCountRef.current = newOrdersCount;
-  }, [newOrdersCount, isAuthenticated]);
+  }, [newOrdersCount]);
 
-  const handleLockSession = () => {
-    try {
-      localStorage.removeItem('vishwakarma_admin_session');
-    } catch {}
-    setIsAuthenticated(false);
-  };
-
-  // 1. Loading splash while verifying local storage session
-  if (isAuthenticated === null) {
-    return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#062e1e] text-white">
-        <div className="relative w-16 h-16 rounded-2xl overflow-hidden border border-emerald-400/40 shadow-xl mb-4 bg-[#042f2e] animate-pulse">
-          <Image 
-            src="/images/logo.png" 
-            alt="Vishwakarma Logo" 
-            fill 
-            sizes="64px"
-            className="object-cover" 
-          />
-        </div>
-        <p className="text-sm font-bold text-emerald-200 flex items-center gap-2">
-          <RefreshCw size={15} className="animate-spin text-amber-400" />
-          <span>Verifying Admin Access...</span>
-        </p>
-      </div>
-    );
-  }
-
-  // 2. 6-Digit PIN Screen if not authenticated
-  if (!isAuthenticated) {
-    return <AdminPinScreen onSuccess={() => setIsAuthenticated(true)} />;
-  }
-
-  // 3. Authenticated Admin View
+  // Admin View Navigation States
   const isDashboardActive = pathname === '/admin' || pathname === '/admin/';
   const isOrdersActive = pathname.startsWith('/admin/orders');
   const isProductsActive = pathname.startsWith('/admin/products');
@@ -136,7 +108,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       href: '/admin/orders',
       active: isOrdersActive,
       icon: ShoppingBag,
-      badge: newOrdersCount > 0 ? `${newOrdersCount} New` : null,
+      badge: mounted && newOrdersCount > 0 ? `${newOrdersCount} New` : null,
     },
     {
       name: 'Products',
@@ -163,49 +135,50 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex h-screen h-[100dvh] bg-[#f3f4f6] text-gray-900 overflow-hidden relative w-full font-sans antialiased">
-      {/* Mobile Sidebar Overlay with guaranteed touch & click handling */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 md:hidden transition-opacity cursor-pointer" 
-          onClick={() => setSidebarOpen(false)}
-          onTouchEnd={() => setSidebarOpen(false)}
-          role="button"
-          tabIndex={0}
-          aria-label="Close sidebar"
-        />
-      )}
-
-      {/* Sidebar - Forest Green Background (Desktop & Drawer) */}
-      <aside 
-        className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#062e1e] text-white flex flex-col transform transition-transform duration-300 ease-in-out shrink-0 ${
-          sidebarOpen 
-            ? 'translate-x-0 pointer-events-auto visible' 
-            : '-translate-x-full pointer-events-none invisible md:translate-x-0 md:pointer-events-auto md:visible'
+      {/* Mobile Sidebar Overlay with smooth fade */}
+      <div 
+        className={`fixed inset-0 bg-black/60 backdrop-blur-xs z-40 md:hidden transition-opacity duration-300 ease-in-out cursor-pointer ${
+          sidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
+        onClick={(e) => {
+          e.stopPropagation();
+          setSidebarOpen(false);
+        }}
+        role="button"
+        tabIndex={sidebarOpen ? 0 : -1}
+        aria-hidden={!sidebarOpen}
+        aria-label="Close sidebar overlay"
+      />
+
+      {/* Sidebar - Forest Green Background (Identical to Laptop, Smooth Mobile Drawer) */}
+      <aside 
+        className={`fixed md:static inset-y-0 left-0 z-50 w-72 max-w-[85vw] md:w-64 bg-[#062e1e] text-white flex flex-col transition-transform duration-300 ease-in-out shrink-0 shadow-2xl md:shadow-none ${
+          sidebarOpen 
+            ? 'translate-x-0 pointer-events-auto' 
+            : '-translate-x-full pointer-events-none md:translate-x-0 md:pointer-events-auto'
+        }`}
+        aria-label="Admin Navigation Sidebar"
       >
         {/* Brand Header */}
         <div className="p-4 border-b border-[#0b482d] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-teal-500/40 shadow-xs shrink-0 bg-[#042f2e]">
-              <Image 
-                src="/images/logo.png" 
-                alt="Vishwakarma Logo" 
-                fill 
-                sizes="36px"
-                className="object-cover" 
-              />
+            <div className="w-8 h-8 rounded-lg bg-amber-400 text-[#062e1e] flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+              V
             </div>
             <div>
               <span className="font-bold text-base tracking-wide text-white block leading-tight">Atta Admin</span>
-              <span className="text-[10px] text-amber-300/80 font-medium">PIN Secured</span>
             </div>
           </div>
           <button 
-            className="md:hidden text-gray-300 hover:text-white p-2 rounded-xl active:bg-white/10 transition touch-manipulation cursor-pointer" 
-            onClick={() => setSidebarOpen(false)}
+            type="button"
+            className="md:hidden text-gray-300 hover:text-white p-2 rounded-xl hover:bg-white/10 active:bg-white/20 active:scale-95 transition-all duration-150 touch-manipulation cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center" 
+            onClick={(e) => {
+              e.stopPropagation();
+              setSidebarOpen(false);
+            }}
             aria-label="Close Sidebar"
           >
-            <X size={22} />
+            <X size={22} className="shrink-0" />
           </button>
         </div>
         
@@ -246,25 +219,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </ul>
         </nav>
         
-        {/* Footer Actions: Lock & Storefront Button */}
-        <div className="p-4 border-t border-[#0b482d] space-y-2">
-          {/* Lock Admin Button */}
-          <button
-            onClick={handleLockSession}
-            className="flex items-center gap-3 px-3.5 py-2.5 w-full rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-400/20 text-xs font-bold transition cursor-pointer touch-manipulation"
-            title="Lock Admin Panel (PIN Required)"
-          >
-            <Lock size={16} />
-            <span>Lock Admin Panel</span>
-          </button>
-
+        {/* Footer Actions: Exit Admin / Logout */}
+        <div className="p-4 border-t border-[#0b482d]">
           <Link 
             href="/"
             onClick={() => setSidebarOpen(false)}
-            className="flex items-center gap-3 px-3.5 py-2.5 w-full rounded-xl hover:bg-red-900/40 text-red-300/90 hover:text-red-200 text-xs font-medium transition cursor-pointer touch-manipulation"
+            className="flex items-center gap-2.5 px-3.5 py-2.5 w-full rounded-xl hover:bg-red-950/40 text-red-300 hover:text-red-200 text-xs font-medium transition cursor-pointer touch-manipulation group"
+            title="Exit Admin Panel"
           >
-            <LogOut size={16} />
-            <span>Go to Storefront</span>
+            <DoorOpen size={16} className="text-red-400 group-hover:scale-110 transition-transform" />
+            <span>Logout</span>
           </Link>
         </div>
       </aside>
@@ -276,33 +240,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             {/* Mobile Hamburger Menu Button */}
             <button 
-              className="md:hidden text-gray-700 hover:text-gray-900 p-2 -ml-1 rounded-xl hover:bg-gray-100 active:bg-gray-200 transition touch-manipulation cursor-pointer" 
-              onClick={() => setSidebarOpen(true)}
+              type="button"
+              className="md:hidden text-gray-700 hover:text-gray-900 active:text-gray-950 p-2 -ml-1 rounded-xl hover:bg-gray-100 active:bg-gray-200 active:scale-95 transition-all duration-150 touch-manipulation cursor-pointer flex items-center justify-center min-w-[42px] min-h-[42px]" 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setSidebarOpen(prev => !prev);
+              }}
               aria-label="Open menu"
+              aria-expanded={sidebarOpen}
             >
-              <Menu size={22} />
+              <Menu size={24} className="shrink-0" />
             </button>
             
             <div className="min-w-0">
               <h1 className="text-base sm:text-xl font-bold text-gray-900 tracking-tight truncate leading-tight">
                 {getTitle()}
               </h1>
-              <span className="hidden xs:inline-block text-[10px] text-emerald-800 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
-                Vishwakarma Chakki
-              </span>
             </div>
           </div>
           
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Real-time Incoming New Order Pill */}
+            {/* Real-time Incoming New Order Pill - Identical to Laptop */}
             {newOrdersCount > 0 && (
               <Link
                 href="/admin/orders"
-                className="inline-flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-black animate-pulse shadow-2xs touch-manipulation"
+                className="inline-flex items-center gap-1.5 bg-[#fef3c7] hover:bg-amber-200 text-amber-950 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold shadow-2xs touch-manipulation"
                 title={`${newOrdersCount} orders waiting for confirmation`}
               >
-                <Bell size={13} className="text-red-600 fill-red-600" />
-                <span>{newOrdersCount} New</span>
+                <Bell size={13} className="text-amber-800" />
+                <span>{newOrdersCount} New Orders</span>
               </Link>
             )}
 
@@ -316,14 +283,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </header>
 
-        {/* Scrollable Main Viewport with pb-28 on mobile for bottom navigation bar */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 md:p-6 pb-28 md:pb-6 w-full max-w-full min-w-0 bg-[#f8fafc]">
+        {/* Scrollable Main Viewport with pb-6 (Clean view, exactly like laptop) */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 md:p-6 pb-6 w-full max-w-full min-w-0 bg-[#f8fafc]">
           {children}
         </div>
       </main>
-
-      {/* Mobile-Friendly Bottom Navigation Bar */}
-      <AdminBottomNav />
     </div>
   );
 }

@@ -16,7 +16,9 @@ test.describe('Flipkart-style Orders Redesign & Normal Delivery Flow', () => {
   });
 
   test.afterAll(() => {
-    fs.writeFileSync(dataFilePath, '[]', 'utf8');
+    if (backupOrders) {
+      fs.writeFileSync(dataFilePath, backupOrders, 'utf8');
+    }
   });
 
   test('Verify Flipkart-style Orders layout, clean timeline, no verification codes, no ODR in customer view, and admin normal delivery', async ({ browser }) => {

@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const viewport: Viewport = {
-  themeColor: "#042f2e",
+  themeColor: "#3B00A8",
   width: "device-width",
   initialScale: 1,
 };

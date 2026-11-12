@@ -20,7 +20,8 @@ import {
   Edit3
 } from 'lucide-react';
 import { useOrders } from '@/context/OrderContext';
-import { Order, products, checkDeliveryFeasibility, getCanonicalStatus } from '@/lib/data';
+import { Order, products, getCanonicalStatus } from '@/lib/data';
+import { checkDeliveryFeasibility } from '@/lib/delivery';
 
 const ETA_PRESETS = [
   { value: 'within 30 mins', label: '⚡ 30 Mins (30 मिनट)' },
@@ -228,6 +229,7 @@ export default function OrdersPage() {
   };
 
   const getEstDelivery = (order: Order) => {
+    if (!order) return 'Standard Delivery';
     const canonical = getCanonicalStatus(order.status);
     if (canonical === 'Delivered') return 'Delivered Successfully.';
     if (order.estimatedDelivery) return order.estimatedDelivery;
@@ -235,8 +237,13 @@ export default function OrdersPage() {
     if (canonical === 'Pending') return '1 hour';
     if (canonical === 'Confirmed') return '2 hours';
     const baseDate = order.date ? new Date(order.date) : new Date();
-    const feasibility = checkDeliveryFeasibility(order.items || [], order.customerInfo?.city, order.customerInfo?.pincode, baseDate);
-    return order.deliveryType === 'express' ? feasibility.estimatedDeliveryTime : feasibility.standardDeliveryTime;
+    try {
+      const feasibility = checkDeliveryFeasibility(order.items || [], order.customerInfo?.city, order.customerInfo?.pincode, baseDate);
+      const res = order.deliveryType === 'express' ? feasibility?.estimatedDeliveryTime : feasibility?.standardDeliveryTime;
+      return res || 'Tomorrow Morning';
+    } catch {
+      return 'Tomorrow Morning';
+    }
   };
 
   return (
@@ -317,8 +324,8 @@ export default function OrdersPage() {
 
           const canonical = getCanonicalStatus(order.status);
           const isNewOrder = canonical === 'New';
-          const currentEta = getEstDelivery(order);
-          const isExpress = order.deliveryType === 'express' || currentEta.toLowerCase().includes('within 2');
+          const currentEta = getEstDelivery(order) || 'Standard Delivery';
+          const isExpress = order.deliveryType === 'express' || (typeof currentEta === 'string' && currentEta.toLowerCase().includes('within 2'));
 
           const addressUrl = extractUrl(order.customerInfo?.address);
           const googleMapsUrl = order.customerInfo?.liveLocationUrl || 
@@ -384,7 +391,10 @@ export default function OrdersPage() {
                 </div>
 
                 {/* Right side: Date & Time */}
-                <div className="text-[10.5px] sm:text-xs text-gray-500 font-semibold flex items-center gap-1 ml-auto shrink-0">
+                <div 
+                  suppressHydrationWarning 
+                  className="text-[10.5px] sm:text-xs text-gray-500 font-semibold flex items-center gap-1 ml-auto shrink-0"
+                >
                   <span>📅</span> {formattedDate}, {formattedTime}
                 </div>
               </div>
@@ -482,15 +492,15 @@ export default function OrdersPage() {
                   <div className="flex items-center justify-between pt-1 border-t border-gray-200">
                     <span className="font-black text-xs sm:text-sm text-emerald-950">₹{order.total}</span>
                     <span className={`text-[9px] font-black px-1.5 py-0.2 rounded border ${
-                      order.advancePaid >= order.total 
+                      (order.advancePaid ?? 0) >= order.total 
                         ? 'bg-emerald-100 text-emerald-900 border-emerald-300' 
-                        : order.advancePaid > 0 
+                        : (order.advancePaid ?? 0) > 0 
                         ? 'bg-amber-100 text-amber-950 border-amber-300' 
                         : 'bg-amber-50 text-amber-900 border border-amber-300'
                     }`}>
-                      {order.advancePaid >= order.total 
+                      {(order.advancePaid ?? 0) >= order.total 
                         ? 'PAID ONLINE' 
-                        : order.advancePaid > 0 
+                        : (order.advancePaid ?? 0) > 0 
                         ? `PARTIAL (₹${order.advancePaid})` 
                         : 'COD'}
                     </span>

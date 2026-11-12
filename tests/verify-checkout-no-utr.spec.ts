@@ -48,9 +48,9 @@ test.describe('Checkout UPI Payment Screen', () => {
     const upiQr = page.locator('img[alt*="UPI QR Code"]');
     await expect(upiQr).toBeVisible();
 
-    // Assert that the Copy UPI ID button exists
-    const copyBtn = page.getByRole('button', { name: /Copy|कॉपी/i });
-    await expect(copyBtn).toBeVisible();
+    // Assert that direct UPI App Pay button is visible
+    const upiPayBtn = page.getByRole('link', { name: /Pay Directly via UPI App|सीधे UPI ऐप से भुगतान करें/i });
+    await expect(upiPayBtn).toBeVisible();
 
     // Capture screenshot of the verified payment UI
     await page.screenshot({ path: 'screenshots/checkout-payment-screen-no-utr.png', fullPage: true });

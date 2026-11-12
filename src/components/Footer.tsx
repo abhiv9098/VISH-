@@ -61,9 +61,10 @@ export default function Footer() {
 
         <div className="border-t border-green-900 pt-4 md:pt-6 mt-4 md:mt-6 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4 text-xs md:text-sm text-gray-500">
           <p>{t('copyright')}</p>
-          <div className="flex space-x-3 md:space-x-4">
+          <div className="flex items-center space-x-3 md:space-x-4">
             <Link href="/privacy" className="hover:text-gray-300">{t('privacyPolicy')}</Link>
             <Link href="/terms" className="hover:text-gray-300">{t('termsOfService')}</Link>
+            <Link href="/admin" className="hover:text-amber-400 font-semibold text-emerald-400 transition">Admin Panel</Link>
           </div>
         </div>
       </div>

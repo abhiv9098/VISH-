@@ -102,7 +102,7 @@ test.describe('Profile Page Two Small Buttons Redesign & Verification', () => {
     await savePromise;
 
     // Verify Success notification and updated address in view
-    await expect(page.locator('text=Profile updated successfully!')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('text=/Details saved successfully!|विवरण सफलतापूर्वक सेव हो गया!/i')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('text=Shop No. 12, Shivaji Chowk, Sonkach')).toBeVisible();
 
     // 6. Verify Database File customer_profile.json was updated on disk

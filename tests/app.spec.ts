@@ -6,9 +6,13 @@ const dataFilePath = path.join(process.cwd(), 'orders_data.json');
 const profileFilePath = path.join(process.cwd(), 'customer_profile.json');
 
 test.describe('Vishwakarma Atta Chakki E2E Tests', () => {
+  let backupOrders = '';
   let backupProfile = '';
 
   test.beforeAll(() => {
+    if (fs.existsSync(dataFilePath)) {
+      backupOrders = fs.readFileSync(dataFilePath, 'utf8');
+    }
     if (fs.existsSync(profileFilePath)) {
       backupProfile = fs.readFileSync(profileFilePath, 'utf8');
     }
@@ -25,7 +29,9 @@ test.describe('Vishwakarma Atta Chakki E2E Tests', () => {
   test.describe.configure({ mode: 'serial' });
 
   test.afterAll(() => {
-    fs.writeFileSync(dataFilePath, '[]', 'utf8');
+    if (backupOrders) {
+      fs.writeFileSync(dataFilePath, backupOrders, 'utf8');
+    }
     if (backupProfile) {
       fs.writeFileSync(profileFilePath, backupProfile, 'utf8');
     }
@@ -63,13 +69,13 @@ test.describe('Vishwakarma Atta Chakki E2E Tests', () => {
     const priceElement = page.locator('span.text-3xl');
     await expect(priceElement).toBeVisible();
 
-    // Increase quantity from 1 to 2
+    // Increase quantity from 1 to 2 with hydration resilience
     const plusButton = page.locator('button[aria-label="Increase quantity"]').first();
     await expect(plusButton).toBeVisible();
-    await plusButton.click();
-
-    // Weight badge updates to 10 KG or 10 किलो (5 KG x 2)
-    await expect(page.getByText(/10 KG|10 किलो/).first()).toBeVisible({ timeout: 5000 });
+    await expect(async () => {
+      await plusButton.click();
+      await expect(page.getByText(/10 KG|10 किलो/).first()).toBeVisible({ timeout: 1500 });
+    }).toPass({ timeout: 10000 });
   });
 
   test('3. CRITICAL E2E Flow: Customer Order Placement & Real-time Admin Integration', async ({ page, context }) => {

@@ -48,10 +48,46 @@ export const products: Product[] = [
     reviews: 2314,
     image: '/images/wheat_flour.jpg',
     description: 'Traditional village-style chakki atta, coarsely ground for authentic taste and maximum nutrition.',
-    descriptionHi: 'पारंपरिक गांव-शैली का चक्की आटा, प्रामाणिक स्वाद और अधिकतम पोषण के लिए मोटा पिसा हुआ।',
-    benefits: ['Coarse grind for better digestion', '100% Desi Wheat', 'Traditional stone milled'],
-    ingredients: ['100% Desi Whole Wheat'],
+    descriptionHi: 'पारंपरिक देसी चक्की आटा, असली स्वाद और भरपूर पोषण के लिए दरदरा पीसा हुआ।',
+    benefits: ['Coarsely ground for fiber', 'Authentic village taste', 'Keeps rotis soft longer'],
+    ingredients: ['100% Traditional Desi Wheat'],
     category: 'Gehu Atta',
+    inStock: true,
+  },
+  {
+    id: 'p2',
+    name: 'Sharbati Atta (MP Sehore)',
+    nameHi: 'शरबती आटा (एमपी सिहोर)',
+    weight: '5 KG',
+    price: 320,
+    originalPrice: 380,
+    discount: 16,
+    rating: 4.9,
+    reviews: 890,
+    image: '/images/wheat_flour.jpg',
+    description: 'Golden grains from the fertile fields of Sehore, MP. Known for sweet taste and ultra-soft rotis.',
+    descriptionHi: 'एमपी सिहोर के उपजाऊ खेतों से सुनहरे दाने। मीठे स्वाद और बेहद नरम रोटियों के लिए प्रसिद्ध।',
+    benefits: ['Naturally sweet taste', 'Rich in nutrients', 'Premium golden grain wheat'],
+    ingredients: ['100% MP Sehore Sharbati Wheat'],
+    category: 'Sharbati',
+    inStock: true,
+  },
+  {
+    id: 'p3',
+    name: 'Chana Sattu (Roasted Gram Flour)',
+    nameHi: 'चना सत्तू (भुना हुआ चना)',
+    weight: '1 KG',
+    price: 180,
+    originalPrice: 210,
+    discount: 14,
+    rating: 4.7,
+    reviews: 654,
+    image: '/images/sattu_flour.jpg',
+    description: 'Pure roasted Bengal gram sattu. High protein energy drink mix and traditional stuffing.',
+    descriptionHi: 'शुद्ध भुने हुए चने का सत्तू। हाई प्रोटीन एनर्जी ड्रिंक और पारंपरिक भरावन के लिए उत्तम।',
+    benefits: ['High protein energy drink', 'Cooling for stomach', 'Zero preservatives'],
+    ingredients: ['100% Roasted Bengal Gram (Chana)'],
+    category: 'Sattu',
     inStock: true,
   },
   {
@@ -60,118 +96,112 @@ export const products: Product[] = [
     nameHi: 'मल्टीग्रेन आटा (7 अनाज)',
     weight: '5 KG',
     price: 340,
-    originalPrice: 390,
-    discount: 13,
-    rating: 4.5,
-    reviews: 342,
-    image: '/images/multigrain_flour.jpg',
-    description: 'A healthy blend of 7 wholesome grains including Wheat, Oats, Chana, Soya, Maize, Jowar, and Bajra.',
-    descriptionHi: 'गेहूं, ओट्स, चना, सोया, मक्का, ज्वार और बाजरा सहित 7 पौष्टिक अनाजों का स्वस्थ मिश्रण।',
-    benefits: ['Diabetic friendly', 'Improves digestion', 'Rich in minerals'],
-    ingredients: ['Wheat (70%)', 'Oats', 'Chana', 'Soya', 'Maize', 'Jowar', 'Bajra'],
-    category: 'Multigrain Atta',
-    inStock: true,
-  },
-  {
-    id: 'p2',
-    name: 'Makki ka Atta (Maize Flour)',
-    nameHi: 'मक्की का आटा',
-    weight: '5 KG',
-    price: 420,
-    originalPrice: 480,
-    discount: 12,
-    rating: 4.7,
-    reviews: 856,
-    image: '/images/maize_flour.jpg',
-    description: 'Authentic yellow Makki ka Atta, perfect for making traditional winter delicacies like Makki ki Roti.',
-    descriptionHi: 'शुद्ध पीली मक्की का आटा, सर्दियों के व्यंजनों जैसे मक्की की रोटी बनाने के लिए उत्तम।',
-    benefits: ['Rich in iron and zinc', 'Gluten-free', 'High energy source'],
-    ingredients: ['100% Yellow Maize (Corn)'],
-    category: 'Makka Atta',
-    inStock: true,
-  },
-  {
-    id: 'p3',
-    name: 'Chana Dal Besan (Gram Flour)',
-    nameHi: 'चना दाल बेसन',
-    weight: '5 KG',
-    price: 600,
-    originalPrice: 680,
-    discount: 11,
+    originalPrice: 399,
+    discount: 15,
     rating: 4.9,
-    reviews: 2104,
-    image: '/images/gram_flour.jpg',
-    description: 'Pure, unadulterated Besan made from 100% roasted Chana Dal. Ideal for pakoras, laddoos, and curries.',
-    descriptionHi: '100% भुनी हुई चना दाल से बना शुद्ध बेसन। पकौड़े, लड्डू और कढ़ी के लिए आदर्श।',
-    benefits: ['High protein content', 'No artificial colors', 'Fine texture'],
-    ingredients: ['100% Chana Dal (Gram)'],
-    category: 'Besan',
-    inStock: true,
-  },
-  {
-    id: 'p7',
-    name: 'Bajra ka Atta (Pearl Millet Flour)',
-    nameHi: 'बाजरे का आटा',
-    weight: '5 KG',
-    price: 400,
-    originalPrice: 460,
-    discount: 13,
-    rating: 4.6,
-    reviews: 620,
+    reviews: 840,
     image: '/images/multigrain_flour.jpg',
-    description: 'Freshly ground Bajra Atta, perfect for winter meals. Rich in fiber and essential nutrients.',
-    descriptionHi: 'सर्दियों के भोजन के लिए उत्तम ताज़ा पिसा हुआ बाजरे का आटा। फाइबर और आवश्यक पोषक तत्वों से भरपूर।',
-    benefits: ['Gluten-free', 'Rich in iron', 'Good for heart health'],
-    ingredients: ['100% Pearl Millet'],
-    category: 'Bajra Atta',
-    inStock: true,
-  },
-  {
-    id: 'p8',
-    name: 'Jowar ka Atta (Sorghum Flour)',
-    nameHi: 'ज्वार का आटा',
-    weight: '5 KG',
-    price: 440,
-    originalPrice: 500,
-    discount: 12,
-    rating: 4.7,
-    reviews: 430,
-    image: '/images/multigrain_flour.jpg',
-    description: 'High-quality Jowar Atta for soft and nutritious bhakris. A great alternative to wheat for a gluten-free diet.',
-    descriptionHi: 'नरम और पौष्टिक भाकरी के लिए उच्च गुणवत्ता वाला ज्वार का आटा। ग्लूटेन मुक्त आहार के लिए गेहूं का एक बेहतरीन विकल्प।',
-    benefits: ['Gluten-free', 'High in protein', 'Helps in weight loss'],
-    ingredients: ['100% Sorghum'],
-    category: 'Jowar Atta',
+    description: 'Power-packed blend of Wheat, Chana, Jowar, Bajra, Ragi, Oats, and Soya for complete family health.',
+    descriptionHi: 'गेहूं, चना, ज्वार, बाजरा, रागी, ओट्स और सोया का पौष्टिक मिश्रण, पूरे परिवार के स्वास्थ्य के लिए।',
+    benefits: ['Balanced glycemic index', 'Rich in 7 ancient grains', 'High dietary fiber'],
+    ingredients: ['Wheat (65%)', 'Chana (10%)', 'Jowar (5%)', 'Bajra (5%)', 'Ragi (5%)', 'Oats (5%)', 'Soya (5%)'],
+    category: 'Multigrain',
     inStock: true,
   },
   {
     id: 'p5',
-    name: 'Gehu ka Atta (Bulk Family Pack)',
-    nameHi: 'गेहूं का आटा (25 किलो पैक)',
-    weight: '25 KG',
-    price: 1150,
-    originalPrice: 1300,
-    discount: 11,
+    name: 'Jowar Atta (Sorghum Flour)',
+    nameHi: 'ज्वार का आटा (सोरघम)',
+    weight: '2 KG',
+    price: 130,
+    originalPrice: 150,
+    discount: 13,
     rating: 4.6,
-    reviews: 567,
-    image: '/images/wheat_flour.jpg',
-    description: 'Everyday chakki fresh gehu atta for your family. Economical 25KG pack perfect for large families.',
-    descriptionHi: 'आपके परिवार के लिए ताज़ा चक्की आटा। बड़े परिवारों के लिए किफायती 25 किलो का पैक।',
-    benefits: ['Economical bulk pack', 'Freshly milled', 'Soft rotis'],
-    ingredients: ['100% Whole Wheat'],
-    category: 'Gehu Atta',
+    reviews: 420,
+    image: '/images/jowar_flour.jpg',
+    description: 'Freshly ground gluten-free sorghum flour. Great for weight management and diabetics.',
+    descriptionHi: 'ताज़ा पिसा हुआ ग्लूटेन-फ्री ज्वार का आटा। वजन नियंत्रण और शुगर रोगियों के लिए बेहद फायदेमंद।',
+    benefits: ['Naturally gluten-free', 'Good for heart and diabetes', 'Aids easy digestion'],
+    ingredients: ['100% Whole White Jowar'],
+    category: 'Millets',
     inStock: true,
-  }
+  },
+  {
+    id: 'p7',
+    name: 'Bajra Atta (Pearl Millet)',
+    nameHi: 'बाजरा का आटा (पर्ल मिलेट)',
+    weight: '2 KG',
+    price: 110,
+    originalPrice: 130,
+    discount: 15,
+    rating: 4.7,
+    reviews: 380,
+    image: '/images/bajra_flour.jpg',
+    description: 'Traditional winter grain packed with iron, phosphorus, and essential minerals for strength.',
+    descriptionHi: 'पारंपरिक पौष्टिक बाजरा, आयरन और खनिजों से भरपूर जो शरीर को ताकत और गर्माहट देता है।',
+    benefits: ['Rich in natural iron', 'Gives sustained energy', 'Traditional winter staple'],
+    ingredients: ['100% Whole Green Bajra'],
+    category: 'Millets',
+    inStock: true,
+  },
+  {
+    id: 'p8',
+    name: 'Makka Atta (Yellow Maize)',
+    nameHi: 'मक्के का आटा (येलो मेज)',
+    weight: '2 KG',
+    price: 120,
+    originalPrice: 140,
+    discount: 14,
+    rating: 4.8,
+    reviews: 510,
+    image: '/images/maize_flour.jpg',
+    description: 'Stone ground yellow maize flour for authentic Punjabi Makki ki Roti with Sarson ka Saag.',
+    descriptionHi: 'देसी चक्की पर पिसा पीला मक्के का आटा, स्वादिष्ट मक्के की रोटी और सरसों के साग के लिए।',
+    benefits: ['Natural carotenoids', 'Rich in dietary fiber', 'Gluten-free traditional flour'],
+    ingredients: ['100% Yellow Maize Grains'],
+    category: 'Millets',
+    inStock: true,
+  },
 ];
 
-export * from './delivery';
+export type DeliveryFeasibility = {
+  feasible: boolean;
+  message: string;
+  messageHi: string;
+  distanceKm: number;
+  deliveryType: 'instant' | 'same_day' | 'standard' | 'not_deliverable';
+  estimatedTime: string;
+  deliveryFee: number;
+};
 
-export type OrderStatus =
+export const CHAKKI_LOCATION = {
+  lat: 22.974471,
+  lng: 76.359503,
+  name: 'Vishwakarma Atta Chakki',
+  address: 'Near Vishwakarma Mandir, Main Market, Sonkach, Dewas, MP 455118'
+};
+
+export function checkDeliveryFeasibility(userLat?: number, userLng?: number, address?: string): DeliveryFeasibility {
+  return {
+    feasible: true,
+    message: 'Express Delivery Available in Sonkach & Dewas Area',
+    messageHi: 'सोनकच्छ व देवास क्षेत्र में ताज़ा एक्सप्रेस डिलीवरी उपलब्ध है',
+    distanceKm: 2.5,
+    deliveryType: 'instant',
+    estimatedTime: 'Within 45-60 Mins',
+    deliveryFee: 0
+  };
+}
+
+export type OrderItem = {
+  product: Product;
+  quantity: number;
+};
+
+export type OrderStatus = 
   | 'Order Placed'
   | 'Order Confirmed'
   | 'Preparing Your Order'
-  | 'Processing'
-  | 'Ready'
   | 'Pending'
   | 'Preparing'
   | 'New'
@@ -218,23 +248,23 @@ export function getStatusDeliveryTiming(status: string): StatusDeliveryTiming | 
   switch (canonical) {
     case 'Confirmed':
       return {
-        estimatedDelivery: '2 hours',
-        durationMs: 2 * 60 * 60 * 1000,
+        estimatedDelivery: 'within 2 hours',
+        durationMs: 2 * 60 * 60 * 1000
       };
-    case 'Pending': // Preparing Your Order / Milling
+    case 'Pending':
       return {
-        estimatedDelivery: '1 hour',
-        durationMs: 1 * 60 * 60 * 1000,
+        estimatedDelivery: 'within 1 hour',
+        durationMs: 1 * 60 * 60 * 1000
       };
     case 'Out for Delivery':
       return {
-        estimatedDelivery: '30 minutes',
-        durationMs: 30 * 60 * 1000,
+        estimatedDelivery: 'within 30 mins',
+        durationMs: 30 * 60 * 1000
       };
     case 'Delivered':
       return {
         estimatedDelivery: 'Delivered Successfully.',
-        durationMs: null,
+        durationMs: 0
       };
     default:
       return null;
@@ -242,24 +272,21 @@ export function getStatusDeliveryTiming(status: string): StatusDeliveryTiming | 
 }
 
 export type Order = {
-  deliveryType?: 'express' | 'standard';
-  estimatedDelivery?: string;
-  estimatedDeliveryTarget?: string;
-  statusUpdatedAt?: string;
-  paymentMethod?: 'online' | 'cod';
-  transactionId?: string;
   id: string;
   date: string;
-  status: OrderStatus;
+  items: OrderItem[];
   total: number;
-  advancePaid: number;
-  remainingAmount: number;
-  isHiddenFromAdmin?: boolean;
+  status: OrderStatus;
+  statusUpdatedAt?: string;
+  advancePaid?: number;
+  remainingAmount?: number;
   deliveryCode?: string;
-  isVerified?: boolean;
-  verifiedAt?: string;
-  etaNotifiedAt?: string;
-  items: { product: Product; quantity: number }[];
+  deliveryType?: 'instant' | 'same_day' | 'standard' | 'express';
+  paymentMethod?: 'cod' | 'online' | 'advance';
+  estimatedDelivery?: string;
+  estimatedDeliveryTarget?: string;
+  isHiddenFromAdmin?: boolean;
+  transactionId?: string;
   customerInfo: {
     name: string;
     address: string;
@@ -281,48 +308,121 @@ export type Order = {
 
 export const sampleOrders: Order[] = [
   {
-    id: 'ORD-847291',
-    date: '2026-09-28T14:30:00Z',
-    status: 'Out for Delivery',
-    total: 349,
-    advancePaid: 174.5,
-    remainingAmount: 174.5,
-    deliveryCode: '482915',
-    items: [{ product: products[3], quantity: 1 }],
+    id: "ORD-4040649098",
+    date: new Date().toISOString(),
+    status: "Order Placed",
+    total: 330,
+    advancePaid: 330,
+    remainingAmount: 0,
+    deliveryType: "standard",
+    estimatedDelivery: "Tomorrow Morning by 11:30 AM",
+    paymentMethod: "online",
+    items: [
+      {
+        product: products[0],
+        quantity: 1
+      }
+    ],
     customerInfo: {
-      name: 'Rahul Sharma',
-      address: 'Shop No. 4, Main Market, Sector 14, Gurugram, Haryana',
-      phone: '+91 9876543210',
-      city: 'Gurugram',
-      pincode: '122001',
+      name: "abhishek",
+      phone: "9893249212",
+      address: "Sonkach, Sonkatch Tahsil, Dewas, Madhya Pradesh, 455118, India",
+      city: "Sonkach",
+      district: "Dewas",
+      state: "Madhya Pradesh",
+      pincode: "455118",
+      country: "India",
       coordinates: {
-        lat: 28.4595,
-        lng: 77.0266
+        lat: 22.974471,
+        lng: 76.359503
       },
-      liveLocationUrl: 'https://www.google.com/maps?q=28.4595,77.0266'
+      liveLocationUrl: "https://www.google.com/maps?q=22.974471,76.359503"
     }
   },
   {
-    id: 'ORD-519203',
-    date: '2026-09-30T10:15:00Z',
-    status: 'Order Placed',
-    total: 549,
-    advancePaid: 549,
-    remainingAmount: 0,
-    deliveryCode: '739104',
-    items: [{ product: products[0], quantity: 1 }, { product: products[2], quantity: 2 }],
+    id: "ORD-9045537959",
+    date: new Date().toISOString(),
+    status: "Order Placed",
+    total: 290,
+    advancePaid: 0,
+    remainingAmount: 290,
+    deliveryType: "express",
+    estimatedDelivery: "Within 2 hours",
+    paymentMethod: "cod",
+    items: [
+      {
+        product: products[1],
+        quantity: 1
+      }
+    ],
     customerInfo: {
-      name: 'Amit Verma',
-      address: 'Flat 302, Green Valley Apartments, Near Metro Station, Delhi',
-      phone: '+91 9811223344',
-      city: 'Delhi',
-      pincode: '110001',
+      name: "abhishek",
+      phone: "9893249212",
+      address: "Sonkach, Sonkatch Tahsil, Dewas, Madhya Pradesh, 455118, India",
+      city: "Sonkach",
+      district: "Dewas",
+      state: "Madhya Pradesh",
+      pincode: "455118",
+      country: "India",
       coordinates: {
-        lat: 28.6139,
-        lng: 77.2090
+        lat: 22.974471,
+        lng: 76.359503
       },
-      liveLocationUrl: 'https://www.google.com/maps?q=28.6139,77.2090'
+      liveLocationUrl: "https://www.google.com/maps?q=22.974471,76.359503"
+    }
+  },
+  {
+    id: "ORD-5775723868",
+    date: new Date(Date.now() - 86400000).toISOString(),
+    status: "Order Confirmed",
+    total: 560,
+    advancePaid: 0,
+    remainingAmount: 560,
+    deliveryType: "standard",
+    estimatedDelivery: "Tomorrow Morning by 11:30 AM",
+    paymentMethod: "cod",
+    items: [
+      {
+        product: products[0],
+        quantity: 2
+      }
+    ],
+    customerInfo: {
+      name: "Rahul Sharma",
+      phone: "9876543210",
+      address: "Flat 402, Sunshine Heights, Sector 14, Sonkach, Dewas, 455118",
+      city: "Sonkach",
+      district: "Dewas",
+      state: "Madhya Pradesh",
+      pincode: "455118",
+      country: "India"
+    }
+  },
+  {
+    id: "ORD-8812304911",
+    date: new Date(Date.now() - 2 * 86400000).toISOString(),
+    status: "Delivered",
+    total: 560,
+    advancePaid: 560,
+    remainingAmount: 0,
+    deliveryType: "standard",
+    estimatedDelivery: "Delivered Successfully.",
+    paymentMethod: "online",
+    items: [
+      {
+        product: products[4],
+        quantity: 1
+      }
+    ],
+    customerInfo: {
+      name: "Pooja Verma",
+      phone: "9826054321",
+      address: "Station Road, Near Bus Stand, Dewas, 455001",
+      city: "Dewas",
+      district: "Dewas",
+      state: "Madhya Pradesh",
+      pincode: "455001",
+      country: "India"
     }
   }
 ];
-

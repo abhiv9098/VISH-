@@ -2,12 +2,12 @@
   {
     "id": "ORD-9628125709",
     "date": "2026-11-03T10:32:42.812Z",
-    "status": "Order Placed",
+    "status": "Delivered",
     "total": 330,
     "advancePaid": 330,
     "remainingAmount": 0,
     "deliveryType": "standard",
-    "estimatedDelivery": "Today in 3-4 hrs (by 8:02 pm)",
+    "estimatedDelivery": "Delivered Successfully.",
     "paymentMethod": "online",
     "items": [
       {
@@ -54,6 +54,8 @@
         "lng": 76.359503
       },
       "liveLocationUrl": "https://www.google.com/maps?q=22.974471,76.359503"
-    }
+    },
+    "estimatedDeliveryTarget": "",
+    "statusUpdatedAt": "2026-11-12T17:08:56.491Z"
   }
 ]

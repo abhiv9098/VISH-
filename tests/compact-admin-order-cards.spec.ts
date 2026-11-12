@@ -93,7 +93,9 @@ test.describe('Compact Admin Order Cards Test Suite', () => {
   });
 
   test.afterAll(() => {
-    fs.writeFileSync(dataFilePath, '[]', 'utf8');
+    if (originalOrders) {
+      fs.writeFileSync(dataFilePath, originalOrders, 'utf8');
+    }
   });
 
   test('Verify compact order cards on desktop viewport', async ({ page }) => {

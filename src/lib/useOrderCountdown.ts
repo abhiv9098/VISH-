@@ -37,9 +37,12 @@ export function useOrderCountdown(
   },
   language: string = 'en'
 ): CountdownInfo {
-  const [now, setNow] = useState<number>(() => Date.now());
+  const [mounted, setMounted] = useState(false);
+  const [now, setNow] = useState<number>(0);
 
   useEffect(() => {
+    setMounted(true);
+    setNow(Date.now());
     const timer = setInterval(() => {
       setNow(Date.now());
     }, 1000);
@@ -72,6 +75,17 @@ export function useOrderCountdown(
       displayText: text,
       countdownOnly: '',
       baseEstimate: text,
+      remainingSeconds: 0,
+    };
+  }
+
+  if (!mounted || !now) {
+    return {
+      isDelivered: false,
+      isCancelled: false,
+      displayText: baseEstimate,
+      countdownOnly: '',
+      baseEstimate,
       remainingSeconds: 0,
     };
   }

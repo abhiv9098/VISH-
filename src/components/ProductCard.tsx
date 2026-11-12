@@ -14,7 +14,12 @@ export default function ProductCard({ product }: { product: Product }) {
   const { language, t } = useLanguage();
   const [qty, setQty] = useState(1);
   const [isOpening, setIsOpening] = useState(false);
+  const [imgSrc, setImgSrc] = useState(product.image || '/images/wheat_flour.jpg');
   const router = useRouter();
+
+  useEffect(() => {
+    setImgSrc(product.image || '/images/wheat_flour.jpg');
+  }, [product.image]);
 
   // Prefetch order route for instant 0ms mobile transitions
   useEffect(() => {
@@ -43,11 +48,12 @@ export default function ProductCard({ product }: { product: Product }) {
           className="relative aspect-[4/3] w-full overflow-hidden bg-stone-100/80 rounded-xl block border border-stone-100 group-hover:border-amber-200/60 transition-colors"
         >
           <Image 
-            src={product.image} 
+            src={imgSrc} 
             alt={name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className="object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={() => setImgSrc('/images/wheat_flour.jpg')}
           />
 
           {/* Discount Tag */}
@@ -132,16 +138,16 @@ export default function ProductCard({ product }: { product: Product }) {
             )}
           </div>
           
-          {/* Buy Now Button: Slightly smaller, touch-friendly, vibrant Vishwakarma brand */}
+          {/* Buy Now Button: Blue color */}
           {product.inStock ? (
             <button
               type="button"
               onClick={handleBuyNow}
               disabled={isOpening}
-              className="w-full mt-2 py-1.5 sm:py-1.5 px-2 rounded-xl flex items-center justify-center gap-1.5 bg-[#f59e0b] hover:bg-[#d97706] active:bg-[#b45309] active:scale-[0.98] text-[#062e1e] font-black text-[11.5px] sm:text-xs shadow-2xs hover:shadow-xs transition-all cursor-pointer touch-manipulation disabled:opacity-80"
+              className="w-full mt-2 py-1.5 sm:py-1.5 px-2 rounded-xl flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 active:scale-[0.98] text-white font-black text-[11.5px] sm:text-xs shadow-2xs hover:shadow-xs transition-all cursor-pointer touch-manipulation disabled:opacity-80"
             >
               <span>{isOpening ? (language === 'hi' ? 'खुल रहा है...' : 'Opening...') : buyBtnText}</span>
-              <ArrowRight size={12} className="shrink-0 text-[#062e1e]" />
+              <ArrowRight size={12} className="shrink-0 text-white" />
             </button>
           ) : (
             <button

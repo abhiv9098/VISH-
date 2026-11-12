@@ -17,6 +17,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const { language, t } = useLanguage();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [imgSrc, setImgSrc] = useState(product?.image || '/images/wheat_flour.jpg');
   const router = useRouter();
 
   if (!product) return notFound();
@@ -83,10 +84,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           <div className="w-full md:w-1/2">
             <div className="relative h-[250px] sm:h-[350px] md:h-[500px] w-full bg-gray-50 rounded-xl overflow-hidden">
               <Image 
-                src={product.image} 
+                src={imgSrc} 
                 alt={name}
                 fill
                 className="object-cover"
+                onError={() => setImgSrc('/images/wheat_flour.jpg')}
               />
               {product.discount > 0 && (
                 <div className="absolute top-3 left-3 md:top-4 md:left-4 bg-red-600 text-white text-xs md:text-sm font-bold px-2 py-1 md:px-3 rounded">
@@ -151,7 +153,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               {/* Buy Now */}
               <button 
                 onClick={handleBuyNow}
-                className="flex-1 h-10 sm:h-12 rounded-lg font-bold flex items-center justify-center transition text-sm sm:text-base bg-yellow-500 hover:bg-yellow-600 text-green-950 shadow-sm px-4 cursor-pointer"
+                className="flex-1 h-10 sm:h-12 rounded-lg font-bold flex items-center justify-center transition text-sm sm:text-base bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white shadow-sm px-4 cursor-pointer"
               >
                 {t('buyNow')}
               </button>

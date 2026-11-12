@@ -2,7 +2,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Order, getStatusDeliveryTiming } from '@/lib/data';
+import { Order, getStatusDeliveryTiming, sampleOrders } from '@/lib/data';
 
 export type DeliverySettings = {
   threshold: number;
@@ -96,20 +96,14 @@ function deduplicateOrders(orderList: Order[]): Order[] {
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
 export function OrderProvider({ children }: { children: React.ReactNode }) {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<Order[]>(sampleOrders);
   const [deliverySettings, setDeliverySettings] = useState<DeliverySettings>({
     threshold: 500,
     chargeBelow: 50,
     chargeAbove: 20
   });
   const [customerProfile, setCustomerProfile] = useState<CustomerProfile | null>(null);
-  const [lastSeenTime, setLastSeenTime] = useState<number>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('vishwakarma_last_seen_time');
-      return saved ? parseInt(saved, 10) : 0;
-    }
-    return 0;
-  });
+  const [lastSeenTime, setLastSeenTime] = useState<number>(0);
 
   // Fetch orders from API with guaranteed deduplication and reference equality preservation
   const fetchOrders = useCallback(async () => {
@@ -120,15 +114,12 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       });
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length > 0) {
           const clean = deduplicateOrders(data);
-          setOrders(prev => {
-            // Keep identical reference to avoid unnecessary re-renders that interrupt mobile touches
-            if (areOrderListsEqual(prev, clean)) {
-              return prev;
-            }
-            return clean;
-          });
+          try {
+            localStorage.setItem('vishwakarma_orders_cache', JSON.stringify(clean));
+          } catch {}
+          setOrders(clean);
         }
       }
     } catch (e) {
@@ -170,6 +161,24 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    // Hydrate cached orders and last seen time from localStorage after mounting
+    try {
+      const cached = localStorage.getItem('vishwakarma_orders_cache');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setOrders(deduplicateOrders(parsed));
+        }
+      }
+    } catch {}
+
+    try {
+      const savedTime = localStorage.getItem('vishwakarma_last_seen_time');
+      if (savedTime) {
+        setLastSeenTime(parseInt(savedTime, 10));
+      }
+    } catch {}
+
     fetchOrders();
     fetchProfile();
 

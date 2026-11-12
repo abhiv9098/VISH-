@@ -53,44 +53,24 @@ test.describe('Mobile Admin Panel with 6-Digit PIN & Navigation', () => {
     hasTouch: true,
   });
 
-  test('End-to-End Mobile Admin Flow: PIN Login, Navigation Drawer, Call, WhatsApp, GPS, Status & Settings', async ({ page, context }) => {
-    await context.addInitScript(() => localStorage.clear());
+  test('End-to-End Mobile Admin Flow: Dashboard, Navigation Drawer, Call, WhatsApp, GPS, Status & Settings', async ({ page }) => {
     await page.goto('http://localhost:4000/admin');
     await page.waitForLoadState('networkidle');
 
-    // 1. Verify 6-digit PIN Login Screen is displayed first
-    const pinHeading = page.locator('text=Enter 6-Digit Admin PIN');
-    await expect(pinHeading).toBeVisible({ timeout: 10000 });
-
-    // Verify numeric keypad (1 through 9, 0, Clear, Delete)
-    await expect(page.getByRole('button', { name: '1', exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Clear', exact: true })).toBeVisible();
-
-    // Take screenshot of PIN Login Screen
-    await page.screenshot({ path: 'screenshots/mobile-admin-01-pin-screen.png' });
-
-    // 2. Test Incorrect PIN (999999)
-    for (const d of ['9', '9', '9', '9', '9', '9']) {
-      await page.getByRole('button', { name: d, exact: true }).click();
-    }
-    const errorMsg = page.locator('text=Incorrect PIN');
-    await expect(errorMsg).toBeVisible({ timeout: 5000 });
-    await page.waitForTimeout(600);
-
-    // 3. Test Correct Default PIN (123456)
-    for (const d of ['1', '2', '3', '4', '5', '6']) {
-      await page.getByRole('button', { name: d, exact: true }).click();
-    }
-
-    // 4. Verify Admin Panel is unlocked and Dashboard loads
+    // 1. Verify Admin Dashboard loads directly and cleanly on mobile
     await expect(page.locator('h1:has-text("Dashboard")')).toBeVisible({ timeout: 10000 });
+    await page.screenshot({ path: 'screenshots/mobile-admin-01-dashboard.png' });
 
     // Helper function to open mobile navigation drawer
     const openDrawer = async () => {
+      await page.waitForTimeout(500);
       const menuBtn = page.getByRole('button', { name: 'Open menu' }).first();
       await expect(menuBtn).toBeVisible({ timeout: 5000 });
       await menuBtn.click();
-      await page.waitForTimeout(400);
+      // Wait for drawer CSS transition to complete and links to be visible
+      const aside = page.locator('aside').first();
+      await expect(aside).toHaveClass(/translate-x-0/, { timeout: 3000 });
+      await page.waitForTimeout(300);
     };
 
     // 5. Navigate to Orders via Mobile Sidebar Drawer
@@ -134,17 +114,10 @@ test.describe('Mobile Admin Panel with 6-Digit PIN & Navigation', () => {
     await expect(page.locator('text=Admin Security & 6-Digit PIN')).toBeVisible();
     await page.screenshot({ path: 'screenshots/mobile-admin-06-settings-pin.png' });
 
-    // 9. Test Quick Lock button
-    const lockBtn = page.locator('button:has-text("Lock Admin")').first();
-    if (await lockBtn.isVisible()) {
-      await lockBtn.click();
-    } else {
-      await openDrawer();
-      await page.locator('button:has-text("Lock Admin Panel")').first().click();
-    }
-
-    // Verify it securely returns to PIN screen immediately!
-    await expect(page.locator('text=Enter 6-Digit Admin PIN')).toBeVisible({ timeout: 5000 });
-    await page.screenshot({ path: 'screenshots/mobile-admin-07-locked-again.png' });
+    // 9. Test Storefront / Logout link in mobile drawer
+    await openDrawer();
+    const logoutLink = page.locator('aside a:has-text("Logout"), aside a:has-text("Go to Storefront")').first();
+    await expect(logoutLink).toBeVisible();
+    await page.screenshot({ path: 'screenshots/mobile-admin-07-drawer-logout.png' });
   });
 });

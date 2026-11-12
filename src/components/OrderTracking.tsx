@@ -83,25 +83,25 @@ export default function OrderTracking({
   const progressPercent = (currentIndex / (STAGES.length - 1)) * 100;
 
   return (
-    <div className="bg-white rounded-xl p-3 sm:p-3.5 border border-slate-200/90 shadow-2xs">
+    <div className="bg-white rounded-xl p-3 sm:p-3.5 border border-[#E8E0D2] shadow-2xs">
       
       {/* Top Status & Delivery Countdown */}
-      <div className="flex flex-wrap items-center justify-between gap-1.5 pb-2.5 mb-2.5 border-b border-slate-100 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-1.5 pb-2.5 mb-2.5 border-b border-[#E8E0D2] text-xs">
         <div className="flex items-center gap-1.5">
           <span className="relative flex h-2 w-2">
             {currentIndex < 3 ? (
               <>
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D6A63C] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#174D38]"></span>
               </>
             ) : (
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#174D38]"></span>
             )}
           </span>
-          <span className="text-[11px] font-medium text-slate-500">
+          <span className="text-[11px] font-medium text-[#777777]">
             {language === 'hi' ? 'स्थिति:' : 'Status:'}
           </span>
-          <span className="text-xs font-black text-emerald-800">
+          <span className="text-xs font-black text-[#174D38]">
             {stageDisplayLabel}
           </span>
         </div>
@@ -114,26 +114,26 @@ export default function OrderTracking({
             </span>
           </div>
         ) : (
-          <div className="flex items-center gap-1.5 text-[11px] font-black text-amber-950 bg-amber-50/90 px-2.5 py-0.5 rounded-md border border-amber-300 shadow-2xs">
-            <Clock size={11} className="text-amber-700 shrink-0" />
-            <span className="text-[10px] font-bold text-amber-800 uppercase">
+          <div className="flex items-center gap-1.5 text-[11px] font-black text-[#174D38] bg-[#FFF8ED] px-2.5 py-0.5 rounded-md border border-[#E8E0D2] shadow-2xs">
+            <Clock size={11} className="text-[#D6A63C] shrink-0" />
+            <span className="text-[10px] font-bold text-[#777777] uppercase">
               {language === 'hi' ? 'डिलीवरी:' : 'Delivery:'}
             </span>
-            <span className="font-extrabold text-amber-950 font-mono">
+            <span className="font-extrabold text-[#174D38] font-mono">
               {countdown.displayText}
             </span>
           </div>
         )}
       </div>
 
-      {/* Flipkart-Style 4-Stage Horizontal Timeline */}
+      {/* 4-Stage Horizontal Timeline with Dark Forest Green and Gold */}
       <div className="relative px-2 sm:px-4 py-2">
         
         {/* Background Track Bar */}
-        <div className="absolute top-5 left-6 right-6 sm:left-8 sm:right-8 h-1 bg-slate-200 rounded-full -translate-y-1/2">
+        <div className="absolute top-5 left-6 right-6 sm:left-8 sm:right-8 h-1 bg-[#E8E0D2] rounded-full -translate-y-1/2">
           {/* Animated Green Fill Bar */}
           <div 
-            className="h-full bg-emerald-600 rounded-full transition-all duration-700 ease-in-out"
+            className="h-full bg-[#174D38] rounded-full transition-all duration-700 ease-in-out"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
@@ -155,18 +155,18 @@ export default function OrderTracking({
                 <div 
                   className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-500 z-10 ${
                     isCompleted
-                      ? 'bg-emerald-600 text-white shadow-2xs'
+                      ? 'bg-[#174D38] text-white shadow-2xs'
                       : isCurrent
-                      ? 'bg-emerald-600 text-white ring-4 ring-emerald-100 scale-105 shadow-xs'
-                      : 'bg-white border-2 border-slate-300 text-slate-400'
+                      ? 'bg-[#174D38] text-white ring-4 ring-[#D6A63C]/30 scale-105 shadow-xs'
+                      : 'bg-white border-2 border-[#E8E0D2] text-[#777777]'
                   }`}
                 >
                   {isCompleted ? (
                     <Check size={13} className="stroke-[3]" />
                   ) : isCurrent ? (
-                    <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-[#D6A63C] animate-pulse" />
                   ) : (
-                    <span className="text-[10px] font-bold text-slate-400">{idx + 1}</span>
+                    <span className="text-[10px] font-bold text-[#777777]">{idx + 1}</span>
                   )}
                 </div>
 
@@ -174,10 +174,10 @@ export default function OrderTracking({
                 <span 
                   className={`mt-1.5 text-[10px] sm:text-[11.5px] leading-tight px-0.5 max-w-[72px] sm:max-w-[90px] transition-colors ${
                     isCurrent
-                      ? 'font-black text-emerald-900'
+                      ? 'font-black text-[#174D38]'
                       : isCompleted
-                      ? 'font-bold text-slate-800'
-                      : 'font-medium text-slate-400'
+                      ? 'font-bold text-[#174D38]'
+                      : 'font-medium text-[#777777]'
                   }`}
                 >
                   {label}
@@ -185,7 +185,7 @@ export default function OrderTracking({
 
                 {/* Sub-label for current stage */}
                 {isCurrent && (
-                  <span className="text-[8.5px] font-bold text-emerald-700 uppercase tracking-wider mt-0.5 bg-emerald-50 px-1 py-0.2 rounded">
+                  <span className="text-[8.5px] font-bold text-[#174D38] uppercase tracking-wider mt-0.5 bg-[#FFF8ED] px-1 py-0.2 rounded border border-[#D6A63C]">
                     {language === 'hi' ? 'सक्रिय' : 'Active'}
                   </span>
                 )}

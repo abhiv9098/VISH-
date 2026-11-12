@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   TrendingUp, 
   Users, 
@@ -52,6 +52,10 @@ export default function AdminDashboard() {
   const [customEtaModalOrder, setCustomEtaModalOrder] = useState<Order | null>(null);
   const [customEtaInput, setCustomEtaInput] = useState('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -474,7 +478,10 @@ export default function AdminDashboard() {
                       </button>
                     </div>
 
-                    <div className="text-[10.5px] sm:text-xs text-gray-500 font-semibold flex items-center gap-1 ml-auto shrink-0">
+                    <div 
+                      suppressHydrationWarning 
+                      className="text-[10.5px] sm:text-xs text-gray-500 font-semibold flex items-center gap-1 ml-auto shrink-0"
+                    >
                       <span>📅</span> {orderDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}, {orderDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
@@ -559,11 +566,11 @@ export default function AdminDashboard() {
                       <div className="flex items-center justify-between pt-1 border-t border-gray-200">
                         <span className="font-black text-xs sm:text-sm text-gray-900">₹{order.total}</span>
                         <span className={`text-[9.5px] font-black px-1.5 py-0.2 rounded border ${
-                          order.advancePaid >= order.total 
+                          (order.advancePaid ?? 0) >= order.total 
                             ? 'bg-emerald-100 text-emerald-900 border-emerald-300' 
                             : 'bg-amber-100 text-amber-950 border-amber-300'
                         }`}>
-                          {order.advancePaid >= order.total ? 'PAID' : 'COD'}
+                          {(order.advancePaid ?? 0) >= order.total ? 'PAID' : 'COD'}
                         </span>
                       </div>
                     </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, Suspense } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -68,20 +68,20 @@ function ActiveOrderCard({
     <div 
       className={`bg-white rounded-xl border transition-all duration-300 shadow-2xs overflow-hidden ${
         isNew 
-          ? 'border-emerald-500 ring-2 ring-emerald-500/20' 
-          : 'border-slate-200 hover:border-slate-300'
+          ? 'border-[#174D38] ring-2 ring-[#174D38]/20' 
+          : 'border-[#E8E0D2] hover:border-[#174D38]/40'
       }`}
     >
       {/* 1. Header: Date & Status Badge with Live Countdown */}
-      <div className="bg-slate-50/80 px-3.5 py-2.5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
+      <div className="bg-[#FFF8ED] px-3.5 py-2.5 border-b border-[#E8E0D2] flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-slate-600">
+          <span className="text-xs font-semibold text-[#777777]">
             {language === 'hi' ? 'ऑर्डर की तारीख:' : 'Ordered on'}{' '}
-            <strong className="text-slate-900">{formatOrderDate(order.date)}, {formatOrderTime(order.date)}</strong>
+            <strong className="text-[#174D38]">{formatOrderDate(order.date)}, {formatOrderTime(order.date)}</strong>
           </span>
           {isNew && (
-            <span className="bg-emerald-600 text-white text-[9.5px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-2xs">
-              <Sparkles size={10} className="fill-white" />
+            <span className="bg-[#174D38] text-[#D6A63C] text-[9.5px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-2xs border border-[#174D38]">
+              <Sparkles size={10} className="fill-[#D6A63C]" />
               <span>{language === 'hi' ? 'नया ऑर्डर' : 'New Order'}</span>
             </span>
           )}
@@ -89,14 +89,14 @@ function ActiveOrderCard({
 
         <div className="flex items-center gap-1.5 flex-wrap">
           {countdown.isDelivered ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-950 border border-emerald-300 shadow-2xs">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
               <Check size={11} className="text-emerald-700 stroke-[3]" />
               <span><strong>{countdown.displayText}</strong></span>
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-50 text-amber-950 border border-amber-300 shadow-2xs">
-              <Clock size={11} className="text-amber-700" />
-              <span>{language === 'hi' ? 'समय:' : 'ETA:'} <strong className="font-mono">{countdown.displayText}</strong></span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-white text-[#174D38] border border-[#E8E0D2] shadow-2xs">
+              <Clock size={11} className="text-[#D6A63C]" />
+              <span>{language === 'hi' ? 'समय:' : 'ETA:'} <strong className="font-mono text-[#174D38]">{countdown.displayText}</strong></span>
             </span>
           )}
           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border ${statusMeta.bg}`}>
@@ -106,9 +106,9 @@ function ActiveOrderCard({
         </div>
       </div>
 
-      {/* 2. Items List (Flipkart E-Commerce Product Rows) */}
+      {/* 2. Items List */}
       <div className="p-3.5 space-y-3">
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-[#E8E0D2]/60">
           {order.items?.map((item: any, idx: number) => {
             const itemName = language === 'hi' && item.product?.nameHi ? item.product.nameHi : (item.product?.name || 'Chakki Fresh Atta');
             const itemWeight = item.product?.weight || '5 KG';
@@ -117,25 +117,26 @@ function ActiveOrderCard({
 
             return (
               <div key={idx} className="py-2 first:pt-0 last:pb-0 flex items-center gap-3">
-                <div className="relative w-14 h-14 rounded-lg bg-amber-50/40 border border-slate-200/80 overflow-hidden shrink-0">
+                <div className="relative w-14 h-14 rounded-lg bg-[#FFF8ED] border border-[#E8E0D2] overflow-hidden shrink-0">
                   <Image 
                     src={itemImage} 
                     alt={itemName} 
                     fill 
+                    sizes="56px"
                     className="object-cover" 
                   />
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-slate-900 text-xs sm:text-sm truncate">
+                  <h4 className="font-bold text-[#174D38] text-xs sm:text-sm truncate">
                     {itemName}
                   </h4>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
+                  <p className="text-[11px] text-[#777777] mt-0.5">
                     {language === 'hi' ? 'पैक:' : 'Pack:'} <span className="font-semibold text-slate-700">{itemWeight}</span>
                     {' • '}
-                    {language === 'hi' ? 'मात्रा:' : 'Qty:'} <span className="font-bold text-emerald-800">{item.quantity}</span>
+                    {language === 'hi' ? 'मात्रा:' : 'Qty:'} <span className="font-bold text-[#174D38]">{item.quantity}</span>
                   </p>
-                  <p className="text-xs font-black text-slate-900 mt-0.5">
+                  <p className="text-xs font-black text-[#174D38] mt-0.5">
                     ₹{itemPrice * item.quantity}
                   </p>
                 </div>
@@ -144,7 +145,7 @@ function ActiveOrderCard({
           })}
         </div>
 
-        {/* 3. Flipkart 4-Stage Timeline Tracker */}
+        {/* 3. 4-Stage Timeline Tracker with Dark Forest Green and Gold */}
         <div className="pt-2">
           <OrderTracking 
             currentStatus={order.status} 
@@ -155,34 +156,34 @@ function ActiveOrderCard({
           />
         </div>
 
-        {/* 4. Delivery Address & Expected Arrival */}
-        <div className="bg-slate-50/70 rounded-xl p-3 border border-slate-200/80 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+        {/* 4. Delivery Address & Expected Arrival (Soft Cream Beige Card) */}
+        <div className="bg-[#FFF8ED] rounded-xl p-3 border border-[#E8E0D2] flex flex-wrap items-center justify-between gap-2.5 text-xs">
           <div className="flex items-start gap-2 min-w-0 flex-1">
-            <MapPin size={14} className="text-emerald-700 shrink-0 mt-0.5" />
+            <MapPin size={14} className="text-[#174D38] shrink-0 mt-0.5" />
             <div className="min-w-0">
-              <p className="font-bold text-slate-900 text-xs truncate">
+              <p className="font-bold text-[#174D38] text-xs truncate">
                 {safeName} {safePhone ? `(${safePhone})` : ''}
               </p>
-              <p className="text-[11px] text-slate-600 line-clamp-1 mt-0.5">
+              <p className="text-[11px] text-[#777777] line-clamp-1 mt-0.5">
                 {safeAddress}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <div className="bg-white px-2.5 py-1 rounded-lg border border-amber-300 text-[11px] flex items-center gap-1.5 shadow-2xs">
-              <Clock size={12} className="text-amber-700 shrink-0" />
+            <div className="bg-white px-2.5 py-1 rounded-lg border border-[#E8E0D2] text-[11px] flex items-center gap-1.5 shadow-2xs">
+              <Clock size={12} className="text-[#D6A63C] shrink-0" />
               <div>
-                <span className="text-[9px] font-bold text-slate-400 uppercase block leading-none">
+                <span className="text-[9px] font-bold text-[#777777] uppercase block leading-none">
                   {language === 'hi' ? 'डिलीवरी समय' : 'Delivery Time'}
                 </span>
-                <span className="font-extrabold text-slate-900 leading-tight block">
+                <span className="font-extrabold text-[#174D38] leading-tight block">
                   {countdown.isDelivered ? (
                     <span className="text-emerald-800 font-bold">{countdown.displayText}</span>
                   ) : (
                     <span className="flex items-center gap-1">
                       <span>{countdown.baseEstimate}</span>
-                      <span className="text-amber-700 font-mono text-[10.5px]">({countdown.displayText})</span>
+                      <span className="text-[#174D38] font-mono text-[10.5px]">({countdown.displayText})</span>
                     </span>
                   )}
                 </span>
@@ -194,7 +195,7 @@ function ActiveOrderCard({
                 href={mapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline shrink-0 bg-white px-2 py-1.5 rounded-lg border border-slate-200"
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-[#174D38] hover:text-[#123d2c] hover:underline shrink-0 bg-white px-2 py-1.5 rounded-lg border border-[#E8E0D2]"
               >
                 <span>{language === 'hi' ? 'नक्शा देखें' : 'Map'}</span>
                 <ExternalLink size={10} />
@@ -205,17 +206,15 @@ function ActiveOrderCard({
       </div>
 
       {/* 5. Footer: Total, Payment Method & Toggle Details */}
-      <div className="bg-slate-50/60 px-3.5 py-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+      <div className="bg-[#FFF8ED] px-3.5 py-2.5 border-t border-[#E8E0D2] flex flex-wrap items-center justify-between gap-2 text-xs">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-slate-500 text-[11px]">
+          <span className="font-bold text-[#777777] text-[11px]">
             {language === 'hi' ? 'कुल राशि:' : 'Total Amount:'}
           </span>
-          <span className="font-black text-sm text-slate-900">
+          <span className="font-black text-sm text-[#174D38]">
             ₹{order.total}
           </span>
-          <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md border ${
-            isOnlinePaid ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-900 border-amber-200'
-          }`}>
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md border bg-white text-[#174D38] border-[#E8E0D2]">
             {isOnlinePaid ? <CreditCard size={10} /> : <Banknote size={10} />}
             <span>{isOnlinePaid ? (language === 'hi' ? 'ऑनलाइन भुगतान' : 'Paid Online') : (language === 'hi' ? 'कैश ऑन डिलीवरी' : 'Cash on Delivery')}</span>
           </span>
@@ -223,7 +222,7 @@ function ActiveOrderCard({
 
         <button
           onClick={onToggleDetails}
-          className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs hover:bg-slate-50 transition cursor-pointer"
+          className="inline-flex items-center gap-1 text-xs font-bold text-[#174D38] hover:text-[#123d2c] bg-white px-2.5 py-1 rounded-lg border border-[#E8E0D2] shadow-2xs hover:bg-[#FFF8ED] transition cursor-pointer"
         >
           <span>{isDetailsOpen ? (language === 'hi' ? 'कम विवरण' : 'Hide Details') : (language === 'hi' ? 'बिल विवरण' : 'Price Details')}</span>
           {isDetailsOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
@@ -232,18 +231,18 @@ function ActiveOrderCard({
 
       {/* 6. Expandable Bill Details */}
       {isDetailsOpen && (
-        <div className="p-3.5 bg-slate-50 border-t border-slate-200/80 space-y-1.5 text-xs">
-          <div className="flex justify-between text-slate-600">
+        <div className="p-3.5 bg-[#FFF8ED] border-t border-[#E8E0D2] space-y-1.5 text-xs">
+          <div className="flex justify-between text-[#777777]">
             <span>{language === 'hi' ? 'आइटम मूल्य:' : 'Items Subtotal:'}</span>
-            <span className="font-semibold text-slate-900">₹{order.total - 50 > 0 ? order.total - 50 : order.total}</span>
+            <span className="font-semibold text-[#174D38]">₹{order.total - 50 > 0 ? order.total - 50 : order.total}</span>
           </div>
-          <div className="flex justify-between text-slate-600">
+          <div className="flex justify-between text-[#777777]">
             <span>{language === 'hi' ? 'डिलीवरी शुल्क:' : 'Delivery Charge:'}</span>
             <span className="font-semibold text-emerald-800">{order.total - 50 > 0 ? '₹50' : (language === 'hi' ? 'मुफ्त' : 'FREE')}</span>
           </div>
-          <div className="flex justify-between font-black text-xs text-slate-900 border-t border-slate-200 pt-1.5">
+          <div className="flex justify-between font-black text-xs text-[#174D38] border-t border-[#E8E0D2] pt-1.5">
             <span>{language === 'hi' ? 'अंतिम राशि:' : 'Final Payable:'}</span>
-            <span className="text-emerald-950 font-black">₹{order.total}</span>
+            <span className="text-[#174D38] font-black">₹{order.total}</span>
           </div>
         </div>
       )}
@@ -257,6 +256,11 @@ function MyOrdersContent() {
   const newOrderId = searchParams?.get('newOrder');
   const { language, t } = useLanguage();
   const { orders, customerProfile } = useOrders();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Filter tab: 'ALL' | 'ACTIVE' | 'HISTORY'
   const [activeTab, setActiveTab] = useState<'ALL' | 'ACTIVE' | 'HISTORY'>('ALL');
@@ -335,44 +339,45 @@ function MyOrdersContent() {
     });
   };
 
+  // Status Badge styling according to theme palette:
   const getStatusBadge = (status: string) => {
     const s = (status || '').toLowerCase().trim();
-    if (s === 'delivered' || s === 'completed') {
+    if (s === 'delivered' || s === 'completed' || s === 'complete delivery') {
       return {
         label: language === 'hi' ? 'डिलीवर हो गया' : 'Delivered',
         bg: 'bg-emerald-50 text-emerald-800 border-emerald-200',
         dot: 'bg-emerald-600'
       };
     }
-    if (s === 'out for delivery' || s === 'dispatched') {
+    if (s === 'out for delivery' || s === 'dispatched' || s === 'on the way') {
       return {
         label: language === 'hi' ? 'डिलीवरी के लिए निकला' : 'Out for Delivery',
-        bg: 'bg-blue-50 text-blue-800 border-blue-200',
-        dot: 'bg-blue-600'
+        bg: 'bg-[#FFF8ED] text-[#174D38] border-[#D6A63C]',
+        dot: 'bg-[#D6A63C]'
       };
     }
-    if (s === 'order confirmed' || s === 'confirmed' || s === 'preparing your order' || s === 'pending') {
+    if (s === 'order confirmed' || s === 'confirmed' || s === 'accepted' || s === 'preparing your order' || s === 'preparing' || s === 'processing' || s === 'pending' || s === 'ready') {
       return {
         label: language === 'hi' ? 'कन्फ़र्म हुआ' : 'Confirmed',
-        bg: 'bg-teal-50 text-teal-800 border-teal-200',
-        dot: 'bg-teal-600'
+        bg: 'bg-[#FFF8ED] text-[#174D38] border-[#E8E0D2]',
+        dot: 'bg-[#174D38]'
       };
     }
     if (s === 'cancelled') {
       return {
         label: language === 'hi' ? 'रद्द हुआ' : 'Cancelled',
-        bg: 'bg-red-50 text-red-800 border-red-200',
+        bg: 'bg-red-50 text-red-700 border-red-200',
         dot: 'bg-red-600'
       };
     }
     return {
       label: language === 'hi' ? 'ऑर्डर दिया गया' : 'Order Placed',
       bg: 'bg-amber-50 text-amber-900 border-amber-200',
-      dot: 'bg-amber-500'
+      dot: 'bg-[#D6A63C]'
     };
   };
 
-  // Render an individual Active / Current Purchase Card (Flipkart Style with Live Countdown)
+  // Render an individual Active / Current Purchase Card
   const renderActiveOrderCard = (order: any) => (
     <ActiveOrderCard
       key={order.id}
@@ -399,25 +404,25 @@ function MyOrdersContent() {
     return (
       <div 
         key={order.id} 
-        className="bg-white rounded-xl border border-slate-200 hover:border-slate-300 transition-all shadow-2xs overflow-hidden"
+        className="bg-white rounded-xl border border-[#E8E0D2] hover:border-[#174D38]/40 transition-all shadow-2xs overflow-hidden"
       >
         {/* Header: Delivery Date & Clean Status */}
-        <div className="bg-slate-50/70 px-3.5 py-2.5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="bg-[#FFF8ED] px-3.5 py-2.5 border-b border-[#E8E0D2] flex flex-wrap items-center justify-between gap-2 text-xs">
           <div className="flex items-center gap-1.5">
             {isDelivered ? (
               <span className="inline-flex items-center gap-1 text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 text-xs">
-                <CheckCircle2 size={13} className="text-emerald-600" />
+                <CheckCircle2 size={13} className="text-emerald-700" />
                 <span>{language === 'hi' ? 'डिलीवर हुआ' : 'Delivered on'} {formatOrderDate(order.date)}</span>
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 text-red-800 font-bold bg-red-50 px-2 py-0.5 rounded-md border border-red-200 text-xs">
+              <span className="inline-flex items-center gap-1 text-red-700 font-bold bg-red-50 px-2 py-0.5 rounded-md border border-red-200 text-xs">
                 <XCircle size={13} className="text-red-600" />
                 <span>{language === 'hi' ? 'रद्द हुआ' : 'Cancelled on'} {formatOrderDate(order.date)}</span>
               </span>
             )}
           </div>
 
-          <span className="text-slate-500 font-medium text-[11px]">
+          <span className="text-[#777777] font-medium text-[11px]">
             {formatOrderTime(order.date)}
           </span>
         </div>
@@ -425,26 +430,27 @@ function MyOrdersContent() {
         {/* Card Body: Items Preview */}
         <div className="p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="relative w-14 h-14 rounded-lg bg-amber-50/40 border border-slate-200/80 overflow-hidden shrink-0">
+            <div className="relative w-14 h-14 rounded-lg bg-[#FFF8ED] border border-[#E8E0D2] overflow-hidden shrink-0">
               <Image 
                 src={firstProductImage} 
                 alt={firstProductName} 
                 fill 
+                sizes="56px"
                 className="object-cover" 
               />
             </div>
 
             <div className="min-w-0">
-              <h4 className="font-bold text-slate-900 text-xs sm:text-sm truncate">
+              <h4 className="font-bold text-[#174D38] text-xs sm:text-sm truncate">
                 {firstProductName}
               </h4>
-              <p className="text-[11px] text-slate-500 mt-0.5">
+              <p className="text-[11px] text-[#777777] mt-0.5">
                 {order.items?.length > 1 ? (
                   <span>{order.items.length} {language === 'hi' ? 'उत्पाद' : 'items'} • </span>
                 ) : null}
                 <span className="font-semibold text-slate-700">{firstProduct?.weight || '5 KG'}</span>
               </p>
-              <p className="text-xs font-black text-slate-900 mt-0.5">
+              <p className="text-xs font-black text-[#174D38] mt-0.5">
                 ₹{order.total}
               </p>
             </div>
@@ -455,16 +461,16 @@ function MyOrdersContent() {
             {firstProduct?.id && (
               <Link
                 href={`/order?productId=${firstProduct.id}`}
-                className="inline-flex items-center gap-1 bg-emerald-950 hover:bg-emerald-900 text-amber-300 font-bold text-xs px-3 py-1.5 rounded-lg shadow-2xs transition active:scale-95"
+                className="inline-flex items-center gap-1 bg-[#174D38] hover:bg-[#123d2c] text-white font-bold text-xs px-3 py-1.5 rounded-lg shadow-2xs transition active:scale-95"
               >
-                <RotateCcw size={12} />
+                <RotateCcw size={12} className="text-[#D6A63C]" />
                 <span>{language === 'hi' ? 'फिर से ऑर्डर करें' : 'Buy Again'}</span>
               </Link>
             )}
 
             <button
               onClick={() => toggleDetails(order.id)}
-              className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg transition cursor-pointer"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#174D38] bg-white hover:bg-[#FFF8ED] border border-[#E8E0D2] px-2.5 py-1.5 rounded-lg transition cursor-pointer"
             >
               <span>{isDetailsOpen ? (language === 'hi' ? 'कम' : 'Hide') : (language === 'hi' ? 'विवरण' : 'Details')}</span>
               {isDetailsOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
@@ -474,21 +480,21 @@ function MyOrdersContent() {
 
         {/* Expandable Order Details */}
         {isDetailsOpen && (
-          <div className="p-3.5 bg-slate-50 border-t border-slate-200/80 space-y-2 text-xs">
-            <div className="divide-y divide-slate-200/60">
+          <div className="p-3.5 bg-[#FFF8ED] border-t border-[#E8E0D2] space-y-2 text-xs">
+            <div className="divide-y divide-[#E8E0D2]/70">
               {order.items?.map((item: any, idx: number) => (
                 <div key={idx} className="py-1.5 first:pt-0 last:pb-0 flex justify-between text-slate-700">
                   <span>
                     {language === 'hi' && item.product?.nameHi ? item.product.nameHi : item.product?.name} ({item.product?.weight || '5 KG'}) × {item.quantity}
                   </span>
-                  <span className="font-bold text-slate-900">₹{(item.product?.price || 0) * item.quantity}</span>
+                  <span className="font-bold text-[#174D38]">₹{(item.product?.price || 0) * item.quantity}</span>
                 </div>
               ))}
             </div>
 
-            <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between text-xs font-black">
-              <span className="text-slate-600">{language === 'hi' ? 'कुल भुगतान:' : 'Total Paid:'}</span>
-              <span className="text-emerald-900 font-black">₹{order.total}</span>
+            <div className="pt-2 border-t border-[#E8E0D2] flex items-center justify-between text-xs font-black">
+              <span className="text-[#777777]">{language === 'hi' ? 'कुल भुगतान:' : 'Total Paid:'}</span>
+              <span className="text-[#174D38] font-black">₹{order.total}</span>
             </div>
           </div>
         )}
@@ -497,38 +503,38 @@ function MyOrdersContent() {
   };
 
   return (
-    <div className="min-h-[85vh] bg-[#f8f9fa] py-4 sm:py-6 px-3 sm:px-6 lg:px-8 max-w-3xl mx-auto pb-24 md:pb-12">
+    <div className="min-h-[85vh] bg-[#FFF8ED] py-4 sm:py-6 px-3 sm:px-6 lg:px-8 max-w-3xl mx-auto pb-32 sm:pb-36 md:pb-12">
       
       {/* 1. Header Bar with Order Count */}
-      <div className="bg-white px-4 py-3 rounded-xl border border-slate-200 shadow-2xs mb-4 flex items-center justify-between gap-2">
+      <div className="bg-white px-4 py-3 rounded-xl border border-[#E8E0D2] shadow-2xs mb-4 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-emerald-950 text-amber-300 flex items-center justify-center shrink-0 shadow-2xs">
+          <div className="w-8 h-8 rounded-lg bg-[#174D38] text-[#D6A63C] flex items-center justify-center shrink-0 shadow-2xs">
             <Package size={17} />
           </div>
           <div>
-            <h1 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
+            <h1 className="text-base sm:text-lg font-black text-[#174D38] leading-tight">
               {language === 'hi' ? 'मेरे ऑर्डर' : 'My Orders'}
             </h1>
-            <p className="text-[11px] text-slate-500">
+            <p className="text-[11px] text-[#777777]">
               {language === 'hi' ? 'ताज़ा चक्की आटा पिसाई और डिलीवरी स्थिति' : 'Track your fresh chakki flour orders'}
             </p>
           </div>
         </div>
 
-        <span className="bg-slate-100 text-slate-700 font-bold text-xs px-2.5 py-1 rounded-lg border border-slate-200">
+        <span className="bg-[#FFF8ED] text-[#174D38] font-bold text-xs px-2.5 py-1 rounded-lg border border-[#E8E0D2]">
           {totalOrdersCount} {language === 'hi' ? 'ऑर्डर' : (totalOrdersCount === 1 ? 'Order' : 'Orders')}
         </span>
       </div>
 
-      {/* 2. Flipkart Style Filter Tabs */}
+      {/* 2. Filter Tabs (Dark Forest Green #174D38 Selected with Gold Count Badge) */}
       {totalOrdersCount > 0 && (
         <div className="flex items-center gap-1.5 mb-4 overflow-x-auto pb-1 scrollbar-none">
           <button
             onClick={() => setActiveTab('ALL')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap ${
               activeTab === 'ALL'
-                ? 'bg-emerald-950 text-amber-300 shadow-2xs'
-                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                ? 'bg-[#174D38] text-white border border-[#174D38] shadow-2xs'
+                : 'bg-white text-[#777777] border border-[#E8E0D2] hover:bg-[#FFF8ED] hover:text-[#174D38]'
             }`}
           >
             {language === 'hi' ? 'सभी ऑर्डर' : 'All Orders'} ({totalOrdersCount})
@@ -536,15 +542,15 @@ function MyOrdersContent() {
 
           <button
             onClick={() => setActiveTab('ACTIVE')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap flex items-center gap-1 ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'ACTIVE'
-                ? 'bg-emerald-950 text-amber-300 shadow-2xs'
-                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                ? 'bg-[#174D38] text-white border border-[#174D38] shadow-2xs'
+                : 'bg-white text-[#777777] border border-[#E8E0D2] hover:bg-[#FFF8ED] hover:text-[#174D38]'
             }`}
           >
             <span>{language === 'hi' ? 'सक्रिय नए ऑर्डर' : 'Active Orders'}</span>
             <span className={`text-[10px] font-black px-1.5 py-0.2 rounded-full ${
-              activeTab === 'ACTIVE' ? 'bg-amber-400 text-emerald-950' : 'bg-emerald-100 text-emerald-800'
+              activeTab === 'ACTIVE' ? 'bg-[#D6A63C] text-[#174D38]' : 'bg-[#FFF8ED] text-[#174D38] border border-[#E8E0D2]'
             }`}>
               {activeOrders.length}
             </span>
@@ -552,15 +558,15 @@ function MyOrdersContent() {
 
           <button
             onClick={() => setActiveTab('HISTORY')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap flex items-center gap-1 ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'HISTORY'
-                ? 'bg-emerald-950 text-amber-300 shadow-2xs'
-                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                ? 'bg-[#174D38] text-white border border-[#174D38] shadow-2xs'
+                : 'bg-white text-[#777777] border border-[#E8E0D2] hover:bg-[#FFF8ED] hover:text-[#174D38]'
             }`}
           >
             <span>{language === 'hi' ? 'ऑर्डर इतिहास' : 'Order History'}</span>
             <span className={`text-[10px] font-black px-1.5 py-0.2 rounded-full ${
-              activeTab === 'HISTORY' ? 'bg-amber-400 text-emerald-950' : 'bg-slate-200 text-slate-700'
+              activeTab === 'HISTORY' ? 'bg-[#D6A63C] text-[#174D38]' : 'bg-[#FFF8ED] text-[#174D38] border border-[#E8E0D2]'
             }`}>
               {historyOrders.length}
             </span>
@@ -569,25 +575,32 @@ function MyOrdersContent() {
       )}
 
       {/* 3. Empty State */}
-      {totalOrdersCount === 0 ? (
-        <div className="bg-white rounded-2xl shadow-2xs border border-slate-200 p-8 sm:p-12 text-center max-w-md mx-auto my-6 space-y-3">
-          <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center mx-auto shadow-2xs">
+      {!mounted ? (
+        <div className="bg-white rounded-2xl shadow-2xs border border-[#E8E0D2] p-8 text-center max-w-md mx-auto my-6 space-y-3">
+          <div className="w-8 h-8 border-2 border-[#174D38] border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-xs text-[#777777]">
+            {language === 'hi' ? 'ऑर्डर लोड हो रहे हैं...' : 'Loading orders...'}
+          </p>
+        </div>
+      ) : totalOrdersCount === 0 ? (
+        <div className="bg-white rounded-2xl shadow-2xs border border-[#E8E0D2] p-8 sm:p-12 text-center max-w-md mx-auto my-6 space-y-3">
+          <div className="w-16 h-16 rounded-2xl bg-[#FFF8ED] border border-[#E8E0D2] text-[#174D38] flex items-center justify-center mx-auto shadow-2xs">
             <ShoppingBag size={30} className="stroke-[2.2]" />
           </div>
           <div className="space-y-1">
-            <h2 className="text-base sm:text-lg font-black text-slate-900">
+            <h2 className="text-base sm:text-lg font-black text-[#174D38]">
               {language === 'hi' ? 'कोई ऑर्डर नहीं मिला' : 'No Orders Yet'}
             </h2>
-            <p className="text-xs text-slate-600 leading-relaxed max-w-xs mx-auto">
+            <p className="text-xs text-[#777777] leading-relaxed max-w-xs mx-auto">
               {language === 'hi' ? 'आपने अभी तक कोई ऑर्डर नहीं दिया है। ताज़ा चक्की आटा आज ही ऑर्डर करें!' : 'You haven\'t placed any orders yet. Fresh stone-milled atta delivered to your doorstep!'}
             </p>
           </div>
           <div className="pt-2">
             <Link 
               href="/" 
-              className="inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-emerald-950 font-black px-5 py-2.5 rounded-xl shadow-xs transition active:scale-95 text-xs sm:text-sm"
+              className="inline-flex items-center justify-center gap-1.5 bg-[#174D38] hover:bg-[#123d2c] text-white font-black px-5 py-2.5 rounded-xl shadow-xs transition active:scale-95 text-xs sm:text-sm"
             >
-              <ShoppingBag size={15} className="stroke-[2.5]" />
+              <ShoppingBag size={15} className="stroke-[2.5] text-[#D6A63C]" />
               <span>{language === 'hi' ? 'अभी आटा ऑर्डर करें' : 'Order Fresh Atta Now'}</span>
             </Link>
           </div>
@@ -595,21 +608,21 @@ function MyOrdersContent() {
       ) : (
         <div className="space-y-6">
           
-          {/* 4. ACTIVE / NEW ORDERS SECTION (Clearly at the top) */}
+          {/* 4. ACTIVE / NEW ORDERS SECTION */}
           {(activeTab === 'ALL' || activeTab === 'ACTIVE') && activeOrders.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-2 px-1">
-                <h2 className="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                <h2 className="text-xs sm:text-sm font-black text-[#174D38] uppercase tracking-wider flex items-center gap-1.5">
                   <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D6A63C] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#174D38]"></span>
                   </span>
                   <span>{language === 'hi' ? 'सक्रिय ऑर्डर' : 'Active Orders'}</span>
-                  <span className="bg-emerald-100 text-emerald-900 text-[10px] font-black px-2 py-0.2 rounded-full border border-emerald-300">
+                  <span className="bg-[#FFF8ED] text-[#174D38] text-[10px] font-black px-2 py-0.2 rounded-full border border-[#E8E0D2]">
                     {activeOrders.length}
                   </span>
                 </h2>
-                <span className="text-[11px] text-emerald-700 font-bold">
+                <span className="text-[11px] text-[#D6A63C] font-bold">
                   {language === 'hi' ? 'लाइव ट्रैकिंग जारी' : 'Live Tracking'}
                 </span>
               </div>
@@ -621,18 +634,18 @@ function MyOrdersContent() {
             </div>
           )}
 
-          {/* 5. ORDER HISTORY SECTION (Previous purchases below, without duplicates) */}
+          {/* 5. ORDER HISTORY SECTION */}
           {(activeTab === 'ALL' || activeTab === 'HISTORY') && historyOrders.length > 0 && (
-            <div className={`space-y-3 ${activeOrders.length > 0 && activeTab === 'ALL' ? 'pt-4 border-t border-slate-200' : ''}`}>
+            <div className={`space-y-3 ${activeOrders.length > 0 && activeTab === 'ALL' ? 'pt-4 border-t border-[#E8E0D2]' : ''}`}>
               <div className="flex items-center justify-between gap-2 px-1">
-                <h2 className="text-xs sm:text-sm font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                <h2 className="text-xs sm:text-sm font-black text-[#174D38] uppercase tracking-wider flex items-center gap-1.5">
                   <CheckCircle2 size={15} className="text-emerald-700" />
                   <span>{language === 'hi' ? 'ऑर्डर इतिहास' : 'Order History'}</span>
-                  <span className="bg-slate-100 text-slate-700 text-[10px] font-black px-2 py-0.2 rounded-full border border-slate-200">
+                  <span className="bg-[#FFF8ED] text-[#174D38] text-[10px] font-black px-2 py-0.2 rounded-full border border-[#E8E0D2]">
                     {historyOrders.length}
                   </span>
                 </h2>
-                <span className="text-[11px] text-slate-500 font-medium">
+                <span className="text-[11px] text-[#777777] font-medium">
                   {language === 'hi' ? 'पूर्ण किए गए ऑर्डर' : 'Past Purchases'}
                 </span>
               </div>
@@ -646,13 +659,13 @@ function MyOrdersContent() {
 
           {/* Fallback when a filter tab has no matching orders */}
           {activeTab === 'ACTIVE' && activeOrders.length === 0 && (
-            <div className="bg-white rounded-xl p-8 text-center border border-slate-200 text-slate-500 text-xs font-semibold">
+            <div className="bg-white rounded-xl p-8 text-center border border-[#E8E0D2] text-[#777777] text-xs font-semibold">
               {language === 'hi' ? 'कोई सक्रिय ऑर्डर नहीं है।' : 'No active orders in progress.'}
             </div>
           )}
 
           {activeTab === 'HISTORY' && historyOrders.length === 0 && (
-            <div className="bg-white rounded-xl p-8 text-center border border-slate-200 text-slate-500 text-xs font-semibold">
+            <div className="bg-white rounded-xl p-8 text-center border border-[#E8E0D2] text-[#777777] text-xs font-semibold">
               {language === 'hi' ? 'अभी तक कोई पिछला ऑर्डर नहीं है।' : 'No past orders in history.'}
             </div>
           )}
@@ -666,7 +679,7 @@ function MyOrdersContent() {
 
 export default function MyOrdersPage() {
   return (
-    <Suspense fallback={<div className="flex justify-center items-center min-h-[50vh] text-xs font-bold text-slate-500">Loading Orders...</div>}>
+    <Suspense fallback={<div className="flex justify-center items-center min-h-[50vh] text-xs font-bold text-[#777777]">Loading Orders...</div>}>
       <MyOrdersContent />
     </Suspense>
   );

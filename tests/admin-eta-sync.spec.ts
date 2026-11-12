@@ -46,7 +46,9 @@ test.describe('Admin Status Dropdown with Integrated Delivery Times', () => {
   });
 
   test.afterAll(() => {
-    fs.writeFileSync(dataFilePath, '[]', 'utf8');
+    if (backupOrders) {
+      fs.writeFileSync(dataFilePath, backupOrders, 'utf8');
+    }
   });
 
   test('Selecting Out for Delivery with time directly in status dropdown updates app in real time', async ({ browser }) => {

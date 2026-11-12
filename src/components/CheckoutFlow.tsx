@@ -24,7 +24,6 @@ import {
   Compass, 
   AlertTriangle, 
   Loader2, 
-  ExternalLink, 
   Check, 
   Smartphone,
   ChevronRight
@@ -353,38 +352,6 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
         >
           {language === 'hi' ? 'बाहर जाएं' : 'Exit'}
         </button>
-      </div>
-
-      {/* 3-Step Progress Indicator */}
-      <div className="mb-8 bg-white p-4 rounded-2xl border border-amber-900/10 shadow-sm">
-        <div className="flex justify-between items-center relative max-w-sm mx-auto">
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-200 z-0 rounded-full"></div>
-          <div 
-            className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-emerald-800 z-0 rounded-full transition-all duration-300"
-            style={{ width: `${((step - 1) / 2) * 100}%` }}
-          ></div>
-          
-          {[1, 2, 3].map((s) => (
-            <div 
-              key={s} 
-              className={`relative z-10 w-9 h-9 rounded-full flex items-center justify-center font-black text-xs transition-all ${
-                step === s 
-                  ? 'bg-amber-400 text-emerald-950 ring-4 ring-amber-400/30 scale-110 shadow-md' 
-                  : step > s 
-                  ? 'bg-emerald-900 text-amber-300 shadow-sm' 
-                  : 'bg-slate-100 text-slate-400 border border-slate-200'
-              }`}
-            >
-              {step > s ? '✓' : s}
-            </div>
-          ))}
-        </div>
-
-        <div className="flex justify-between text-xs font-bold text-slate-600 mt-2 max-w-sm mx-auto px-1">
-          <span className={step === 1 ? 'text-emerald-950 font-black' : ''}>{t('step1Title')}</span>
-          <span className={step === 2 ? 'text-emerald-950 font-black' : ''}>{t('step2Title')}</span>
-          <span className={step === 3 ? 'text-emerald-950 font-black' : ''}>{t('step3Title')}</span>
-        </div>
       </div>
 
       <div className="bg-white shadow-md rounded-2xl overflow-hidden border border-amber-900/10">
@@ -750,24 +717,6 @@ export default function CheckoutFlow({ title = 'Order Checkout' }: CheckoutFlowP
                   />
                 </div>
               </div>
-
-              {/* Coordinates Preview */}
-              {customerInfo.lat && customerInfo.lng && (
-                <div className="bg-emerald-50/70 p-3 rounded-xl border border-emerald-200/70 flex items-center justify-between text-xs text-emerald-950">
-                  <div className="flex items-center gap-1.5 font-bold">
-                    <Navigation size={13} className="text-emerald-700" />
-                    <span>GPS: {customerInfo.lat.toFixed(5)}, {customerInfo.lng.toFixed(5)}</span>
-                  </div>
-                  <a 
-                    href={`https://www.google.com/maps?q=${customerInfo.lat},${customerInfo.lng}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-700 underline font-black text-[11px] flex items-center gap-0.5"
-                  >
-                    View Map <ExternalLink size={11} />
-                  </a>
-                </div>
-              )}
 
               <button 
                 type="submit" 

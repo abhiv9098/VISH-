@@ -11,8 +11,9 @@
 # testing
 /coverage
 /test-results/
-playwright-report/data/
+playwright-report/
 screenshots/
+*.patch
 
 # next.js
 /.next/
